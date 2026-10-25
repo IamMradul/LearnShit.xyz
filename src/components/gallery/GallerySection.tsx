@@ -4,6 +4,10 @@ import { TreeRenderer } from '../visualizer/renderers/TreeRenderer';
 import { LinkedListRenderer } from '../visualizer/renderers/LinkedListRenderer';
 import { BSTGalleryModule } from './BSTGalleryModule';
 import { GraphGalleryModule } from './GraphGalleryModule';
+import { VISUALGO_ITEMS, type VisuAlgoItem } from './visuAlgoData';
+import { VisuAlgoCard } from './VisuAlgoCard';
+import { InteractivePlaygroundCard } from './InteractivePlaygroundCard';
+import { VisuAlgoDetailModal } from './VisuAlgoDetailModal';
 import { Play, Pause, SkipBack, ChevronLeft, ChevronRight, Shuffle, Upload } from 'lucide-react';
 import { useEditorStore } from '../../store/editorStore';
 import { useTraceStore } from '../../store/traceStore';
@@ -811,11 +815,77 @@ print("Reversed:", arr)`;
 
 // ── Main Gallery Section ──────────────────────────────────────────────────────
 
-const CATEGORIES = ['All', 'Linear', 'Sorting', 'Trees', 'Graphs'];
+const CATEGORIES = [
+  'All',
+  'Linear',
+  'Sorting',
+  'Trees',
+  'Graphs',
+  'Recursion',
+  'Strings',
+  'Geometry',
+  'Advanced',
+  'NP-Hard',
+];
 
 export const GallerySection: React.FC = () => {
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
+  const [selectedDetailItem, setSelectedDetailItem] = useState<{
+    item: VisuAlgoItem;
+    mode: 'overview' | 'training';
+  } | null>(null);
+
+  const { setCode, setInput, setLanguage } = useEditorStore();
+  const { setResult, setRunning, setError } = useTraceStore();
+
+  const handleQuickLoad = async (item: VisuAlgoItem) => {
+    const lang = item.sampleCode.python ? 'python' : 'javascript';
+    const code = item.sampleCode[lang] || '';
+    const input = item.sampleInput;
+
+    setCode(code);
+    setInput(input);
+    setLanguage(lang);
+
+    const visualizerEl = document.getElementById('visualizer') || document.getElementById('workspace');
+    if (visualizerEl) {
+      visualizerEl.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    setRunning(true);
+    try {
+      const adapter = getAdapter(lang);
+      const res = await adapter.trace({
+        code,
+        input,
+        mode: 'auto',
+        maxSteps: 5000,
+        timeoutMs: 10000,
+        language: lang,
+      });
+      setResult(res);
+    } catch (err) {
+      setError(String(err));
+    } finally {
+      setRunning(false);
+    }
+  };
+
+  // Filter 26 interactive playground items
+  const filteredItems = VISUALGO_ITEMS.filter((item) => {
+    const matchesCategory = activeCategory === 'All' || item.category === activeCategory;
+    if (!matchesCategory) return false;
+    if (!search.trim()) return true;
+    const q = search.toLowerCase();
+    return (
+      item.title.toLowerCase().includes(q) ||
+      item.description.toLowerCase().includes(q) ||
+      item.category.toLowerCase().includes(q) ||
+      item.complexity.toLowerCase().includes(q) ||
+      item.tags.some((t) => t.toLowerCase().includes(q))
+    );
+  });
 
   return (
     <section
@@ -828,9 +898,9 @@ export const GallerySection: React.FC = () => {
         position: 'relative',
       }}
     >
-      {/* Header matching Hero aesthetic */}
-      <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-        <div style={{ marginBottom: 44, textAlign: 'center' }}>
+      <div style={{ maxWidth: 1360, margin: '0 auto' }}>
+        {/* Header matching Hero aesthetic */}
+        <div style={{ marginBottom: 36, textAlign: 'center' }}>
           <div
             style={{
               fontFamily: "'JetBrains Mono', monospace",
@@ -842,7 +912,7 @@ export const GallerySection: React.FC = () => {
               marginBottom: 10,
             }}
           >
-            02 // STANDALONE CATALOG
+            02 // INTERACTIVE ALGORITHM PLAYGROUNDS
           </div>
           <h2
             style={{
@@ -855,35 +925,34 @@ export const GallerySection: React.FC = () => {
               marginBottom: 10,
             }}
           >
-            ALGORITHM GALLERY
+            ALGORITHM PLAYGROUNDS
           </h2>
           <p
             style={{
               color: 'var(--text-secondary)',
               fontSize: 15,
-              maxWidth: 640,
+              maxWidth: 680,
               margin: '0 auto',
               lineHeight: 1.6,
             }}
           >
-            Explore algorithms interactively without writing code. Click{' '}
-            <strong style={{ color: 'var(--accent)' }}>Visualize</strong> on any algorithm to inspect its trace on the main visualizer stage.
+            Explore and interact with all 26 core data structures and algorithms directly in your browser. Step through execution states, play animations in real-time, or launch any module into the full visualizer stage.
           </p>
         </div>
 
         {/* Search + category filter */}
-        <div style={{ display: 'flex', gap: 12, marginBottom: 32, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 10, marginBottom: 30, flexWrap: 'wrap', alignItems: 'center' }}>
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search algorithms (bubble, quick, tree, list)..."
+            placeholder="Search 26 interactive playgrounds (e.g. hash table, bst, mst, convex hull, tsp, O(log n))..."
             id="gallery-search"
             style={{
               flex: 1,
-              minWidth: 240,
+              minWidth: 260,
               padding: '10px 16px',
               background: '#111216',
-              border: '1px solid rgba(247, 245, 239, 0.1)',
+              border: '1px solid rgba(247, 245, 239, 0.12)',
               borderRadius: 8,
               color: '#F7F5EF',
               fontSize: 13,
@@ -892,67 +961,69 @@ export const GallerySection: React.FC = () => {
               transition: 'border-color 0.15s',
             }}
             onFocus={(e) => (e.currentTarget.style.borderColor = 'var(--accent)')}
-            onBlur={(e) => (e.currentTarget.style.borderColor = 'rgba(247, 245, 239, 0.1)')}
+            onBlur={(e) => (e.currentTarget.style.borderColor = 'rgba(247, 245, 239, 0.12)')}
           />
-          {CATEGORIES.map((c) => (
-            <button
-              key={c}
-              onClick={() => setActiveCategory(c)}
-              id={`cat-${c.toLowerCase()}`}
-              style={{
-                padding: '8px 18px',
-                borderRadius: 8,
-                background: activeCategory === c ? 'var(--accent)' : '#111216',
-                border: `1px solid ${activeCategory === c ? 'var(--accent)' : 'rgba(247, 245, 239, 0.1)'}`,
-                color: activeCategory === c ? '#F7F5EF' : 'var(--text-secondary)',
-                fontFamily: "'Oswald', sans-serif",
-                fontSize: 13,
-                fontWeight: 600,
-                letterSpacing: '0.05em',
-                textTransform: 'uppercase',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-              }}
-            >
-              {c}
-            </button>
-          ))}
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {CATEGORIES.map((c) => {
+              const count =
+                c === 'All'
+                  ? VISUALGO_ITEMS.length
+                  : VISUALGO_ITEMS.filter((it) => it.category === c).length;
+              return (
+                <button
+                  key={c}
+                  onClick={() => setActiveCategory(c)}
+                  id={`cat-${c.toLowerCase()}`}
+                  style={{
+                    padding: '7px 14px',
+                    borderRadius: 8,
+                    background: activeCategory === c ? 'var(--accent)' : '#111216',
+                    border: `1px solid ${activeCategory === c ? 'var(--accent)' : 'rgba(247, 245, 239, 0.1)'}`,
+                    color: activeCategory === c ? '#F7F5EF' : 'var(--text-secondary)',
+                    fontFamily: "'Oswald', sans-serif",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    letterSpacing: '0.04em',
+                    textTransform: 'uppercase',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  {c} ({count})
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        {/* Cards grid */}
+        {/* ── 26 Interactive Playgrounds Grid ───────────────────────────────── */}
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(520px, 1fr))',
-            gap: 28,
+            gridTemplateColumns: 'repeat(auto-fill, minmax(330px, 1fr))',
+            gap: 24,
           }}
         >
-          {/* Array module — always shown for Linear / All */}
-          {(activeCategory === 'All' || activeCategory === 'Linear') &&
-            (!search || 'array list linear'.includes(search.toLowerCase())) && (
-              <ArrayGalleryModule />
-            )}
-
-          {/* Sorting module — always shown for Sorting / All */}
-          {(activeCategory === 'All' || activeCategory === 'Sorting') &&
-            (!search ||
-              'bubble selection insertion merge quick sort'.includes(
-                search.toLowerCase(),
-              )) && <SortingGalleryModule />}
-
-          {/* Phase 2 Interactive Tree Module */}
-          {(activeCategory === 'All' || activeCategory === 'Trees') &&
-            (!search || 'tree bst binary search'.includes(search.toLowerCase())) && (
-              <BSTGalleryModule />
-            )}
-
-          {/* Phase 2 Interactive Graph Module */}
-          {(activeCategory === 'All' || activeCategory === 'Graphs') &&
-            (!search || 'graph dfs bfs depth breadth'.includes(search.toLowerCase())) && (
-              <GraphGalleryModule />
-            )}
+          {filteredItems.map((item) => (
+            <InteractivePlaygroundCard
+              key={item.id}
+              item={item}
+              onOpenDetail={(it, mode) => setSelectedDetailItem({ item: it, mode })}
+              onQuickLoad={handleQuickLoad}
+            />
+          ))}
         </div>
       </div>
+
+      {/* Detail / Training Modal */}
+      {selectedDetailItem && (
+        <VisuAlgoDetailModal
+          item={selectedDetailItem.item}
+          mode={selectedDetailItem.mode}
+          onClose={() => setSelectedDetailItem(null)}
+        />
+      )}
     </section>
   );
 };
+

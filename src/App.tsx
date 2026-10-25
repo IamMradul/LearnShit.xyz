@@ -3,6 +3,7 @@ import { MainLayout } from './components/layout/MainLayout';
 import { GallerySection } from './components/gallery/GallerySection';
 import { HeroSection } from './components/landing/HeroSection';
 import { useUIStore } from './store/uiStore';
+import { Analytics } from "@vercel/analytics/react";
 
 export default function App() {
   const { theme } = useUIStore();

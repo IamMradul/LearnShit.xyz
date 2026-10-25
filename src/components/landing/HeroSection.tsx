@@ -512,11 +512,11 @@ export function HeroSection({ onEnterApp }: { onEnterApp: () => void }) {
         {/* ── Top Bar / Navigation ── */}
         <header className="hero-top-nav">
           <div className="hero-brand">
-            <div className="hero-brand-logo">
-              <span style={{ color: 'var(--accent)', fontWeight: 900, fontSize: 16 }}>λ</span>
+            <div className="hero-brand-logo" style={{ overflow: 'hidden' }}>
+              <img src="/learnshit.svg" alt="LearnShit Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span className="hero-brand-name">AlgoLens</span>
+              <span className="hero-brand-name">LearnShit</span>
               <span className="hero-brand-badge">ENGINE v2.4</span>
             </div>
           </div>
@@ -641,6 +641,7 @@ export function HeroSection({ onEnterApp }: { onEnterApp: () => void }) {
             <br />
             <br />
             <br />
+
             <button className="hero-main-cta" onClick={onEnterApp}>
               Launch Visualizer
               <ArrowDown size={14} />

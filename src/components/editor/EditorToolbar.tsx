@@ -89,20 +89,21 @@ export const EditorToolbar: React.FC = () => {
           style={{
             width: 22,
             height: 22,
-            borderRadius: 6,
-            background: 'linear-gradient(135deg, var(--accent), var(--purple))',
+            borderRadius: 5,
+            overflow: 'hidden',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: 11,
-            fontWeight: 700,
-            color: '#fff',
           }}
         >
-          AL
+          <img
+            src="/learnshit.svg"
+            alt="LearnShit Logo"
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
         </div>
         <span style={{ fontWeight: 700, fontSize: 14, letterSpacing: '-0.02em' }}>
-          AlgoLens
+          LearnShit
         </span>
       </div>
 
@@ -149,27 +150,14 @@ export const EditorToolbar: React.FC = () => {
                   border: 'none',
                   color: language === l.id ? 'var(--accent)' : 'var(--text-primary)',
                   fontSize: 13,
-                  cursor: l.phase > 2 ? 'not-allowed' : 'pointer',
-                  opacity: l.phase > 2 ? 0.5 : 1,
+                  cursor: 'pointer',
+                  opacity: 1,
                   textAlign: 'left',
                 }}
-                disabled={l.phase > 2}
+                disabled={false}
                 id={`lang-opt-${l.id}`}
               >
                 {l.label}
-                {l.phase > 2 && (
-                  <span
-                    style={{
-                      fontSize: 9,
-                      background: 'var(--orange-subtle)',
-                      color: 'var(--orange)',
-                      borderRadius: 4,
-                      padding: '1px 5px',
-                    }}
-                  >
-                    Ph{l.phase}
-                  </span>
-                )}
               </button>
             ))}
           </div>

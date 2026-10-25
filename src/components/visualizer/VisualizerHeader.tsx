@@ -199,23 +199,20 @@ export const VisualizerHeader: React.FC = () => {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginRight: 8 }}>
           <div
             style={{
-              width: 26,
-              height: 26,
+              width: 28,
+              height: 28,
               borderRadius: 6,
-              background: 'var(--accent)',
+              overflow: 'hidden',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               boxShadow: '0 0 12px var(--accent-glow)',
             }}
           >
-            <div
-              style={{
-                width: 8,
-                height: 8,
-                borderRadius: '50%',
-                background: '#F7F5EF',
-              }}
+            <img
+              src="/learnshit.svg"
+              alt="LearnShit Logo"
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             />
           </div>
           <span
@@ -227,7 +224,7 @@ export const VisualizerHeader: React.FC = () => {
               color: '#F7F5EF',
             }}
           >
-            Algo<span style={{ color: 'var(--accent)' }}>Lens</span>
+            Learn<span style={{ color: 'var(--accent)' }}>Shit</span>
           </span>
           <span
             style={{

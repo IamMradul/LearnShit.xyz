@@ -9,6 +9,7 @@ import { LinkedListRenderer } from './renderers/LinkedListRenderer';
 import { GridRenderer } from './renderers/GridRenderer';
 import { RecursionTreeRenderer } from './renderers/RecursionTreeRenderer';
 import { PlaybackControls } from './playback/PlaybackControls';
+import { WalkthroughExplainer } from './WalkthroughExplainer';
 import { getAdapter } from '../../engine/adapters/AdapterRegistry';
 import { ALGORITHM_PRESETS } from '../../engine/presets';
 import {
@@ -707,6 +708,9 @@ export const VisualizerPane: React.FC = () => {
           )}
         </div>
       )}
+
+      {/* ── Step-by-Step AI Walkthrough Narration & Profiler Trigger ────────── */}
+      <WalkthroughExplainer />
 
       {/* ── Bottom Floating Playback Media Bar ──────────────────────────────── */}
       <PlaybackControls />

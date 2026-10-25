@@ -60,13 +60,37 @@ const JAVA_SAMPLE = `class Solution {
     }
 }`;
 
+const GO_SAMPLE = `func bubbleSort(arr []int) []int {
+    n := len(arr)
+    for i := 0; i < n; i++ {
+        for j := 0; j < n-i-1; j++ {
+            if arr[j] > arr[j+1] {
+                arr[j], arr[j+1] = arr[j+1], arr[j]
+            }
+        }
+    }
+    return arr
+}`;
+
+const RUST_SAMPLE = `fn bubble_sort(mut arr: Vec<i32>) -> Vec<i32> {
+    let n = arr.len();
+    for i in 0..n {
+        for j in 0..(n - i - 1) {
+            if arr[j] > arr[j + 1] {
+                arr.swap(j, j + 1);
+            }
+        }
+    }
+    arr
+}`;
+
 const DEFAULT_INPUTS: Record<SupportedLanguage, string> = {
   python: '[[64, 34, 25, 12, 22, 11, 90]]',
   javascript: '[[64, 34, 25, 12, 22, 11, 90]]',
   cpp: '[[64, 34, 25, 12, 22, 11, 90]]',
   java: '[[64, 34, 25, 12, 22, 11, 90]]',
-  go: '7\n64 34 25 12 22 11 90',
-  rust: '7\n64 34 25 12 22 11 90',
+  go: '[[64, 34, 25, 12, 22, 11, 90]]',
+  rust: '[[64, 34, 25, 12, 22, 11, 90]]',
 };
 
 const DEFAULT_CODE: Record<SupportedLanguage, string> = {
@@ -74,8 +98,8 @@ const DEFAULT_CODE: Record<SupportedLanguage, string> = {
   javascript: JS_SAMPLE,
   cpp: CPP_SAMPLE,
   java: JAVA_SAMPLE,
-  go: '// Go support coming in Phase 3',
-  rust: '// Rust support coming in Phase 3',
+  go: GO_SAMPLE,
+  rust: RUST_SAMPLE,
 };
 
 interface EditorStore {
