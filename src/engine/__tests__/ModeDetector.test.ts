@@ -1,0 +1,94 @@
+import { describe, it, expect } from 'vitest';
+import { detectMode, buildDriver } from '../ModeDetector';
+
+describe('ModeDetector', () => {
+  describe('detectMode', () => {
+    it('detects Python full-program mode from if __name__ == "__main__"', () => {
+      const code = `
+def solve():
+    print("hello")
+
+if __name__ == "__main__":
+    solve()
+`;
+      expect(detectMode(code, 'python')).toBe('full-program');
+    });
+
+    it('detects Python full-program mode from def main():', () => {
+      const code = `
+def main():
+    pass
+main()
+`;
+      expect(detectMode(code, 'python')).toBe('full-program');
+    });
+
+    it('detects Python function mode for pure algorithmic functions', () => {
+      const code = `
+def two_sum(nums, target):
+    seen = {}
+    for i, num in enumerate(nums):
+        if target - num in seen:
+            return [seen[target - num], i]
+        seen[num] = i
+`;
+      expect(detectMode(code, 'python')).toBe('function');
+    });
+
+    it('detects JavaScript full-program mode with function main()', () => {
+      const code = `
+function main() {
+  console.log("running");
+}
+main();
+`;
+      expect(detectMode(code, 'javascript')).toBe('full-program');
+    });
+
+    it('detects JavaScript function mode for leetcode style functions', () => {
+      const code = `
+function lengthOfLongestSubstring(s) {
+  let set = new Set();
+  return set.size;
+}
+`;
+      expect(detectMode(code, 'javascript')).toBe('function');
+    });
+
+    it('detects C++ full-program mode with int main()', () => {
+      const code = `#include <iostream>\nint main() { return 0; }`;
+      expect(detectMode(code, 'cpp')).toBe('full-program');
+    });
+
+    it('detects Java full-program mode with public static void main', () => {
+      const code = `class Solution { public static void main(String[] args) {} }`;
+      expect(detectMode(code, 'java')).toBe('full-program');
+    });
+  });
+
+  describe('buildDriver', () => {
+    it('generates a Python driver that calls the function with JSON array args', () => {
+      const code = `def bubble_sort(arr):\n    return arr`;
+      const input = '[[3, 2, 1]]';
+      const output = buildDriver(code, input, 'python');
+      expect(output).toContain('_result = bubble_sort(*_converted_args)');
+      expect(output).toContain('_raw_args = [[3,2,1]]');
+      expect(output).toContain('# ── AlgoLens generated driver');
+    });
+
+    it('generates a JavaScript driver that wraps execution in an IIFE', () => {
+      const code = `function bubbleSort(arr) {\n  return arr;\n}`;
+      const input = '[[5, 1, 4]]';
+      const output = buildDriver(code, input, 'javascript');
+      expect(output).toContain('bubbleSort([5,1,4])');
+      expect(output).toContain('// ── AlgoLens generated driver');
+    });
+
+    it('handles arrow function syntax in JavaScript', () => {
+      const code = `const quicksort = (arr) => arr;`;
+      const input = '[[9, 8, 7]]';
+      const output = buildDriver(code, input, 'javascript');
+      expect(output).toContain('quicksort([9,8,7])');
+    });
+  });
+});
