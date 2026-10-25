@@ -280,56 +280,66 @@ export const RecursionTreeRenderer: React.FC<RecursionTreeRendererProps> = ({
                 />
               )}
 
-              {/* Node Card */}
-              <rect
-                x={-60}
-                y={-22}
-                width={120}
-                height={44}
-                rx={10}
-                fill={bg}
-                stroke={border}
-                strokeWidth={node.isActive ? 2 : 1}
-                filter="drop-shadow(0 4px 12px rgba(0,0,0,0.5))"
-              />
+              {(() => {
+                const rawLabel = `${node.name}(${node.argsStr})`;
+                const label = rawLabel.length > 24 ? `${node.name}(${node.argsStr.slice(0, 12)}…)` : rawLabel;
+                const boxW = Math.max(140, Math.min(220, label.length * 8 + 26));
 
-              {/* Function name */}
-              <text
-                x={0}
-                y={-4}
-                textAnchor="middle"
-                fill="#F7F5EF"
-                fontSize={12}
-                fontWeight={node.isActive ? 700 : 600}
-                fontFamily="'JetBrains Mono', monospace"
-              >
-                {node.name}({node.argsStr})
-              </text>
+                return (
+                  <>
+                    {/* Node Card */}
+                    <rect
+                      x={-boxW / 2}
+                      y={-24}
+                      width={boxW}
+                      height={48}
+                      rx={10}
+                      fill={bg}
+                      stroke={border}
+                      strokeWidth={node.isActive ? 2 : 1}
+                      filter="drop-shadow(0 4px 12px rgba(0,0,0,0.5))"
+                    />
 
-              {/* Status / Return value */}
-              <text
-                x={0}
-                y={13}
-                textAnchor="middle"
-                fill={
-                  node.isActive
-                    ? '#FFE3DE'
-                    : node.retVal !== undefined
-                    ? '#2ed573'
-                    : 'var(--text-muted)'
-                }
-                fontSize={10}
-                fontFamily="'Inter', sans-serif"
-                fontWeight={500}
-              >
-                {node.retVal !== undefined
-                  ? `ret: ${node.retVal}`
-                  : node.isActive
-                  ? 'executing...'
-                  : node.isCompleted
-                  ? 'completed'
-                  : 'waiting'}
-              </text>
+                    {/* Function name */}
+                    <text
+                      x={0}
+                      y={-5}
+                      textAnchor="middle"
+                      fill="#F7F5EF"
+                      fontSize={11.5}
+                      fontWeight={node.isActive ? 700 : 600}
+                      fontFamily="'JetBrains Mono', monospace"
+                    >
+                      {label}
+                    </text>
+
+                    {/* Status / Return value */}
+                    <text
+                      x={0}
+                      y={14}
+                      textAnchor="middle"
+                      fill={
+                        node.isActive
+                          ? '#FFE3DE'
+                          : node.retVal !== undefined
+                          ? '#2ed573'
+                          : 'var(--text-muted)'
+                      }
+                      fontSize={10}
+                      fontFamily="'Inter', sans-serif"
+                      fontWeight={500}
+                    >
+                      {node.retVal !== undefined
+                        ? `ret: ${node.retVal}`
+                        : node.isActive
+                        ? 'executing...'
+                        : node.isCompleted
+                        ? 'completed'
+                        : 'waiting'}
+                    </text>
+                  </>
+                );
+              })()}
             </g>
           );
         })}

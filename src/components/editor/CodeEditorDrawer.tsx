@@ -48,10 +48,18 @@ export const CodeEditorDrawer: React.FC = () => {
     }
     try {
       const adapter = getAdapter(language);
-      const effectiveInput = input.trim()
-        ? input
-        : (inferDefaultInput(code) ?? '[[64, 34, 25, 12, 22, 11, 90]]');
-      if (!input.trim() && effectiveInput) {
+      const inferred = inferDefaultInput(code);
+      let effectiveInput = input.trim();
+      if (!effectiveInput) {
+        effectiveInput = inferred ?? '[[64, 34, 25, 12, 22, 11, 90]]';
+        setInput(effectiveInput);
+      } else if (
+        inferred &&
+        (code.includes('addTwoNumbers') || code.includes('add_two_numbers') || code.includes('mergeTwoLists')) &&
+        !effectiveInput.includes('], [') &&
+        !effectiveInput.includes('l2')
+      ) {
+        effectiveInput = inferred;
         setInput(effectiveInput);
       }
 

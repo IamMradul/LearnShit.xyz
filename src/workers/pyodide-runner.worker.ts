@@ -121,6 +121,12 @@ _TOTAL = 0
 _last_vars_snapshot = {}
 _MAX_USER_LINE = 999999
 
+def _is_list_node(obj):
+    return obj is not None and (type(obj).__name__ == 'ListNode' or (hasattr(obj, 'val') and hasattr(obj, 'next')))
+
+def _is_tree_node(obj):
+    return obj is not None and (type(obj).__name__ == 'TreeNode' or (hasattr(obj, 'val') and hasattr(obj, 'left') and hasattr(obj, 'right')))
+
 def _safe_repr(val, depth=0):
     if depth > 3:
         return "..."
@@ -132,6 +138,21 @@ def _safe_repr(val, depth=0):
         return str(val)
     if isinstance(val, str):
         return json.dumps(val)
+    if _is_list_node(val):
+        vals = []
+        curr = val
+        count = 0
+        visited = set()
+        while curr and id(curr) not in visited and count < 15:
+            visited.add(id(curr))
+            vals.append(str(curr.val))
+            curr = curr.next
+            count += 1
+        if curr:
+            vals.append('...')
+        return ' -> '.join(vals) if vals else 'None'
+    if _is_tree_node(val):
+        return f"TreeNode({val.val})"
     if isinstance(val, (list, tuple)):
         if len(val) > 30:
             return f"[...{len(val)} items]"
@@ -151,7 +172,7 @@ def _safe_clone(val, depth=0):
         return "..."
     if val is None or isinstance(val, (bool, int, float, str)):
         return val
-    if isinstance(val, ListNode):
+    if _is_list_node(val):
         nodes = []
         curr = val
         visited = set()
@@ -163,7 +184,7 @@ def _safe_clone(val, depth=0):
             })
             curr = curr.next
         return nodes
-    if isinstance(val, TreeNode):
+    if _is_tree_node(val):
         return {
             "val": val.val,
             "left": _safe_clone(val.left, depth + 1) if val.left else None,
@@ -188,6 +209,10 @@ def _get_type(val):
         return "float"
     if isinstance(val, str):
         return "str"
+    if _is_list_node(val):
+        return "linkedList"
+    if _is_tree_node(val):
+        return "binaryTree"
     if isinstance(val, list):
         return "list"
     if isinstance(val, dict):
@@ -196,17 +221,14 @@ def _get_type(val):
         return "tuple"
     if isinstance(val, set):
         return "set"
-    if isinstance(val, ListNode):
-        return "linkedList"
-    if isinstance(val, TreeNode):
-        return "binaryTree"
     return type(val).__name__
 
 SKIP_VARS = frozenset({
     '__name__', '__doc__', '__package__', '__loader__', '__spec__',
     '__builtins__', '__file__', '__cached__', '_tracer_fn',
     '_steps', '_stdout_capture', '_MAX_STEPS', '_TRUNCATED', '_TOTAL',
-    '_safe_repr', '_safe_clone', '_get_type', 'SKIP_VARS', 'self',
+    '_safe_repr', '_safe_clone', '_get_type', '_is_list_node', '_is_tree_node',
+    'SKIP_VARS', 'self',
     '_last_vars_snapshot', '_MAX_USER_LINE', 'ListNode', 'TreeNode', 'Node',
     '_to_list_node', '_to_tree_node', '_convert_arg', '_serialize',
     '_sol', '_result', '_raw_args', '_params_names', '_converted_args',

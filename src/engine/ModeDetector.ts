@@ -70,7 +70,21 @@ export function parseDriverArgs(input: string, paramCount: number = 0): unknown[
   // Try standard JSON parse first
   try {
     const parsed = JSON.parse(trimmed);
-    if (paramCount === 1 && Array.isArray(parsed) && (parsed.length === 0 || !Array.isArray(parsed[0]))) {
+    if (paramCount === 1) {
+      if (Array.isArray(parsed)) {
+        if (parsed.length === 1) {
+          return parsed;
+        }
+        return [parsed];
+      }
+      return [parsed];
+    }
+    if (
+      paramCount > 1 &&
+      Array.isArray(parsed) &&
+      parsed.length !== paramCount &&
+      parsed.every((x) => typeof x !== 'object' || x === null || !Array.isArray(x))
+    ) {
       return [parsed];
     }
     return Array.isArray(parsed) ? parsed : [parsed];
@@ -86,7 +100,21 @@ export function parseDriverArgs(input: string, paramCount: number = 0): unknown[
       .replace(/^,\s*/, '');
     const wrappedJson = `[${cleaned}]`;
     const parsed = JSON.parse(wrappedJson);
-    if (paramCount === 1 && Array.isArray(parsed) && (parsed.length === 0 || !Array.isArray(parsed[0]))) {
+    if (paramCount === 1) {
+      if (Array.isArray(parsed)) {
+        if (parsed.length === 1) {
+          return parsed;
+        }
+        return [parsed];
+      }
+      return [parsed];
+    }
+    if (
+      paramCount > 1 &&
+      Array.isArray(parsed) &&
+      parsed.length !== paramCount &&
+      parsed.every((x) => typeof x !== 'object' || x === null || !Array.isArray(x))
+    ) {
       return [parsed];
     }
     return Array.isArray(parsed) ? parsed : [parsed];
@@ -173,31 +201,71 @@ export function inferDefaultInput(code: string): string | null {
 // ─── Python driver ────────────────────────────────────────────────────────────
 
 function buildPythonDriver(code: string, input: string): string {
-  // Check if user code is LeetCode class Solution style
-  const classMatch = code.match(/class\s+(\w+)(?:\([^)]*\))?\s*:/);
-  let callerLines: string[] = [];
+  let targetClass = '';
+  let methodName = '';
   let paramNames: string[] = [];
+  let callerLines: string[] = [];
 
-  if (classMatch) {
-    const className = classMatch[1];
-    // Find the primary method inside the class (taking self)
-    const methodMatch = code.match(/def\s+(\w+)\s*\(\s*self\s*(?:,\s*([\s\S]*?))?\)\s*(?:->[^:]+)?\s*:/);
-    if (methodMatch) {
-      const methodName = methodMatch[1];
-      const rawParams = methodMatch[2] || '';
-      paramNames = splitTopLevelParams(rawParams);
-      callerLines = [`_sol = ${className}()`, `_result = _sol.${methodName}(*_converted_args)`];
+  // 1. Look for explicit class Solution
+  const solutionMatch = code.match(/class\s+(Solution[a-zA-Z0-9_]*)(?:\([^)]*\))?\s*:/);
+  if (solutionMatch) {
+    targetClass = solutionMatch[1];
+    const classIdx = code.indexOf(solutionMatch[0]);
+    const afterClass = code.slice(classIdx);
+    const methodMatches = afterClass.matchAll(/def\s+([a-zA-Z0-9_]+)\s*\(\s*self\s*(?:,\s*([\s\S]*?))?\)\s*(?:->[^:]+)?\s*:/g);
+    for (const m of methodMatches) {
+      if (!m[1].startsWith('__')) {
+        methodName = m[1];
+        paramNames = splitTopLevelParams(m[2] || '');
+        break;
+      }
+    }
+    if (methodName) {
+      callerLines = [`_sol = ${targetClass}()`, `_result = _sol.${methodName}(*_converted_args)`];
     }
   }
 
-  // If not class Solution, check top-level function
+  // 2. If no Solution class, check if any class has a non-dunder algorithm method
   if (callerLines.length === 0) {
-    const fnMatch = code.match(/def\s+(\w+)\s*\(([\s\S]*?)\)\s*(?:->[^:]+)?\s*:/);
-    if (!fnMatch) return code;
-    const fnName = fnMatch[1];
-    paramNames = splitTopLevelParams(fnMatch[2] || '');
-    callerLines = [`_result = ${fnName}(*_converted_args)`];
+    const classRegex = /class\s+([a-zA-Z0-9_]+)(?:\([^)]*\))?\s*:/g;
+    let cm: RegExpExecArray | null;
+    while ((cm = classRegex.exec(code)) !== null) {
+      const cName = cm[1];
+      if (/^(ListNode|TreeNode|Node|TrieNode|GraphNode)$/i.test(cName)) continue;
+      const classStart = cm.index;
+      const afterClass = code.slice(classStart);
+      const mMatches = afterClass.matchAll(/def\s+([a-zA-Z0-9_]+)\s*\(\s*self\s*(?:,\s*([\s\S]*?))?\)\s*(?:->[^:]+)?\s*:/g);
+      for (const m of mMatches) {
+        if (!m[1].startsWith('__')) {
+          targetClass = cName;
+          methodName = m[1];
+          paramNames = splitTopLevelParams(m[2] || '');
+          callerLines = [`_sol = ${targetClass}()`, `_result = _sol.${methodName}(*_converted_args)`];
+          break;
+        }
+      }
+      if (callerLines.length > 0) break;
+    }
   }
+
+  // 3. Fall back to top-level function outside classes
+  if (callerLines.length === 0) {
+    const fnMatches = code.matchAll(/^\s*def\s+([a-zA-Z0-9_]+)\s*\(([\s\S]*?)\)\s*(?:->[^:]+)?\s*:/gm);
+    for (const fm of fnMatches) {
+      const fName = fm[1];
+      if (fName.startsWith('__')) continue;
+      const lineStart = code.lastIndexOf('\n', fm.index) + 1;
+      const indent = fm.index - lineStart;
+      if (indent > 0) continue; // inside a class
+
+      const fnName = fName;
+      paramNames = splitTopLevelParams(fm[2] || '');
+      callerLines = [`_result = ${fnName}(*_converted_args)`];
+      break;
+    }
+  }
+
+  if (callerLines.length === 0) return code;
 
   const effectiveInput = input && input.trim() ? input : (inferDefaultInput(code) ?? '');
   const args = parseDriverArgs(effectiveInput, paramNames.length);
@@ -209,10 +277,32 @@ function buildPythonDriver(code: string, input: string): string {
 # ── AlgoLens generated driver ──────────────────────────
 import json as _json
 
+def _is_list_node(obj):
+    return obj is not None and (type(obj).__name__ == 'ListNode' or (hasattr(obj, 'val') and hasattr(obj, 'next')))
+
+def _is_tree_node(obj):
+    return obj is not None and (type(obj).__name__ == 'TreeNode' or (hasattr(obj, 'val') and hasattr(obj, 'left') and hasattr(obj, 'right')))
+
 def _to_list_node(vals, pos=-1):
+    if vals is None:
+        return None
+    if _is_list_node(vals):
+        return vals
+    if isinstance(vals, (int, float)):
+        return ListNode(int(vals))
+    if not isinstance(vals, (list, tuple)):
+        try:
+            vals = list(vals)
+        except Exception:
+            return ListNode(vals)
     if not vals:
         return None
-    nodes = [ListNode(v) for v in vals]
+    nodes = []
+    for v in vals:
+        if _is_list_node(v):
+            nodes.append(v)
+        else:
+            nodes.append(ListNode(v))
     for i in range(len(nodes) - 1):
         nodes[i].next = nodes[i + 1]
     if isinstance(pos, int) and 0 <= pos < len(nodes):
@@ -220,6 +310,17 @@ def _to_list_node(vals, pos=-1):
     return nodes[0]
 
 def _to_tree_node(vals):
+    if vals is None:
+        return None
+    if _is_tree_node(vals):
+        return vals
+    if isinstance(vals, (int, float)):
+        return TreeNode(int(vals))
+    if not isinstance(vals, (list, tuple)):
+        try:
+            vals = list(vals)
+        except Exception:
+            return TreeNode(vals)
     if not vals or vals[0] is None:
         return None
     root = TreeNode(vals[0])
@@ -240,17 +341,38 @@ def _to_tree_node(vals):
 
 def _convert_arg(arg, name_hint=""):
     hint = name_hint.lower()
-    if isinstance(arg, list):
-        if 'head' in hint or 'listnode' in hint or 'l1' in hint or 'l2' in hint or 'list' in hint:
-            return _to_list_node(arg)
-        if 'root' in hint or 'treenode' in hint or 'tree' in hint:
-            return _to_tree_node(arg)
+    is_list_node = any(k in hint for k in ['head', 'listnode', 'l1', 'l2']) or hint == 'node'
+    is_tree_node = any(k in hint for k in ['root', 'treenode', 'tree'])
+    is_scalar_num = any(k in hint for k in ['n', 'k', 'target', 'val', 'num', 'size', 'pos', 'index', 'idx'])
+
+    if is_scalar_num and not (is_list_node or is_tree_node):
+        if isinstance(arg, (list, tuple)) and len(arg) == 1 and isinstance(arg[0], (int, float)):
+            return arg[0]
+
+    if 'edge' in hint or 'graph' in hint:
+        if isinstance(arg, list) and len(arg) == 1 and isinstance(arg[0], list) and len(arg[0]) > 0 and isinstance(arg[0][0], list):
+            arg = arg[0]
+
+    if is_list_node and not is_tree_node:
+        if _is_list_node(arg):
+            return arg
+        if isinstance(arg, (int, float)):
+            return ListNode(int(arg))
+        return _to_list_node(arg)
+
+    if is_tree_node:
+        if _is_tree_node(arg):
+            return arg
+        if isinstance(arg, (int, float)):
+            return TreeNode(int(arg))
+        return _to_tree_node(arg)
+
     return arg
 
 def _serialize(obj):
     if obj is None:
         return None
-    if isinstance(obj, ListNode):
+    if _is_list_node(obj):
         res = []
         curr = obj
         count = 0
@@ -259,7 +381,7 @@ def _serialize(obj):
             curr = curr.next
             count += 1
         return res
-    if isinstance(obj, TreeNode):
+    if _is_tree_node(obj):
         res = []
         q = [obj]
         while q:
@@ -282,6 +404,20 @@ if len(_params_names) == 1 and len(_raw_args) >= 2 and isinstance(_raw_args[1], 
     _converted_args = [_to_list_node(_raw_args[0], _raw_args[1])]
 else:
     _converted_args = [_convert_arg(a, _params_names[i] if i < len(_params_names) else "") for i, a in enumerate(_raw_args)]
+
+while len(_converted_args) < len(_params_names):
+    _missing_idx = len(_converted_args)
+    _p_name = _params_names[_missing_idx].lower()
+    if any(k in _p_name for k in ['head', 'listnode', 'l1', 'l2']) or _p_name == 'node':
+        _converted_args.append(_to_list_node([5, 6, 4] if 'l2' in _p_name else [1, 2, 3]))
+    elif any(k in _p_name for k in ['root', 'treenode', 'tree']):
+        _converted_args.append(_to_tree_node([1, 2, 3]))
+    elif any(k in _p_name for k in ['start', 'src', 'source']):
+        _converted_args.append(0)
+    elif any(k in _p_name for k in ['target', 'k', 'val']):
+        _converted_args.append(9)
+    else:
+        _converted_args.append(None)
 
 try:
 ${indentedCaller}
@@ -359,7 +495,7 @@ function buildJSDriver(code: string, input: string): string {
 
   const needsConversion = paramNames.some((p) => {
     const hint = p.toLowerCase();
-    return hint.includes('head') || hint.includes('root') || hint.includes('tree') || hint.includes('listnode') || hint.includes('treenode');
+    return hint.includes('head') || hint.includes('root') || hint.includes('tree') || hint.includes('listnode') || hint.includes('treenode') || hint.includes('l1') || hint.includes('l2');
   });
 
   if (!needsConversion) {
@@ -399,8 +535,11 @@ class TreeNode {
 }
 
 function _to_list_node(vals, pos = -1) {
+  if (vals === null || vals === undefined) return null;
+  if (vals instanceof ListNode) return vals;
+  if (typeof vals === 'number') return new ListNode(vals);
   if (!Array.isArray(vals) || !vals.length) return null;
-  const nodes = vals.map((v) => new ListNode(v));
+  const nodes = vals.map((v) => (v instanceof ListNode ? v : new ListNode(v)));
   for (let i = 0; i < nodes.length - 1; i++) {
     nodes[i].next = nodes[i + 1];
   }
@@ -438,16 +577,21 @@ function _to_tree_node(vals) {
   const _param_names = ${JSON.stringify(paramNames)};
   const _converted_args = _raw_args.map((arg, idx) => {
     const hint = (_param_names[idx] || '').toLowerCase();
-    if (Array.isArray(arg)) {
-      if (hint.includes('head') || hint.includes('listnode')) {
-        return _to_list_node(arg);
-      }
-      if (hint.includes('root') || hint.includes('treenode') || hint.includes('tree')) {
-        return _to_tree_node(arg);
-      }
-    }
+    const isListNode = hint.includes('head') || hint.includes('listnode') || hint.includes('l1') || hint.includes('l2');
+    const isTreeNode = hint.includes('root') || hint.includes('treenode') || hint.includes('tree');
+    if (isListNode) return _to_list_node(arg);
+    if (isTreeNode) return _to_tree_node(arg);
     return arg;
   });
+  while (_converted_args.length < _param_names.length) {
+    const idx = _converted_args.length;
+    const hint = (_param_names[idx] || '').toLowerCase();
+    if (hint.includes('head') || hint.includes('listnode') || hint.includes('l1') || hint.includes('l2')) {
+      _converted_args.push(_to_list_node(hint.includes('l2') ? [5, 6, 4] : [1, 2, 3]));
+    } else {
+      _converted_args.push(null);
+    }
+  }
 
   try {
     ${caller}

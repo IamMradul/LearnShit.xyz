@@ -533,10 +533,10 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
     complexity: 'O(V + E)',
     spaceComplexity: 'O(V)',
     sampleCode: {
-      python: `def bfs(adj, start):\n    visited = {start}\n    queue = [start]\n    order = []\n    while queue:\n        u = queue.pop(0)\n        order.append(u)\n        for v in adj.get(u, []):\n            if v not in visited:\n                visited.add(v)\n                queue.append(v)\n    return order`,
+      python: `def bfs(adj, start):\n    visited = {start}\n    queue = [start]\n    order = []\n    while queue:\n        u = queue.pop(0)\n        order.append(u)\n        neighbors = adj.get(u, []) if isinstance(adj, dict) else (adj[u] if 0 <= u < len(adj) else [])\n        for v in neighbors:\n            if v not in visited:\n                visited.add(v)\n                queue.append(v)\n    return order`,
       javascript: `function bfs(adj, start) {\n  const visited = new Set([start]);\n  const q = [start], order = [];\n  while (q.length) {\n    const u = q.shift();\n    order.push(u);\n    for (const v of adj[u] || []) {\n      if (!visited.has(v)) {\n        visited.add(v);\n        q.push(v);\n      }\n    }\n  }\n  return order;\n}`,
     },
-    sampleInput: '[[[1, 2], [0, 2, 3], [0, 1, 3], [1, 2]]]',
+    sampleInput: '[[[1, 2], [0, 2, 3], [0, 1, 3], [1, 2]], 0]',
     renderThumbnail: () => (
       <svg width="100%" height="100%" viewBox="0 0 240 140" style={{ background: 'transparent' }}>
         <g stroke="rgba(247, 245, 239, 0.3)" strokeWidth="2" fill="none">
@@ -571,7 +571,7 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
       python: `def kruskal_mst(n, edges):\n    edges.sort(key=lambda e: e[2])\n    parent = list(range(n))\n    def find(x): return x if parent[x] == x else find(parent[x])\n    mst_weight, count = 0, 0\n    for u, v, w in edges:\n        ru, rv = find(u), find(v)\n        if ru != rv:\n            parent[ru] = rv\n            mst_weight += w\n            count += 1\n    return mst_weight`,
       javascript: `function kruskal(n, edges) {\n  edges.sort((a, b) => a[2] - b[2]);\n  const p = Array.from({length: n}, (_, i) => i);\n  const find = x => p[x] === x ? x : (p[x] = find(p[x]));\n  let weight = 0;\n  for (const [u, v, w] of edges) {\n    const ru = find(u), rv = find(v);\n    if (ru !== rv) { p[ru] = rv; weight += w; }\n  }\n  return weight;\n}`,
     },
-    sampleInput: '[4, [[[0, 1, 1], [1, 2, 2], [2, 3, 3], [0, 3, 4], [0, 2, 5]]]]',
+    sampleInput: '[4, [[0, 1, 1], [1, 2, 2], [2, 3, 3], [0, 3, 4], [0, 2, 5]]]',
     renderThumbnail: () => (
       <svg width="100%" height="100%" viewBox="0 0 240 140" style={{ background: 'transparent' }}>
         <g stroke="rgba(247, 245, 239, 0.15)" strokeWidth="1.5" strokeDasharray="3,3" fill="none">
@@ -605,7 +605,7 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
     complexity: 'O((V + E) log V)',
     spaceComplexity: 'O(V)',
     sampleCode: {
-      python: `import heapq\ndef dijkstra(n, adj, src):\n    dist = {i: float('inf') for i in range(n)}\n    dist[src] = 0\n    pq = [(0, src)]\n    while pq:\n        d, u = heapq.heappop(pq)\n        if d > dist[u]: continue\n        for v, weight in adj.get(u, []):\n            if dist[u] + weight < dist[v]:\n                dist[v] = dist[u] + weight\n                heapq.heappush(pq, (dist[v], v))\n    return dist`,
+      python: `import heapq\ndef dijkstra(n, adj, src):\n    dist = {i: float('inf') for i in range(n)}\n    dist[src] = 0\n    pq = [(0, src)]\n    while pq:\n        d, u = heapq.heappop(pq)\n        if d > dist[u]: continue\n        neighbors = adj.get(u, []) if isinstance(adj, dict) else (adj[u] if 0 <= u < len(adj) else [])\n        for item in neighbors:\n            v, weight = item[0], item[1]\n            if dist[u] + weight < dist[v]:\n                dist[v] = dist[u] + weight\n                heapq.heappush(pq, (dist[v], v))\n    return dist`,
       javascript: `function dijkstra(n, adj, src) {\n  const dist = new Array(n).fill(Infinity);\n  dist[src] = 0;\n  // Shortest path relaxations\n  return dist;\n}`,
     },
     sampleInput: '[4, [[[1, 4], [2, 1]], [[3, 1]], [[1, 2], [3, 5]], []], 0]',
@@ -933,7 +933,7 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
       python: `def steiner_tree(terminals, graph):\n    # Minimum Steiner tree search\n    return "Steiner tree minimal edges"`,
       javascript: `function steinerTree(terminals, graph) {\n  return 0;\n}`,
     },
-    sampleInput: '[[0, 2, 4], [[[0, 1, 2], [1, 2, 3], [2, 3, 1], [3, 4, 4]]]]',
+    sampleInput: '[[0, 2, 4], [[0, 1, 2], [1, 2, 3], [2, 3, 1], [3, 4, 4]]]',
     renderThumbnail: () => (
       <svg width="100%" height="100%" viewBox="0 0 240 140" style={{ background: 'transparent' }}>
         <g stroke="rgba(247, 245, 239, 0.2)" strokeWidth="1.5" fill="none">

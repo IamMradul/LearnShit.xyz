@@ -99,6 +99,19 @@ function lengthOfLongestSubstring(s) {
       expect(output).toContain('_raw_args = [[2,4,3], [5,6,4]]');
     });
 
+    it('handles user addTwoNumbers with type hints', () => {
+      const userCode = `class Solution:\n    def addTwoNumbers(self, l1: Optional[ListNode], l2: Optional[ListNode]) -> Optional[ListNode]:\n        return None`;
+      const outputEmpty = buildDriver(userCode, '', 'python');
+      expect(outputEmpty).toContain('_sol.addTwoNumbers(*_converted_args)');
+      expect(outputEmpty).toContain('_raw_args = [[2,4,3], [5,6,4]]');
+
+      const outputLeetCode = buildDriver(userCode, 'l1 = [2,4,3], l2 = [5,6,4]', 'python');
+      expect(outputLeetCode).toContain('_raw_args = [[2,4,3], [5,6,4]]');
+
+      const output1D = buildDriver(userCode, '[2, 4, 3]', 'python');
+      expect(output1D).toContain('_raw_args = [[2,4,3]]');
+    });
+
     it('generates JavaScript driver for LeetCode class Solution with TreeNode', () => {
       const code = `class Solution {\n    invertTree(root) {\n        return root;\n    }\n}`;
       const input = '[[4, 2, 7]]';

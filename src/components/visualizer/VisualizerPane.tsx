@@ -7,6 +7,7 @@ import { ArrayRenderer } from './renderers/ArrayRenderer';
 import { TreeRenderer } from './renderers/TreeRenderer';
 import { LinkedListRenderer } from './renderers/LinkedListRenderer';
 import { GridRenderer } from './renderers/GridRenderer';
+import { GraphRenderer } from './renderers/GraphRenderer';
 import { RecursionTreeRenderer } from './renderers/RecursionTreeRenderer';
 import { PlaybackControls } from './playback/PlaybackControls';
 import { WalkthroughExplainer } from './WalkthroughExplainer';
@@ -55,6 +56,9 @@ function DSRenderer({
       return <LinkedListRenderer step={step} varName={varName} height={height} />;
     case 'grid':
       return <GridRenderer step={step} varName={varName} height={height} />;
+    case 'graph':
+    case 'unionFind':
+      return <GraphRenderer step={step} varName={varName} height={height} />;
     default:
       return (
         <div
@@ -415,9 +419,21 @@ export const VisualizerPane: React.FC = () => {
 
 
 
-  // Recursion detection & view mode
+  // Recursion detection & view mode (only genuine recursive calls or multiple non-module frames)
   const hasRecursion = useMemo(() => {
-    return steps.some((s) => (s.callStack?.length ?? 0) > 1);
+    return steps.some((s) => {
+      if (!s.callStack || s.callStack.length <= 1) return false;
+      const userFrames = s.callStack.filter(
+        (f) =>
+          !f.name.startsWith('__') &&
+          f.name !== '<module>' &&
+          f.name !== 'Solution' &&
+          f.name !== 'run_with_trace',
+      );
+      if (userFrames.length > 1) return true;
+      const names = userFrames.map((f) => f.name);
+      return new Set(names).size < names.length;
+    });
   }, [steps]);
 
   const [visualizerMode, setVisualizerMode] = useState<'ds' | 'recursion'>('ds');
