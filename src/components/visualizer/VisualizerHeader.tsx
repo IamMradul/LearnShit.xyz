@@ -49,7 +49,7 @@ export const VisualizerHeader: React.FC = () => {
     visualizerZoom,
     setVisualizerZoom,
   } = useUIStore();
-  const { setResult, setRunning, setError, isRunning, pyodideLoading, setPyodideLoading } =
+  const { setResult, setStatus, setRunning, setError, isRunning, pyodideLoading, setPyodideLoading } =
     useTraceStore();
 
   const [showLangMenu, setShowLangMenu] = useState(false);
@@ -107,6 +107,9 @@ export const VisualizerHeader: React.FC = () => {
       });
 
       setResult(result);
+      if (result.steps.length > 0) {
+        setStatus('playing');
+      }
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
       setError(msg);
@@ -114,7 +117,7 @@ export const VisualizerHeader: React.FC = () => {
       setRunning(false);
       setPyodideLoading(false);
     }
-  }, [language, code, input, modeOverride, isRunning, setResult, setRunning, setError, setPyodideLoading]);
+  }, [language, code, input, modeOverride, isRunning, setResult, setStatus, setRunning, setError, setPyodideLoading]);
 
   // Load a preset algorithm and auto-run
   const handleSelectPreset = useCallback(
@@ -140,6 +143,9 @@ export const VisualizerHeader: React.FC = () => {
           language,
         });
         setResult(result);
+        if (result.steps.length > 0) {
+          setStatus('playing');
+        }
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : String(e);
         setError(msg);
@@ -147,7 +153,7 @@ export const VisualizerHeader: React.FC = () => {
         setRunning(false);
       }
     },
-    [language, modeOverride, setCode, setInput, setError, setRunning, setResult],
+    [language, modeOverride, setCode, setInput, setError, setRunning, setResult, setStatus],
   );
 
   // Take snapshot of SVG visualizer
@@ -604,8 +610,9 @@ export const VisualizerHeader: React.FC = () => {
           {copied ? <Check size={14} /> : <Share2 size={14} />}
         </button>
 
-        {/* Run Code Primary CTA (staying.fun signature button) */}
+        {/* Visualize Primary CTA (staying.fun signature button) */}
         <button
+          id="visualize-btn"
           onClick={handleRun}
           disabled={isRunning}
           style={{
@@ -641,7 +648,7 @@ export const VisualizerHeader: React.FC = () => {
           ) : (
             <>
               <Play size={14} fill="#F7F5EF" />
-              <span>Run Code</span>
+              <span>Visualize</span>
             </>
           )}
         </button>

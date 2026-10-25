@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { X, Code2, Sliders, Terminal, Play, AlertCircle } from 'lucide-react';
+import { X, Code2, Sliders, Terminal, Play, AlertCircle, Loader2 } from 'lucide-react';
 import { useUIStore } from '../../store/uiStore';
 import { useEditorStore } from '../../store/editorStore';
 import { useTraceStore } from '../../store/traceStore';
 import { CodeEditor } from './CodeEditor';
-import { detectMode } from '../../engine/ModeDetector';
+import { detectMode, inferDefaultInput } from '../../engine/ModeDetector';
 import { getAdapter } from '../../engine/adapters/AdapterRegistry';
 
 export const CodeEditorDrawer: React.FC = () => {
@@ -19,7 +19,16 @@ export const CodeEditorDrawer: React.FC = () => {
     isAutoDetecting,
     setIsAutoDetecting,
   } = useEditorStore();
-  const { setResult, setRunning, setError, isRunning, error } = useTraceStore();
+  const {
+    setResult,
+    setStatus,
+    setRunning,
+    setError,
+    isRunning,
+    error,
+    pyodideLoading,
+    setPyodideLoading,
+  } = useTraceStore();
 
   const [activeTab, setActiveTab] = useState<'input' | 'console'>('input');
 
@@ -34,22 +43,39 @@ export const CodeEditorDrawer: React.FC = () => {
     }
     setRunning(true);
     setError(null);
+    if (language === 'python') {
+      setPyodideLoading(true);
+    }
     try {
       const adapter = getAdapter(language);
+      const effectiveInput = input.trim()
+        ? input
+        : (inferDefaultInput(code) ?? '[[64, 34, 25, 12, 22, 11, 90]]');
+      if (!input.trim() && effectiveInput) {
+        setInput(effectiveInput);
+      }
+
       const result = await adapter.trace({
         code,
-        input,
-        mode: modeOverride,
+        input: effectiveInput,
+        mode: effectiveMode,
         maxSteps: 5000,
         timeoutMs: 10000,
         language,
       });
+
       setResult(result);
+      if (result.steps.length > 0) {
+        setStatus('playing');
+        const el = document.getElementById('ide-anchor') || document.getElementById('visualizer');
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
       setError(msg);
     } finally {
       setRunning(false);
+      setPyodideLoading(false);
     }
   };
 
@@ -257,6 +283,7 @@ export const CodeEditorDrawer: React.FC = () => {
         {/* Action Button */}
         <div style={{ padding: '0 14px 10px', display: 'flex', justifyContent: 'flex-end' }}>
           <button
+            id="drawer-trace-btn"
             onClick={handleRun}
             disabled={isRunning}
             style={{
@@ -270,13 +297,24 @@ export const CodeEditorDrawer: React.FC = () => {
               color: '#F7F5EF',
               fontSize: 12,
               fontWeight: 700,
-              cursor: 'pointer',
+              cursor: isRunning ? 'wait' : 'pointer',
               fontFamily: "'Oswald', sans-serif",
               letterSpacing: '0.04em',
+              opacity: isRunning ? 0.75 : 1,
+              transition: 'opacity 0.15s, transform 0.15s',
             }}
           >
-            <Play size={12} fill="#F7F5EF" />
-            TRACE & VISUALIZE
+            {isRunning ? (
+              <>
+                <Loader2 size={12} className="animate-spin" />
+                <span>{pyodideLoading ? 'LOADING PYODIDE…' : 'TRACING…'}</span>
+              </>
+            ) : (
+              <>
+                <Play size={12} fill="#F7F5EF" />
+                <span>TRACE & VISUALIZE</span>
+              </>
+            )}
           </button>
         </div>
       </div>

@@ -1,6 +1,7 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import type { TraceStep } from '../../../engine/TraceTypes';
+import { useTraceStore } from '../../../store/traceStore';
 
 interface LLNode {
   val: number | string;
@@ -29,16 +30,52 @@ function flattenList(head: LLNode | null | undefined, max = 50): LLNode[] {
 }
 
 function extractLL(step: TraceStep, varName?: string): LLNode[] {
-  const target = varName
+  let target = varName
     ? step.variables[varName]
     : Object.values(step.variables).find(
         (v) =>
-          typeof v.value === 'object' &&
-          v.value !== null &&
-          'next' in (v.value as object),
+          v.type === 'linkedList' ||
+          v.type === 'ListNode' ||
+          (typeof v.value === 'object' &&
+            v.value !== null &&
+            ('next' in (v.value as object) ||
+              (Array.isArray(v.value) &&
+                v.value.length > 0 &&
+                typeof v.value[0] === 'object' &&
+                v.value[0] !== null &&
+                'val' in v.value[0]))),
       );
 
+  // Fallback: search all steps if head not yet in current step's scope
+  if (!target?.value) {
+    const allSteps = useTraceStore.getState().steps;
+    for (const s of allSteps) {
+      const t = varName
+        ? s.variables[varName]
+        : Object.values(s.variables).find(
+            (v) =>
+              v.type === 'linkedList' ||
+              v.type === 'ListNode' ||
+              (typeof v.value === 'object' &&
+                v.value !== null &&
+                'next' in (v.value as object)),
+          );
+      if (t?.value) {
+        target = t;
+        break;
+      }
+    }
+  }
+
   if (!target?.value) return [];
+
+  // If already an array of node objects (from Python worker)
+  if (Array.isArray(target.value)) {
+    return target.value.map((item) => ({
+      val: item && typeof item === 'object' && 'val' in item ? (item as { val: number | string }).val : String(item),
+    }));
+  }
+
   return flattenList(target.value as LLNode);
 }
 
@@ -51,6 +88,23 @@ export const LinkedListRenderer: React.FC<LinkedListRendererProps> = ({
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState<number>(600);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const updateSize = () => {
+      if (el.clientWidth > 0) setContainerWidth(el.clientWidth);
+    };
+    updateSize();
+    const ro = new ResizeObserver(updateSize);
+    ro.observe(el);
+    window.addEventListener('resize', updateSize);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', updateSize);
+    };
+  }, []);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -64,7 +118,7 @@ export const LinkedListRenderer: React.FC<LinkedListRendererProps> = ({
 
     if (!nodes.length) return;
 
-    const W = container.clientWidth || 400;
+    const W = Math.max(300, containerWidth || container.clientWidth || 400);
     const H = height;
     const nodeSize = 48;
     const arrowLen = 30;
@@ -149,7 +203,7 @@ export const LinkedListRenderer: React.FC<LinkedListRendererProps> = ({
           .text('null');
       }
     });
-  }, [step, propNodes, varName, height, highlightIds]);
+  }, [step, propNodes, varName, height, highlightIds, containerWidth]);
 
   return (
     <div ref={containerRef} style={{ width: '100%', height }}>

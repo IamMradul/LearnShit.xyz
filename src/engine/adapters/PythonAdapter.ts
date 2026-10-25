@@ -70,10 +70,7 @@ export class PythonAdapter implements LanguageAdapter {
       const mode =
         request.mode === 'auto' ? this.detectMode(request.code) : request.mode;
 
-      const code =
-        mode === 'function'
-          ? buildDriver(request.code, request.input, 'python')
-          : request.code;
+      const code = buildDriver(request.code, request.input, 'python', mode);
 
       const worker = this.getWorker();
 

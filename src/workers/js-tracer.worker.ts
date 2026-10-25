@@ -387,6 +387,24 @@ async function runTrace(request: TraceRequest): Promise<TraceResult> {
     WeakSet,
     Promise,
     Symbol,
+    ListNode: class ListNode {
+      val: unknown;
+      next: unknown;
+      constructor(val = 0, next = null) {
+        this.val = val;
+        this.next = next;
+      }
+    },
+    TreeNode: class TreeNode {
+      val: unknown;
+      left: unknown;
+      right: unknown;
+      constructor(val = 0, left = null, right = null) {
+        this.val = val;
+        this.left = left;
+        this.right = right;
+      }
+    },
   };
 
   // Execute with timeout
@@ -446,6 +464,10 @@ async function runTrace(request: TraceRequest): Promise<TraceResult> {
 function getType(val: unknown): string {
   if (val === null) return 'null';
   if (Array.isArray(val)) return 'array';
+  if (typeof val === 'object' && val !== null) {
+    if ('left' in val && 'right' in val && 'val' in val) return 'binaryTree';
+    if ('next' in val && 'val' in val) return 'linkedList';
+  }
   return typeof val;
 }
 

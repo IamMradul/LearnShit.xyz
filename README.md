@@ -1,4 +1,4 @@
-# AlgoLens — Algorithm Visualizer
+# LearnShit.xyz
 
 > An interactive, production-quality algorithm visualizer that traces code execution step-by-step and animates data structures in real time.
 

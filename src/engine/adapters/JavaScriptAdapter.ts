@@ -50,10 +50,7 @@ export class JavaScriptAdapter implements LanguageAdapter {
       const mode =
         request.mode === 'auto' ? this.detectMode(request.code) : request.mode;
 
-      const code =
-        mode === 'function'
-          ? buildDriver(request.code, request.input, 'javascript')
-          : request.code;
+      const code = buildDriver(request.code, request.input, 'javascript', mode);
 
       const worker = this.getWorker();
 

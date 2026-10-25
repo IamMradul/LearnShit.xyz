@@ -1,20 +1,23 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { VisuAlgoItem } from './visuAlgoData';
 import { getInteractiveSteps, type InteractiveStep } from './interactiveStepsData';
-import { Play, Pause, ChevronLeft, ChevronRight, RotateCcw, GraduationCap, Code2, Sparkles } from 'lucide-react';
+import { Play, Pause, ChevronLeft, ChevronRight, RotateCcw, GraduationCap, Code2, Sparkles, Shuffle, Loader2 } from 'lucide-react';
 
 interface InteractivePlaygroundCardProps {
   item: VisuAlgoItem;
+  isLoading?: boolean;
   onOpenDetail: (item: VisuAlgoItem, mode: 'overview' | 'training') => void;
-  onQuickLoad: (item: VisuAlgoItem) => void;
+  onQuickLoad: (item: VisuAlgoItem, customInput?: string) => void;
 }
 
 export const InteractivePlaygroundCard: React.FC<InteractivePlaygroundCardProps> = ({
   item,
+  isLoading = false,
   onOpenDetail,
   onQuickLoad,
 }) => {
   const theme = item.themeColor || 'var(--accent)';
+  const [currentInput, setCurrentInput] = useState(item.sampleInput);
   const steps: InteractiveStep[] = getInteractiveSteps(item.id, theme);
 
   const [stepIdx, setStepIdx] = useState(0);
@@ -58,6 +61,36 @@ export const InteractivePlaygroundCard: React.FC<InteractivePlaygroundCardProps>
     e.stopPropagation();
     setIsPlaying(false);
     setStepIdx(0);
+  };
+
+  const handleRandomizeInput = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    let newInput = item.sampleInput;
+    if (item.category === 'Sorting' || item.id === 'array') {
+      const arr = Array.from({ length: 4 }, () => Math.floor(Math.random() * 80 + 10));
+      newInput = item.sampleInput.startsWith('[[') ? `[[${arr.join(', ')}]]` : `[${arr.join(', ')}]`;
+    } else if (item.id === 'bitmask') {
+      const n = Math.floor(Math.random() * 30 + 5);
+      newInput = `[${n}, ${Math.floor(Math.random() * 4 + 1)}]`;
+    } else if (item.category === 'Trees' || item.id === 'binary-heap' || item.id === 'binary-search-tree') {
+      const arr = [50, 25, 75, Math.floor(Math.random() * 20 + 5), Math.floor(Math.random() * 20 + 80)];
+      newInput = `[${arr.join(', ')}]`;
+    } else if (item.category === 'Strings' || item.id === 'suffix-tree' || item.id === 'suffix-array') {
+      const words = ['BANANA', 'MISSISSIPPI', 'ALGORITHM', 'ABRACADABRA', 'CODELAB'];
+      newInput = `["${words[Math.floor(Math.random() * words.length)]}"]`;
+    } else if (item.category === 'Geometry' || item.id === 'convex-hull' || item.id === 'geometry-polygon') {
+      const pts = Array.from({ length: 4 }, () => [Math.floor(Math.random() * 8 + 1), Math.floor(Math.random() * 8 + 1)]);
+      newInput = JSON.stringify([pts]);
+    } else if (item.id === 'linked-list') {
+      const vals = Array.from({ length: 4 }, () => Math.floor(Math.random() * 50 + 1));
+      newInput = `[${vals.join(', ')}]`;
+    } else {
+      const vals = Array.from({ length: 4 }, () => Math.floor(Math.random() * 40 + 2));
+      newInput = `[${vals.join(', ')}]`;
+    }
+    setCurrentInput(newInput);
+    setStepIdx(0);
+    setIsPlaying(false);
   };
 
   return (
@@ -158,6 +191,73 @@ export const InteractivePlaygroundCard: React.FC<InteractivePlaygroundCardProps>
         <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           {currentStep ? currentStep.render() : item.renderThumbnail()}
         </div>
+      </div>
+
+      {/* ── Sample Input & Randomize Strip ─────────────────────────────────── */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '6px 14px',
+          background: 'rgba(14, 16, 22, 0.95)',
+          borderBottom: '1px solid rgba(247, 245, 239, 0.06)',
+          fontSize: 10.5,
+          fontFamily: "'JetBrains Mono', monospace",
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, flex: 1 }}>
+          <span style={{ color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: 9.5, letterSpacing: '0.04em' }}>
+            Input:
+          </span>
+          <span
+            title={currentInput}
+            style={{
+              color: '#F7F5EF',
+              background: 'rgba(255, 255, 255, 0.05)',
+              padding: '2px 6px',
+              borderRadius: 4,
+              border: '1px solid rgba(247, 245, 239, 0.08)',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              maxWidth: 170,
+            }}
+          >
+            {currentInput}
+          </span>
+        </div>
+
+        {/* Randomize Input Button */}
+        <button
+          onClick={handleRandomizeInput}
+          title="Randomize algorithm input"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 4,
+            padding: '3px 8px',
+            background: 'rgba(214, 82, 58, 0.12)',
+            border: '1px solid rgba(214, 82, 58, 0.28)',
+            borderRadius: 4,
+            color: 'var(--accent)',
+            fontSize: 10,
+            cursor: 'pointer',
+            fontFamily: "'JetBrains Mono', monospace",
+            fontWeight: 600,
+            transition: 'all 0.15s ease',
+            flexShrink: 0,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'rgba(214, 82, 58, 0.22)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'rgba(214, 82, 58, 0.12)';
+          }}
+        >
+          <Shuffle size={11} />
+          <span>Randomize</span>
+        </button>
       </div>
 
       {/* ── Interactive Player Control Strip ─────────────────────────────────── */}
@@ -375,7 +475,8 @@ export const InteractivePlaygroundCard: React.FC<InteractivePlaygroundCardProps>
         >
           {/* Primary Visualize CTA */}
           <button
-            onClick={() => onQuickLoad(item)}
+            onClick={() => onQuickLoad(item, currentInput)}
+            disabled={isLoading}
             title={`Visualize ${item.title} in main stage`}
             style={{
               flex: 1,
@@ -393,20 +494,32 @@ export const InteractivePlaygroundCard: React.FC<InteractivePlaygroundCardProps>
               fontWeight: 700,
               letterSpacing: '0.04em',
               textTransform: 'uppercase',
-              cursor: 'pointer',
+              cursor: isLoading ? 'wait' : 'pointer',
+              opacity: isLoading ? 0.75 : 1,
               transition: 'all 0.15s ease',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'var(--accent-hover)';
-              e.currentTarget.style.boxShadow = '0 0 14px rgba(214, 82, 58, 0.45)';
+              if (!isLoading) {
+                e.currentTarget.style.background = 'var(--accent-hover)';
+                e.currentTarget.style.boxShadow = '0 0 14px rgba(214, 82, 58, 0.45)';
+              }
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.background = 'var(--accent)';
               e.currentTarget.style.boxShadow = 'none';
             }}
           >
-            <Play size={11} fill="#F7F5EF" />
-            <span>Visualize</span>
+            {isLoading ? (
+              <>
+                <Loader2 size={12} className="animate-spin" />
+                <span>Tracing…</span>
+              </>
+            ) : (
+              <>
+                <Play size={11} fill="#F7F5EF" />
+                <span>Visualize</span>
+              </>
+            )}
           </button>
 
           {/* Training Quiz CTA */}

@@ -210,6 +210,11 @@ SKIP_VARS = frozenset({
     '_last_vars_snapshot', '_MAX_USER_LINE', 'ListNode', 'TreeNode', 'Node',
     '_to_list_node', '_to_tree_node', '_convert_arg', '_serialize',
     '_sol', '_result', '_raw_args', '_params_names', '_converted_args',
+    'sys', 'json', 'io', 'math', 'heapq', 'bisect', 'random', '_tb',
+    'typing', 'collections', 'Optional', 'List', 'Dict', 'Tuple', 'Set',
+    'Union', 'Any', 'Callable', 'Iterable', 'Iterator', 'Sequence',
+    'Mapping', 'TypeVar', 'Generic', 'deque', 'defaultdict', 'Counter',
+    'OrderedDict',
 })
 
 def _tracer_fn(frame, event, arg):

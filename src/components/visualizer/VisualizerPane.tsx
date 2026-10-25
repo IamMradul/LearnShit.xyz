@@ -23,6 +23,7 @@ import {
   Layers,
   Sparkles,
   ArrowLeft,
+  Loader2,
 } from 'lucide-react';
 import type { DSType } from '../../engine/TraceTypes';
 
@@ -73,9 +74,304 @@ function DSRenderer({
   }
 }
 
+function FallbackStateRenderer({
+  step,
+  currentIndex,
+  totalSteps,
+}: {
+  step: ReturnType<typeof useTraceStore.getState>['steps'][0] | null;
+  currentIndex: number;
+  totalSteps: number;
+}) {
+  const vars = step?.variables ?? {};
+  const entries = Object.entries(vars);
+  const stack = step?.callStack ?? [];
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        width: '100%',
+        maxWidth: 780,
+        gap: 16,
+        padding: '24px 28px',
+        background: 'rgba(16, 18, 22, 0.88)',
+        backdropFilter: 'blur(16px)',
+        borderRadius: 16,
+        border: '1px solid rgba(247, 245, 239, 0.12)',
+        boxShadow: '0 16px 40px rgba(0,0,0,0.6)',
+      }}
+    >
+      {/* Informative Header */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          borderBottom: '1px solid rgba(247, 245, 239, 0.08)',
+          paddingBottom: 12,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: 8,
+              background: 'rgba(88, 166, 255, 0.15)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#58a6ff',
+            }}
+          >
+            <Activity size={18} />
+          </div>
+          <div>
+            <div
+              style={{
+                fontFamily: "'Oswald', sans-serif",
+                fontSize: 15,
+                color: '#F7F5EF',
+                letterSpacing: '0.04em',
+                textTransform: 'uppercase',
+              }}
+            >
+              Execution State Inspector
+            </div>
+            <div
+              style={{
+                fontSize: 11,
+                color: 'var(--text-muted)',
+                fontFamily: "'Inter', sans-serif",
+              }}
+            >
+              No specific visual data structure recognized • Tracking runtime variables & call stack
+            </div>
+          </div>
+        </div>
+        <div
+          style={{
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: 11,
+            color: 'var(--accent)',
+            background: 'rgba(214, 82, 58, 0.15)',
+            padding: '3px 8px',
+            borderRadius: 6,
+            fontWeight: 700,
+          }}
+        >
+          Step {currentIndex + 1} of {totalSteps}
+        </div>
+      </div>
+
+      {/* Two columns: Call Stack & Variables */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: stack.length > 0 ? '1fr 1.4fr' : '1fr',
+          gap: 16,
+        }}
+      >
+        {stack.length > 0 && (
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 8,
+              background: 'rgba(255, 255, 255, 0.02)',
+              border: '1px solid rgba(247, 245, 239, 0.06)',
+              borderRadius: 10,
+              padding: '12px 14px',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                fontSize: 11,
+                color: '#F7F5EF',
+                fontFamily: "'Oswald', sans-serif",
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em',
+              }}
+            >
+              <Layers size={13} style={{ color: 'var(--accent)' }} />
+              <span>Call Stack ({stack.length})</span>
+            </div>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 6,
+                maxHeight: 200,
+                overflowY: 'auto',
+              }}
+            >
+              {stack.map((frame, idx) => (
+                <div
+                  key={idx}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '6px 10px',
+                    borderRadius: 6,
+                    background:
+                      idx === stack.length - 1
+                        ? 'rgba(214, 82, 58, 0.15)'
+                        : 'rgba(255, 255, 255, 0.03)',
+                    border:
+                      idx === stack.length - 1
+                        ? '1px solid rgba(214, 82, 58, 0.35)'
+                        : '1px solid transparent',
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: 11,
+                  }}
+                >
+                  <span
+                    style={{
+                      color: idx === stack.length - 1 ? 'var(--accent)' : '#F7F5EF',
+                      fontWeight: 600,
+                    }}
+                  >
+                    {frame.name || 'anonymous'}()
+                  </span>
+                  <span style={{ color: 'var(--text-muted)', fontSize: 10 }}>
+                    line {frame.line}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 8,
+            background: 'rgba(255, 255, 255, 0.02)',
+            border: '1px solid rgba(247, 245, 239, 0.06)',
+            borderRadius: 10,
+            padding: '12px 14px',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              fontSize: 11,
+              color: '#F7F5EF',
+              fontFamily: "'Oswald', sans-serif",
+              textTransform: 'uppercase',
+              letterSpacing: '0.04em',
+            }}
+          >
+            <Terminal size={13} style={{ color: '#2ed573' }} />
+            <span>Scope Variables ({entries.length})</span>
+          </div>
+
+          {entries.length === 0 ? (
+            <div
+              style={{
+                fontSize: 11,
+                color: 'var(--text-muted)',
+                fontStyle: 'italic',
+                padding: '10px 0',
+              }}
+            >
+              No local variables in scope at this step
+            </div>
+          ) : (
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 6,
+                maxHeight: 200,
+                overflowY: 'auto',
+              }}
+            >
+              {entries.map(([name, v]) => {
+                const isMutated = step?.mutations?.some((m) => m.varName === name);
+                return (
+                  <div
+                    key={name}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '5px 10px',
+                      borderRadius: 6,
+                      background: isMutated
+                        ? 'rgba(46, 213, 115, 0.12)'
+                        : 'rgba(255, 255, 255, 0.02)',
+                      border: isMutated
+                        ? '1px solid rgba(46, 213, 115, 0.3)'
+                        : '1px solid rgba(247, 245, 239, 0.04)',
+                      fontFamily: "'JetBrains Mono', monospace",
+                      fontSize: 11,
+                    }}
+                  >
+                    <span
+                      style={{
+                        color: isMutated ? '#2ed573' : 'var(--accent)',
+                        fontWeight: 600,
+                      }}
+                    >
+                      {name}
+                      <span
+                        style={{
+                          fontSize: 9,
+                          color: 'var(--text-muted)',
+                          marginLeft: 6,
+                          fontWeight: 400,
+                        }}
+                      >
+                        ({v.type})
+                      </span>
+                    </span>
+                    <span
+                      style={{
+                        color: '#F7F5EF',
+                        maxWidth: 180,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {typeof v.value === 'object' && v.value !== null
+                        ? JSON.stringify(v.value)
+                        : String(v.value)}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export const VisualizerPane: React.FC = () => {
-  const { steps, currentIndex, status, result, setResult, setRunning, setError } =
-    useTraceStore();
+  const {
+    steps,
+    currentIndex,
+    status,
+    result,
+    setResult,
+    setRunning,
+    setError,
+    isRunning,
+    error,
+    pyodideLoading,
+  } = useTraceStore();
   const {
     activeVisualizerTab,
     setActiveVisualizerTab,
@@ -116,6 +412,8 @@ export const VisualizerPane: React.FC = () => {
   const currentStep = steps[currentIndex] ?? null;
   const detectedDS = useMemo(() => detectDataStructures(steps), [steps]);
   const activeDS = detectedDS.find((d) => d.varName === activeVisualizerTab) ?? detectedDS[0];
+
+
 
   // Recursion detection & view mode
   const hasRecursion = useMemo(() => {
@@ -181,6 +479,7 @@ export const VisualizerPane: React.FC = () => {
 
   return (
     <div
+      id="visualizer"
       className="visualizer-stage"
       style={{
         position: 'relative',
@@ -194,6 +493,128 @@ export const VisualizerPane: React.FC = () => {
         flexDirection: 'column',
       }}
     >
+      {/* ── Prominent Execution Error Alert ─────────────────────────────────── */}
+      {error && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 60,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 50,
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: 12,
+            padding: '12px 20px',
+            background: 'rgba(28, 12, 14, 0.94)',
+            backdropFilter: 'blur(16px)',
+            border: '1px solid rgba(214, 82, 58, 0.55)',
+            borderRadius: 12,
+            boxShadow: '0 12px 36px rgba(0,0,0,0.7)',
+            maxWidth: '85%',
+            minWidth: 320,
+          }}
+        >
+          <AlertTriangle size={18} style={{ color: 'var(--accent)', flexShrink: 0, marginTop: 2 }} />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div
+              style={{
+                fontFamily: "'Oswald', sans-serif",
+                fontSize: 12,
+                letterSpacing: '0.04em',
+                textTransform: 'uppercase',
+                color: 'var(--accent)',
+                fontWeight: 700,
+                marginBottom: 3,
+              }}
+            >
+              Execution Error
+            </div>
+            <div
+              style={{
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: 11.5,
+                color: '#F7F5EF',
+                lineHeight: 1.45,
+                wordBreak: 'break-word',
+              }}
+            >
+              {error}
+            </div>
+          </div>
+          <button
+            onClick={() => setError(null)}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: 'var(--text-muted)',
+              fontSize: 16,
+              cursor: 'pointer',
+              padding: '0 4px',
+              lineHeight: 1,
+            }}
+            title="Dismiss error"
+          >
+            ×
+          </button>
+        </div>
+      )}
+
+      {/* ── Loading Overlay ─────────────────────────────────────────────────── */}
+      {isRunning && (
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            zIndex: 48,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'rgba(10, 11, 13, 0.65)',
+            backdropFilter: 'blur(6px)',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 12,
+              padding: '24px 32px',
+              background: 'rgba(16, 18, 22, 0.92)',
+              border: '1px solid rgba(214, 82, 58, 0.35)',
+              borderRadius: 16,
+              boxShadow: '0 16px 40px rgba(0,0,0,0.6)',
+            }}
+          >
+            <Loader2 size={28} className="animate-spin" style={{ color: 'var(--accent)' }} />
+            <div style={{ textAlign: 'center' }}>
+              <div
+                style={{
+                  fontFamily: "'Oswald', sans-serif",
+                  fontSize: 14,
+                  letterSpacing: '0.04em',
+                  textTransform: 'uppercase',
+                  color: '#F7F5EF',
+                  fontWeight: 600,
+                  marginBottom: 4,
+                }}
+              >
+                {pyodideLoading ? 'Loading Python Runtime (Pyodide)…' : 'Tracing Algorithm Execution…'}
+              </div>
+              <div
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: 11.5,
+                  color: 'var(--text-muted)',
+                }}
+              >
+                Simulating execution steps in sandbox worker
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {/* ── Top Floating Operation HUD Banner (staying.fun signature) ──────── */}
       {currentStep && (
         <div
@@ -426,6 +847,12 @@ export const VisualizerPane: React.FC = () => {
             />
           ) : hasRecursion ? (
             <RecursionTreeRenderer steps={steps} currentIndex={currentIndex} height={340} />
+          ) : steps.length > 0 ? (
+            <FallbackStateRenderer
+              step={currentStep}
+              currentIndex={currentIndex}
+              totalSteps={steps.length}
+            />
           ) : (
             <div
               style={{
@@ -520,12 +947,12 @@ export const VisualizerPane: React.FC = () => {
         </div>
       </div>
 
-      {/* ── Floating Variables Watch Card (Bottom-Left) ─────────────────────── */}
+      {/* ── Floating Variables Watch Card (Top-Left) ───────────────────────── */}
       {currentStep && Object.keys(currentStep.variables).length > 0 && (
         <div
           style={{
             position: 'absolute',
-            bottom: 24,
+            top: 56,
             left: 20,
             zIndex: 35,
             width: isVariablesWatchOpen ? 230 : 'auto',
@@ -615,7 +1042,7 @@ export const VisualizerPane: React.FC = () => {
         <div
           style={{
             position: 'absolute',
-            top: 18,
+            top: 56,
             right: 20,
             zIndex: 35,
             width: isCodeTrackerOpen ? 270 : 'auto',

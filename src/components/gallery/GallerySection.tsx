@@ -504,7 +504,7 @@ export const SortingGalleryModule: React.FC = () => {
 
   const currentStep = steps[stepIdx] ?? { array: inputArr, highlight: {}, description: '' };
   const hasSteps = steps.length > 0;
-  const { setResult, setRunning, setError } = useTraceStore();
+  const { setResult, setStatus, setRunning, setError } = useTraceStore();
 
   const handleLoad = async () => {
     const code = REF_CODE[algo]?.[language as 'python' | 'javascript'] ?? REF_CODE[algo]?.python;
@@ -530,6 +530,9 @@ export const SortingGalleryModule: React.FC = () => {
         language,
       });
       setResult(res);
+      if (res.steps.length > 0) {
+        setStatus('playing');
+      }
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
       setError(msg);
@@ -839,21 +842,27 @@ export const GallerySection: React.FC = () => {
   const { setCode, setInput, setLanguage } = useEditorStore();
   const { setResult, setRunning, setError } = useTraceStore();
 
-  const handleQuickLoad = async (item: VisuAlgoItem) => {
+  const [loadingItemId, setLoadingItemId] = useState<string | null>(null);
+
+  const handleQuickLoad = async (item: VisuAlgoItem, customInput?: string) => {
     const lang = item.sampleCode.python ? 'python' : 'javascript';
     const code = item.sampleCode[lang] || '';
-    const input = item.sampleInput;
+    const input = customInput !== undefined ? customInput : item.sampleInput;
 
     setCode(code);
     setInput(input);
     setLanguage(lang);
 
-    const visualizerEl = document.getElementById('visualizer') || document.getElementById('workspace');
+    const visualizerEl =
+      document.getElementById('ide-anchor') ||
+      document.getElementById('visualizer') ||
+      document.getElementById('workspace');
     if (visualizerEl) {
       visualizerEl.scrollIntoView({ behavior: 'smooth' });
     }
 
     setRunning(true);
+    setLoadingItemId(item.id);
     try {
       const adapter = getAdapter(lang);
       const res = await adapter.trace({
@@ -869,6 +878,7 @@ export const GallerySection: React.FC = () => {
       setError(String(err));
     } finally {
       setRunning(false);
+      setLoadingItemId(null);
     }
   };
 
@@ -1008,6 +1018,7 @@ export const GallerySection: React.FC = () => {
             <InteractivePlaygroundCard
               key={item.id}
               item={item}
+              isLoading={loadingItemId === item.id}
               onOpenDetail={(it, mode) => setSelectedDetailItem({ item: it, mode })}
               onQuickLoad={handleQuickLoad}
             />

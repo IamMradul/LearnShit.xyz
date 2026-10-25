@@ -90,5 +90,21 @@ function lengthOfLongestSubstring(s) {
       const output = buildDriver(code, input, 'javascript');
       expect(output).toContain('quicksort([9,8,7])');
     });
+
+    it('generates properly indented Python driver for LeetCode class Solution', () => {
+      const code = `class Solution:\n    def addTwoNumbers(self, l1, l2):\n        return l1`;
+      const input = '[[2, 4, 3], [5, 6, 4]]';
+      const output = buildDriver(code, input, 'python');
+      expect(output).toContain('try:\n    _sol = Solution()\n    _result = _sol.addTwoNumbers(*_converted_args)');
+      expect(output).toContain('_raw_args = [[2,4,3], [5,6,4]]');
+    });
+
+    it('generates JavaScript driver for LeetCode class Solution with TreeNode', () => {
+      const code = `class Solution {\n    invertTree(root) {\n        return root;\n    }\n}`;
+      const input = '[[4, 2, 7]]';
+      const output = buildDriver(code, input, 'javascript');
+      expect(output).toContain('class Solution');
+      expect(output).toContain('_sol.invertTree(..._converted_args)');
+    });
   });
 });

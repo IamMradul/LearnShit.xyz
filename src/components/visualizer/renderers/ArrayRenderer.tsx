@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import type { TraceStep } from '../../../engine/TraceTypes';
 import { useTraceStore } from '../../../store/traceStore';
@@ -43,6 +43,23 @@ export const ArrayRenderer: React.FC<ArrayRendererProps> = ({
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState<number>(600);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const updateSize = () => {
+      if (el.clientWidth > 0) setContainerWidth(el.clientWidth);
+    };
+    updateSize();
+    const ro = new ResizeObserver(updateSize);
+    ro.observe(el);
+    window.addEventListener('resize', updateSize);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', updateSize);
+    };
+  }, []);
 
   useEffect(() => {
     const svg = d3.select(svgRef.current);
@@ -112,7 +129,7 @@ export const ArrayRenderer: React.FC<ArrayRendererProps> = ({
       return;
     }
 
-    const fullW = container.clientWidth || 600;
+    const fullW = Math.max(300, containerWidth || container.clientWidth || 600);
     const H = height;
     const n = arr.length;
 
@@ -295,7 +312,7 @@ export const ArrayRenderer: React.FC<ArrayRendererProps> = ({
       .attr('fill', '#0c0c0c')
       .text((d) => d.label);
 
-  }, [step, propValues, propHighlight, varName, height]);
+  }, [step, propValues, propHighlight, varName, height, containerWidth]);
 
   return (
     <div

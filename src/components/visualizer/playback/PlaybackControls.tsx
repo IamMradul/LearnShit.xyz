@@ -73,12 +73,12 @@ export const PlaybackControls: React.FC = () => {
     <div
       style={{
         position: 'absolute',
-        bottom: 24,
+        bottom: 48,
         left: '50%',
         transform: 'translateX(-50%)',
         zIndex: 40,
         width: 'calc(100% - 48px)',
-        maxWidth: 820,
+        maxWidth: 720,
       }}
     >
       <div

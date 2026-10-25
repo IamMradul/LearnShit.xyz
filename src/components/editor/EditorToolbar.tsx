@@ -25,7 +25,7 @@ export const EditorToolbar: React.FC = () => {
   const { language, setLanguage, code, input, fontSize, setFontSize, modeOverride, setModeOverride } =
     useEditorStore();
   const { theme, toggleTheme, resetLayout } = useUIStore();
-  const { setResult, setRunning, setError, isRunning, pyodideLoading, setPyodideLoading } =
+  const { setResult, setStatus, setRunning, setError, isRunning, pyodideLoading, setPyodideLoading } =
     useTraceStore();
 
   const [showLangMenu, setShowLangMenu] = useState(false);
@@ -61,6 +61,9 @@ export const EditorToolbar: React.FC = () => {
       });
 
       setResult(result);
+      if (result.steps.length > 0) {
+        setStatus('playing');
+      }
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
       setError(msg);
@@ -68,7 +71,7 @@ export const EditorToolbar: React.FC = () => {
       setRunning(false);
       setPyodideLoading(false);
     }
-  }, [language, code, input, modeOverride, isRunning, setResult, setRunning, setError, setPyodideLoading]);
+  }, [language, code, input, modeOverride, isRunning, setResult, setStatus, setRunning, setError, setPyodideLoading]);
 
   return (
     <div

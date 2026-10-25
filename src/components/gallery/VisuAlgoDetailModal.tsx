@@ -27,7 +27,7 @@ export const VisuAlgoDetailModal: React.FC<VisuAlgoDetailModalProps> = ({
   onClose,
 }) => {
   const { setCode, setInput, setLanguage } = useEditorStore();
-  const { setResult, setRunning, setError } = useTraceStore();
+  const { setResult, setStatus, setRunning, setError } = useTraceStore();
   const [activeTab, setActiveTab] = useState<'info' | 'code' | 'quiz'>(
     mode === 'training' ? 'quiz' : 'info',
   );
@@ -46,7 +46,10 @@ export const VisuAlgoDetailModal: React.FC<VisuAlgoDetailModalProps> = ({
     onClose();
 
     // Scroll smoothly to visualizer workspace
-    const visualizerEl = document.getElementById('visualizer') || document.getElementById('workspace');
+    const visualizerEl =
+      document.getElementById('ide-anchor') ||
+      document.getElementById('visualizer') ||
+      document.getElementById('workspace');
     if (visualizerEl) {
       visualizerEl.scrollIntoView({ behavior: 'smooth' });
     }
@@ -64,6 +67,9 @@ export const VisuAlgoDetailModal: React.FC<VisuAlgoDetailModalProps> = ({
         language: selectedLang,
       });
       setResult(res);
+      if (res.steps.length > 0) {
+        setStatus('playing');
+      }
     } catch (err) {
       setError(String(err));
     } finally {

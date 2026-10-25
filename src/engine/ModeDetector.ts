@@ -31,9 +31,16 @@ export function buildDriver(
   code: string,
   input: string,
   language: SupportedLanguage,
+  mode: 'function' | 'full-program' = 'function',
 ): string {
-  if (language === 'python') return buildPythonDriver(code, input);
-  if (language === 'javascript') return buildJSDriver(code, input);
+  if (language === 'python') {
+    if (mode === 'full-program') return buildPythonFullProgramDriver(code);
+    return buildPythonDriver(code, input);
+  }
+  if (language === 'javascript') {
+    if (mode === 'full-program') return buildJSFullProgramDriver(code);
+    return buildJSDriver(code, input);
+  }
   return code; // fallback — adapters for other langs handle this
 }
 
@@ -115,15 +122,19 @@ export function inferDefaultInput(code: string): string | null {
   if (/\b(?:hasCycle|has_cycle)\b/.test(code)) return '[[3, 2, 0, -4], 1]';
   if (/\b(?:reverseList|reverse_list)\b/.test(code)) return '[[1, 2, 3, 4, 5]]';
   if (/\b(?:maxSubArray|max_sub_array)\b/.test(code)) return '[[-2, 1, -3, 4, -1, 2, 1, -5, 4]]';
+  if (/\b(?:addTwoNumbers|add_two_numbers)\b/.test(code)) return '[[2, 4, 3], [5, 6, 4]]';
+  if (/\b(?:twoSum|two_sum)\b/.test(code)) return '[[2, 7, 11, 15], 9]';
+  if (/\b(?:reverseList|reverse_list)\b/.test(code)) return '[[1, 2, 3, 4, 5]]';
+  if (/\b(?:mergeTwoLists|merge_two_lists)\b/.test(code)) return '[[1, 2, 4], [1, 3, 4]]';
   if (/\b(?:climbStairs|climb_stairs)\b/.test(code)) return '[5]';
   if (/\b(?:isValid|is_valid)\b/.test(code)) return '["()[]{}"]';
   if (/\b(?:lengthOfLongestSubstring|length_of_longest_substring)\b/.test(code)) return '["abcabcbb"]';
   if (/\b(?:isPalindrome|is_palindrome)\b/.test(code)) return '["A man, a plan, a canal: Panama"]';
   if (/\b(?:coinChange|coin_change)\b/.test(code)) return '[[1, 2, 5], 11]';
   if (/\b(?:invertTree|invert_tree)\b/.test(code)) return '[[4, 2, 7, 1, 3, 6, 9]]';
-  if (/\b(?:maxDepth|max_depth)\b/.test(code)) return '[[3, 9, 20, null, null, 15, 7]]';
-  if (/\b(?:bubbleSort|bubble_sort|insertionSort|selectionSort)\b/.test(code)) return '[[64, 34, 25, 12, 22, 11, 90]]';
-  if (/\b(?:binarySearch|binary_search|search)\b/.test(code)) return '[[ -1, 0, 3, 5, 9, 12 ], 9]';
+  if (/\b(?:bubbleSort|bubble_sort|insertionSort|insertion_sort|selectionSort|selection_sort)\b/i.test(code)) return '[[64, 34, 25, 12, 22, 11, 90]]';
+  if (/\b(?:binarySearch|binary_search|search)\b/i.test(code)) return '[[ -1, 0, 3, 5, 9, 12 ], 9]';
+  if (/\b(?:insert|insertion|insert_at|insertAt|arrayInsertion|array_insertion)\b/i.test(code)) return '[[10, 20, 30, 40, 50], 2, 25]';
 
   const methodMatch = code.match(/def\s+\w+\s*\(\s*(?:self\s*,\s*)?([^)]*)\)|function\s+\w+\s*\(([^)]*)\)/);
   if (methodMatch) {
@@ -139,11 +150,19 @@ export function inferDefaultInput(code: string): string | null {
     } else if (params.length === 2) {
       const p1 = params[0].toLowerCase();
       const p2 = params[1].toLowerCase();
-      if ((p1.includes('num') || p1.includes('arr')) && (p2.includes('target') || p2.includes('k') || p2.includes('val'))) {
+      if ((p1.includes('num') || p1.includes('arr') || p1.includes('list')) && (p2.includes('target') || p2.includes('k') || p2.includes('val') || p2.includes('elem') || p2.includes('item') || p2.includes('x'))) {
         return '[[2, 7, 11, 15], 9]';
       }
       if (p1.includes('head') && p2.includes('pos')) {
         return '[[3, 2, 0, -4], 1]';
+      }
+      if (p1.includes('arr') || p1.includes('num') || p1.includes('list')) {
+        return '[[10, 20, 30, 40, 50], 25]';
+      }
+    } else if (params.length === 3) {
+      const p1 = params[0].toLowerCase();
+      if (p1.includes('arr') || p1.includes('num') || p1.includes('list')) {
+        return '[[10, 20, 30, 40, 50], 2, 25]';
       }
     }
   }
@@ -156,7 +175,7 @@ export function inferDefaultInput(code: string): string | null {
 function buildPythonDriver(code: string, input: string): string {
   // Check if user code is LeetCode class Solution style
   const classMatch = code.match(/class\s+(\w+)(?:\([^)]*\))?\s*:/);
-  let caller = '';
+  let callerLines: string[] = [];
   let paramNames: string[] = [];
 
   if (classMatch) {
@@ -167,21 +186,23 @@ function buildPythonDriver(code: string, input: string): string {
       const methodName = methodMatch[1];
       const rawParams = methodMatch[2] || '';
       paramNames = splitTopLevelParams(rawParams);
-      caller = `_sol = ${className}()\n_result = _sol.${methodName}(*_converted_args)`;
+      callerLines = [`_sol = ${className}()`, `_result = _sol.${methodName}(*_converted_args)`];
     }
   }
 
   // If not class Solution, check top-level function
-  if (!caller) {
+  if (callerLines.length === 0) {
     const fnMatch = code.match(/def\s+(\w+)\s*\(([\s\S]*?)\)\s*(?:->[^:]+)?\s*:/);
     if (!fnMatch) return code;
     const fnName = fnMatch[1];
     paramNames = splitTopLevelParams(fnMatch[2] || '');
-    caller = `_result = ${fnName}(*_converted_args)`;
+    callerLines = [`_result = ${fnName}(*_converted_args)`];
   }
 
-  const args = parseDriverArgs(input, paramNames.length);
+  const effectiveInput = input && input.trim() ? input : (inferDefaultInput(code) ?? '');
+  const args = parseDriverArgs(effectiveInput, paramNames.length);
   const argsRepr = args.map((a) => JSON.stringify(a)).join(', ');
+  const indentedCaller = callerLines.map((l) => `    ${l}`).join('\n');
 
   return `${code}
 
@@ -220,7 +241,7 @@ def _to_tree_node(vals):
 def _convert_arg(arg, name_hint=""):
     hint = name_hint.lower()
     if isinstance(arg, list):
-        if 'head' in hint or 'listnode' in hint:
+        if 'head' in hint or 'listnode' in hint or 'l1' in hint or 'l2' in hint or 'list' in hint:
             return _to_list_node(arg)
         if 'root' in hint or 'treenode' in hint or 'tree' in hint:
             return _to_tree_node(arg)
@@ -263,7 +284,7 @@ else:
     _converted_args = [_convert_arg(a, _params_names[i] if i < len(_params_names) else "") for i, a in enumerate(_raw_args)]
 
 try:
-    ${caller}
+${indentedCaller}
     if _result is not None:
         try:
             print(_json.dumps(_serialize(_result)))
@@ -277,27 +298,164 @@ except TypeError as _te:
 `;
 }
 
+// ─── Full program drivers ───────────────────────────────────────────────────
+
+function buildPythonFullProgramDriver(code: string): string {
+  let driver = code;
+  // If def main(): exists but is not invoked at top-level
+  if (/^\s*def\s+main\s*\(/m.test(code) && !/^\s*(?:if\s+__name__\s*==\s*["']__main__["']|main\s*\()/m.test(code.replace(/^\s*def\s+main\s*\([^)]*\)\s*:/m, ''))) {
+    driver += '\n\n# ── AlgoLens Full Program Auto-Invoke ──\nif "main" in locals() and callable(locals()["main"]):\n    main()\n';
+  }
+  return driver;
+}
+
+function buildJSFullProgramDriver(code: string): string {
+  let driver = code;
+  // If function main() exists but is not invoked at top-level
+  if (/\bfunction\s+main\s*\(/.test(code) && !/\bmain\s*\(\s*\)/.test(code.replace(/\bfunction\s+main\s*\([^)]*\)\s*\{/, ''))) {
+    driver += '\n\n// ── AlgoLens Full Program Auto-Invoke ──\nif (typeof main === "function") {\n  try { main(); } catch(e) { console.error(e); }\n}\n';
+  }
+  return driver;
+}
+
 // ─── JavaScript driver ────────────────────────────────────────────────────────
 
 function buildJSDriver(code: string, input: string): string {
-  const fnMatch = code.match(
-    /(?:function\s+(\w+)\s*\(([^)]*)\)|(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s+)?\(([^)]*)\)\s*=>|(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s+)?function\s*\(([^)]*)\))/,
-  );
-  const fnName = fnMatch?.[1] ?? fnMatch?.[3] ?? fnMatch?.[5];
-  if (!fnName) return code;
+  // Check if user code has class Solution (LeetCode JavaScript style)
+  const classMatch = code.match(/class\s+(\w+)\s*\{([\s\S]*?)\}/);
+  let isSolutionClass = false;
+  let className = '';
+  let methodName = '';
+  let fnName = '';
+  let paramNames: string[] = [];
 
-  const rawParams = fnMatch?.[2] ?? fnMatch?.[4] ?? fnMatch?.[6] ?? '';
-  const paramCount = rawParams.split(',').filter((p) => p.trim().length > 0).length;
+  if (classMatch) {
+    className = classMatch[1];
+    const classBody = classMatch[2];
+    const methodMatch = classBody.match(/(?:async\s+)?([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\(([^)]*)\)\s*\{/);
+    if (methodMatch && methodMatch[1] !== 'constructor') {
+      isSolutionClass = true;
+      methodName = methodMatch[1];
+      const rawParams = methodMatch[2] || '';
+      paramNames = splitTopLevelParams(rawParams);
+    }
+  }
 
-  const args = parseDriverArgs(input, paramCount || 1);
+  // Top-level function or function expression
+  if (!isSolutionClass) {
+    const fnMatch = code.match(
+      /(?:function\s+(\w+)\s*\(([^)]*)\)|(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s+)?\(([^)]*)\)\s*=>|(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s+)?function\s*\(([^)]*)\))/,
+    );
+    fnName = fnMatch?.[1] ?? fnMatch?.[3] ?? fnMatch?.[5] ?? '';
+    if (!fnName) return code;
+
+    const rawParams = fnMatch?.[2] ?? fnMatch?.[4] ?? fnMatch?.[6] ?? '';
+    paramNames = splitTopLevelParams(rawParams);
+  }
+
+  const effectiveInput = input && input.trim() ? input : (inferDefaultInput(code) ?? '');
+  const args = parseDriverArgs(effectiveInput, paramNames.length || 1);
   const argsRepr = args.map((a) => JSON.stringify(a)).join(', ');
+
+  const needsConversion = paramNames.some((p) => {
+    const hint = p.toLowerCase();
+    return hint.includes('head') || hint.includes('root') || hint.includes('tree') || hint.includes('listnode') || hint.includes('treenode');
+  });
+
+  if (!needsConversion) {
+    const directCall = isSolutionClass
+      ? `new ${className}().${methodName}(${argsRepr})`
+      : `${fnName}(${argsRepr})`;
+    return `${code}
+
+// ── AlgoLens generated driver ──────────────────────────
+(function() {
+  const _result = ${directCall};
+  if (_result !== undefined) console.log(JSON.stringify(_result));
+})();
+`;
+  }
+
+  const caller = isSolutionClass
+    ? `const _sol = new ${className}();\n    const _result = _sol.${methodName}(..._converted_args);`
+    : `const _result = ${fnName}(..._converted_args);`;
 
   return `${code}
 
 // ── AlgoLens generated driver ──────────────────────────
+class ListNode {
+  constructor(val = 0, next = null) {
+    this.val = val;
+    this.next = next;
+  }
+}
+
+class TreeNode {
+  constructor(val = 0, left = null, right = null) {
+    this.val = val;
+    this.left = left;
+    this.right = right;
+  }
+}
+
+function _to_list_node(vals, pos = -1) {
+  if (!Array.isArray(vals) || !vals.length) return null;
+  const nodes = vals.map((v) => new ListNode(v));
+  for (let i = 0; i < nodes.length - 1; i++) {
+    nodes[i].next = nodes[i + 1];
+  }
+  if (typeof pos === 'number' && pos >= 0 && pos < nodes.length) {
+    nodes[nodes.length - 1].next = nodes[pos];
+  }
+  return nodes[0];
+}
+
+function _to_tree_node(vals) {
+  if (!Array.isArray(vals) || !vals.length || vals[0] == null) return null;
+  const root = new TreeNode(vals[0]);
+  const queue = [root];
+  let i = 1;
+  while (queue.length && i < vals.length) {
+    const node = queue.shift();
+    if (node) {
+      if (i < vals.length && vals[i] != null) {
+        node.left = new TreeNode(vals[i]);
+        queue.push(node.left);
+      }
+      i++;
+      if (i < vals.length && vals[i] != null) {
+        node.right = new TreeNode(vals[i]);
+        queue.push(node.right);
+      }
+      i++;
+    }
+  }
+  return root;
+}
+
 (function() {
-  const _result = ${fnName}(${argsRepr});
-  if (_result !== undefined) console.log(JSON.stringify(_result));
+  const _raw_args = [${argsRepr}];
+  const _param_names = ${JSON.stringify(paramNames)};
+  const _converted_args = _raw_args.map((arg, idx) => {
+    const hint = (_param_names[idx] || '').toLowerCase();
+    if (Array.isArray(arg)) {
+      if (hint.includes('head') || hint.includes('listnode')) {
+        return _to_list_node(arg);
+      }
+      if (hint.includes('root') || hint.includes('treenode') || hint.includes('tree')) {
+        return _to_tree_node(arg);
+      }
+    }
+    return arg;
+  });
+
+  try {
+    ${caller}
+    if (_result !== undefined) console.log(JSON.stringify(_result));
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
 })();
 `;
 }
