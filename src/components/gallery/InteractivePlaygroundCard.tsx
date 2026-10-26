@@ -70,8 +70,8 @@ export const InteractivePlaygroundCard: React.FC<InteractivePlaygroundCardProps>
       const arr = Array.from({ length: 4 }, () => Math.floor(Math.random() * 80 + 10));
       newInput = item.sampleInput.startsWith('[[') ? `[[${arr.join(', ')}]]` : `[${arr.join(', ')}]`;
     } else if (item.id === 'bitmask') {
-      const n = Math.floor(Math.random() * 30 + 5);
-      newInput = `[${n}, ${Math.floor(Math.random() * 4 + 1)}]`;
+      const n = Math.floor(Math.random() * 2 + 3);
+      newInput = `[${n}]`;
     } else if (item.category === 'Trees' || item.id === 'binary-heap' || item.id === 'binary-search-tree') {
       const arr = [50, 25, 75, Math.floor(Math.random() * 20 + 5), Math.floor(Math.random() * 20 + 80)];
       newInput = `[${arr.join(', ')}]`;
@@ -206,26 +206,45 @@ export const InteractivePlaygroundCard: React.FC<InteractivePlaygroundCardProps>
           fontFamily: "'JetBrains Mono', monospace",
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, flex: 1 }}>
-          <span style={{ color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: 9.5, letterSpacing: '0.04em' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, flex: 1, marginRight: 8 }}>
+          <span style={{ color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: 9.5, letterSpacing: '0.04em', flexShrink: 0 }}>
             Input:
           </span>
-          <span
-            title={currentInput}
+          <input
+            type="text"
+            value={currentInput}
+            onChange={(e) => setCurrentInput(e.target.value)}
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => {
+              e.stopPropagation();
+              if (e.key === 'Enter') {
+                onQuickLoad(item, currentInput);
+              }
+            }}
+            placeholder="Edit input JSON..."
+            title="Edit input parameters (Press Enter or click Visualize to run)"
             style={{
               color: '#F7F5EF',
-              background: 'rgba(255, 255, 255, 0.05)',
-              padding: '2px 6px',
+              background: 'rgba(20, 23, 30, 0.95)',
+              padding: '3px 8px',
               borderRadius: 4,
-              border: '1px solid rgba(247, 245, 239, 0.08)',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              maxWidth: 170,
+              border: '1px solid rgba(247, 245, 239, 0.18)',
+              fontSize: 10.5,
+              fontFamily: "'JetBrains Mono', monospace",
+              outline: 'none',
+              width: '100%',
+              maxWidth: 185,
+              transition: 'border-color 0.15s, box-shadow 0.15s',
             }}
-          >
-            {currentInput}
-          </span>
+            onFocus={(e) => {
+              e.currentTarget.style.borderColor = 'var(--accent)';
+              e.currentTarget.style.boxShadow = '0 0 8px rgba(214, 82, 58, 0.35)';
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.borderColor = 'rgba(247, 245, 239, 0.18)';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
+          />
         </div>
 
         {/* Randomize Input Button */}

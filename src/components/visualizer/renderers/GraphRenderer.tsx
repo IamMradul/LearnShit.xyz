@@ -87,6 +87,25 @@ function parseGraph(step: TraceStep, varName?: string, width = 600, height = 340
           nodesSet.add(v);
           edges.push({ u, v, weight: w, isDirected: false });
         }
+      } else if (
+        raw.length > 1 &&
+        raw.every((r) => Array.isArray(r) && r.length === raw.length && r.every((c) => typeof c === 'number'))
+      ) {
+        // NxN Adjacency / Distance / Capacity matrix: raw[u][v] = weight
+        const matrix = raw as number[][];
+        const isSymmetric = matrix.every((r, i) => r.every((c, j) => c === matrix[j]?.[i]));
+        isDirected = !isSymmetric;
+        for (let u = 0; u < raw.length; u++) {
+          nodesSet.add(String(u));
+          const startV = isSymmetric ? u + 1 : 0;
+          for (let v = startV; v < raw.length; v++) {
+            if (u === v) continue;
+            const w = raw[u][v];
+            if (typeof w === 'number' && w > 0 && w < 1e8) {
+              edges.push({ u: String(u), v: String(v), weight: w, isDirected: !isSymmetric });
+            }
+          }
+        }
       } else {
         // Adjacency list: raw[u] = [v1, v2, ...] or raw[u] = [[v1, w1], [v2, w2], ...]
         isDirected = true;
@@ -154,11 +173,13 @@ function parseGraph(step: TraceStep, varName?: string, width = 600, height = 340
 
   const nodes: GraphNode[] = nodeList.map((id, i) => {
     const angle = (2 * Math.PI * i) / Math.max(1, N) - Math.PI / 2;
+    const nx = cx + radius * Math.cos(angle);
+    const ny = cy + radius * Math.sin(angle);
     return {
       id,
       label: id,
-      x: cx + radius * Math.cos(angle),
-      y: cy + radius * Math.sin(angle),
+      x: isNaN(nx) ? cx : nx,
+      y: isNaN(ny) ? cy : ny,
     };
   });
 
@@ -195,8 +216,9 @@ export const GraphRenderer: React.FC<GraphRendererProps> = ({
     const svgEl = svgRef.current;
     if (!container || !svgEl || !step) return;
 
-    const W = Math.max(340, containerWidth || container.clientWidth || 600);
-    const H = height;
+    // Explicit dimensions guarantee (no 0px collapse)
+    const W = Math.max(420, containerWidth || container.clientWidth || 600);
+    const H = Math.max(280, height || 340);
 
     const { nodes, edges } = parseGraph(step, varName, W, H);
 
@@ -223,12 +245,24 @@ export const GraphRenderer: React.FC<GraphRendererProps> = ({
           activeNodes.add(String(tv.value));
         }
       }
-      // Visited collection
+      // Visited collection (handles boolean array e.g. [true, false] as well as sets)
       if (lk.includes('visited') || lk.includes('seen')) {
         if (Array.isArray(tv.value)) {
-          tv.value.forEach((val) => visitedNodes.add(String(val)));
+          tv.value.forEach((val, idx) => {
+            if (typeof val === 'boolean') {
+              if (val) visitedNodes.add(String(idx));
+            } else if (val !== null && val !== undefined) {
+              visitedNodes.add(String(val));
+            }
+          });
         } else if (typeof tv.value === 'object' && tv.value !== null) {
-          Object.keys(tv.value).forEach((val) => visitedNodes.add(String(val)));
+          Object.entries(tv.value).forEach(([vKey, vVal]) => {
+            if (typeof vVal === 'boolean') {
+              if (vVal) visitedNodes.add(String(vKey));
+            } else {
+              visitedNodes.add(String(vKey));
+            }
+          });
         }
       }
       // Queue / PQ

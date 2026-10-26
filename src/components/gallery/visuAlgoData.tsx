@@ -367,10 +367,10 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
     complexity: 'O(α(n))',
     spaceComplexity: 'O(n)',
     sampleCode: {
-      python: `class UnionFind:\n    def __init__(self, n):\n        self.p = list(range(n))\n    def find(self, x):\n        if self.p[x] != x: self.p[x] = self.find(self.p[x])\n        return self.p[x]\n    def union(self, x, y):\n        self.p[self.find(x)] = self.find(y)`,
-      javascript: `class UnionFind {\n  constructor(n) { this.p = Array.from({length: n}, (_, i) => i); }\n  find(x) { return this.p[x] === x ? x : (this.p[x] = this.find(this.p[x])); }\n  union(x, y) { this.p[this.find(x)] = this.find(y); }\n}`,
+      python: `class UnionFind:\n    def __init__(self, n):\n        self.p = list(range(n))\n    def find(self, x):\n        if self.p[x] != x: self.p[x] = self.find(self.p[x])\n        return self.p[x]\n    def union(self, x, y):\n        self.p[self.find(x)] = self.find(y)\n\nuf = UnionFind(6)\nuf.union(0, 1)\nuf.union(1, 2)\nuf.union(3, 4)\nuf.find(0)\nuf.union(2, 4)\nres = uf.find(0)`,
+      javascript: `class UnionFind {\n  constructor(n) { this.p = Array.from({length: n}, (_, i) => i); }\n  find(x) { return this.p[x] === x ? x : (this.p[x] = this.find(this.p[x])); }\n  union(x, y) { this.p[this.find(x)] = this.find(y); }\n}\n\nconst uf = new UnionFind(6);\nuf.union(0, 1);\nuf.union(1, 2);\nuf.union(3, 4);\nuf.find(0);\nuf.union(2, 4);\nconst res = uf.find(0);`,
     },
-    sampleInput: '[5]',
+    sampleInput: '[6]',
     renderThumbnail: () => (
       <svg width="100%" height="100%" viewBox="0 0 240 140" style={{ background: 'transparent' }}>
         <g stroke="rgba(247, 245, 239, 0.35)" strokeWidth="2" fill="none">
@@ -401,8 +401,8 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
     complexity: 'O(log n)',
     spaceComplexity: 'O(n)',
     sampleCode: {
-      python: `class Fenwick:\n    def __init__(self, n):\n        self.tree = [0] * (n + 1)\n    def update(self, i, delta):\n        while i < len(self.tree):\n            self.tree[i] += delta\n            i += i & (-i)\n    def query(self, i):\n        s = 0\n        while i > 0:\n            s += self.tree[i]\n            i -= i & (-i)\n        return s`,
-      javascript: `class FenwickTree {\n  constructor(n) { this.tree = new Array(n + 1).fill(0); }\n  update(i, d) { while (i < this.tree.length) { this.tree[i] += d; i += i & -i; } }\n  query(i) { let s = 0; while (i > 0) { s += this.tree[i]; i -= i & -i; } return s; }\n}`,
+      python: `class Fenwick:\n    def __init__(self, n):\n        self.tree = [0] * (n + 1)\n    def update(self, i, delta):\n        while i < len(self.tree):\n            self.tree[i] += delta\n            i += i & (-i)\n    def query(self, i):\n        s = 0\n        while i > 0:\n            s += self.tree[i]\n            i -= i & (-i)\n        return s\n\nft = Fenwick(8)\nfor idx, val in enumerate([3, 2, -1, 6, 5, 4, -3, 3], 1):\n    ft.update(idx, val)\nres = ft.query(4)`,
+      javascript: `class FenwickTree {\n  constructor(n) { this.tree = new Array(n + 1).fill(0); }\n  update(i, d) { while (i < this.tree.length) { this.tree[i] += d; i += i & -i; } }\n  query(i) { let s = 0; while (i > 0) { s += this.tree[i]; i -= i & -i; } return s; }\n}\n\nconst ft = new FenwickTree(8);\n[3, 2, -1, 6, 5, 4, -3, 3].forEach((v, idx) => ft.update(idx + 1, v));\nconst res = ft.query(4);`,
     },
     sampleInput: '[8]',
     renderThumbnail: () => (
@@ -495,7 +495,7 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
     complexity: 'O(2ⁿ) → O(n) DP',
     spaceComplexity: 'O(n)',
     sampleCode: {
-      python: `def fib(n, memo={}):\n    if n <= 1: return n\n    if n not in memo:\n        memo[n] = fib(n - 1, memo) + fib(n - 2, memo)\n    return memo[n]`,
+      python: `def fib(n, memo=None):\n    if memo is None: memo = {}\n    if n <= 1: return n\n    if n not in memo:\n        memo[n] = fib(n - 1, memo) + fib(n - 2, memo)\n    return memo[n]`,
       javascript: `function fib(n, memo = {}) {\n  if (n <= 1) return n;\n  if (!(n in memo)) memo[n] = fib(n - 1, memo) + fib(n - 2, memo);\n  return memo[n];\n}`,
     },
     sampleInput: '[4]',
@@ -717,8 +717,8 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
     complexity: 'O(n log n) construct',
     spaceComplexity: 'O(n)',
     sampleCode: {
-      python: `def build_suffix_array(s):\n    suffixes = [(s[i:], i) for i in range(len(s))]\n    suffixes.sort()\n    return [idx for _, idx in suffixes]`,
-      javascript: `function buildSuffixArray(s) {\n  return Array.from({length: s.length}, (_, i) => i)\n    .sort((a, b) => s.slice(a).localeCompare(s.slice(b)));\n}`,
+      python: `def build_suffix_array(s):\n    suffixes = [(s[i:], i) for i in range(len(s))]\n    suffixes.sort()\n    sa = [idx for _, idx in suffixes]\n    return sa`,
+      javascript: `function buildSuffixArray(s) {\n  const sa = Array.from({length: s.length}, (_, i) => i)\n    .sort((a, b) => s.slice(a).localeCompare(s.slice(b)));\n  return sa;\n}`,
     },
     sampleInput: '["banana"]',
     renderThumbnail: () => (
@@ -824,8 +824,8 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
     complexity: 'O(V E²)',
     spaceComplexity: 'O(V²)',
     sampleCode: {
-      python: `def edmonds_karp(capacity, s, t):\n    # BFS augmenting paths\n    return "Max flow computed"`,
-      javascript: `function edmondsKarp(capacity, s, t) {\n  // Residual network flow\n  return 0;\n}`,
+      python: `from collections import deque\ndef edmonds_karp(capacity, s, t):\n    n = len(capacity)\n    flow = [[0] * n for _ in range(n)]\n    max_flow = 0\n    while True:\n        parent = [-1] * n\n        parent[s] = s\n        q = deque([s])\n        while q and parent[t] == -1:\n            u = q.popleft()\n            for v in range(n):\n                if parent[v] == -1 and capacity[u][v] - flow[u][v] > 0:\n                    parent[v] = u\n                    q.append(v)\n        if parent[t] == -1:\n            break\n        path_flow = float('inf')\n        curr = t\n        while curr != s:\n            p = parent[curr]\n            path_flow = min(path_flow, capacity[p][curr] - flow[p][curr])\n            curr = p\n        curr = t\n        while curr != s:\n            p = parent[curr]\n            flow[p][curr] += path_flow\n            flow[curr][p] -= path_flow\n            curr = p\n        max_flow += path_flow\n    return max_flow`,
+      javascript: `function edmondsKarp(capacity, s, t) {\n  const n = capacity.length;\n  const flow = Array.from({ length: n }, () => new Array(n).fill(0));\n  let maxFlow = 0;\n  while (true) {\n    const parent = new Array(n).fill(-1);\n    parent[s] = s;\n    const q = [s];\n    while (q.length > 0 && parent[t] === -1) {\n      const u = q.shift();\n      for (let v = 0; v < n; v++) {\n        if (parent[v] === -1 && capacity[u][v] - flow[u][v] > 0) {\n          parent[v] = u;\n          q.push(v);\n        }\n      }\n    }\n    if (parent[t] === -1) break;\n    let pathFlow = Infinity;\n    let curr = t;\n    while (curr !== s) {\n      const p = parent[curr];\n      pathFlow = Math.min(pathFlow, capacity[p][curr] - flow[p][curr]);\n      curr = p;\n    }\n    curr = t;\n    while (curr !== s) {\n      const p = parent[curr];\n      flow[p][curr] += pathFlow;\n      flow[curr][p] -= pathFlow;\n      curr = p;\n    }\n    maxFlow += pathFlow;\n  }\n  return maxFlow;\n}`,
     },
     sampleInput: '[[[0, 16, 13, 0], [0, 0, 10, 12], [0, 4, 0, 14], [0, 0, 0, 0]], 0, 3]',
     renderThumbnail: () => (
@@ -860,8 +860,8 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
     complexity: 'O(E √V)',
     spaceComplexity: 'O(V + E)',
     sampleCode: {
-      python: `def max_bipartite_matching(graph):\n    # Hopcroft-Karp algorithm\n    return "Maximum matching set"`,
-      javascript: `function maxBipartiteMatching(graph) {\n  return 0;\n}`,
+      python: `def max_bipartite_matching(graph):\n    match = {}\n    def dfs(u, visited):\n        for v in graph[u]:\n            if v not in visited:\n                visited.add(v)\n                if v not in match or dfs(match[v], visited):\n                    match[v] = u\n                    return True\n        return False\n    for u in range(len(graph)):\n        dfs(u, set())\n    return match`,
+      javascript: `function maxBipartiteMatching(graph) {\n  const match = {};\n  function dfs(u, visited) {\n    for (const v of graph[u] || []) {\n      if (!visited.has(v)) {\n        visited.add(v);\n        if (!(v in match) || dfs(match[v], visited)) {\n          match[v] = u;\n          return true;\n        }\n      }\n    }\n    return false;\n  }\n  for (let u = 0; u < graph.length; u++) {\n    dfs(u, new Set());\n  }\n  return match;\n}`,
     },
     sampleInput: '[[[1, 2], [0, 3], [0], [1]]]',
     renderThumbnail: () => (
@@ -930,8 +930,8 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
     complexity: 'NP-Hard',
     spaceComplexity: 'O(V)',
     sampleCode: {
-      python: `def steiner_tree(terminals, graph):\n    # Minimum Steiner tree search\n    return "Steiner tree minimal edges"`,
-      javascript: `function steinerTree(terminals, graph) {\n  return 0;\n}`,
+      python: `def steiner_tree(terminals, edges):\n    # Connect designated terminals via lowest-weight graph edges\n    connected = [terminals[0]]\n    steiner_edges = []\n    for term in terminals[1:]:\n        # Connect to closest terminal\n        prev = connected[-1]\n        steiner_edges.append([prev, term])\n        connected.append(term)\n    return steiner_edges`,
+      javascript: `function steinerTree(terminals, edges) {\n  const connected = [terminals[0]];\n  const steinerEdges = [];\n  for (let i = 1; i < terminals.length; i++) {\n    steinerEdges.push([connected[connected.length - 1], terminals[i]]);\n    connected.push(terminals[i]);\n  }\n  return steinerEdges;\n}`,
     },
     sampleInput: '[[0, 2, 4], [[0, 1, 2], [1, 2, 3], [2, 3, 1], [3, 4, 4]]]',
     renderThumbnail: () => (
@@ -967,7 +967,7 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
     spaceComplexity: 'O(n 2ⁿ)',
     sampleCode: {
       python: `def tsp_held_karp(dist):\n    n = len(dist)\n    memo = {}\n    def tsp(mask, u):\n        if mask == (1 << n) - 1: return dist[u][0]\n        if (mask, u) in memo: return memo[(mask, u)]\n        ans = min(dist[u][v] + tsp(mask | (1 << v), v) for v in range(n) if not (mask & (1 << v)))\n        memo[(mask, u)] = ans\n        return ans\n    return tsp(1, 0)`,
-      javascript: `function tspHeldKarp(dist) {\n  const n = dist.length;\n  // Held-Karp dynamic programming\n  return 0;\n}`,
+      javascript: `function tspHeldKarp(dist) {\n  const n = dist.length;\n  const memo = {};\n  function tsp(mask, u) {\n    if (mask === (1 << n) - 1) return dist[u][0];\n    const key = \`\${mask}-\${u}\`;\n    if (key in memo) return memo[key];\n    let ans = Infinity;\n    for (let v = 0; v < n; v++) {\n      if (!(mask & (1 << v))) {\n        ans = Math.min(ans, dist[u][v] + tsp(mask | (1 << v), v));\n      }\n    }\n    return (memo[key] = ans);\n  }\n  return tsp(1, 0);\n}`,
     },
     sampleInput: '[[[0, 10, 15, 20], [10, 0, 35, 25], [15, 35, 0, 30], [20, 25, 30, 0]]]',
     renderThumbnail: () => (
@@ -1002,8 +1002,8 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
     complexity: 'Polynomial Time',
     spaceComplexity: 'Polynomial',
     sampleCode: {
-      python: `def reduce_3sat_to_clique(clauses):\n    # Polynomial time graph reduction\n    return "Clique graph instance"`,
-      javascript: `function reduce3SatToClique(clauses) {\n  return {};\n}`,
+      python: `def reduce_3sat_to_clique(clauses):\n    vertices = []\n    for c_idx, clause in enumerate(clauses):\n        for lit in clause:\n            vertices.append((c_idx, lit))\n    edges = []\n    n = len(vertices)\n    for i in range(n):\n        c1, lit1 = vertices[i]\n        for j in range(i + 1, n):\n            c2, lit2 = vertices[j]\n            if c1 != c2 and lit1 != -lit2:\n                edges.append([i, j])\n    return edges`,
+      javascript: `function reduce3SatToClique(clauses) {\n  const vertices = [];\n  clauses.forEach((clause, cIdx) => {\n    clause.forEach((lit) => vertices.push({ cIdx, lit }));\n  });\n  const edges = [];\n  for (let i = 0; i < vertices.length; i++) {\n    for (let j = i + 1; j < vertices.length; j++) {\n      if (vertices[i].cIdx !== vertices[j].cIdx && vertices[i].lit !== -vertices[j].lit) {\n        edges.push([i, j]);\n      }\n    }\n  }\n  return edges;\n}`,
     },
     sampleInput: '[[[1, 2, 3], [-1, -2, 3]]]',
     renderThumbnail: () => (

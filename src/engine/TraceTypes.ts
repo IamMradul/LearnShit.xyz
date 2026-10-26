@@ -27,7 +27,8 @@ export type DSType =
   | 'unionFind'
   | 'segmentTree'
   | 'fenwickTree'
-  | 'recursionTree';
+  | 'recursionTree'
+  | 'geometry';
 
 export interface TraceValue {
   type: string;

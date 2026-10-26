@@ -552,4 +552,117 @@ public:
       },
     },
   },
+  {
+    id: 'reverse-linked-list',
+    title: 'Reverse Linked List',
+    category: 'Linked Lists',
+    description: 'Inverts the direction of all pointers in a singly linked list so the last node becomes the head.',
+    timeComplexity: 'O(n)',
+    spaceComplexity: 'O(1)',
+    languages: {
+      javascript: {
+        code: `function reverseList(head) {
+  let prev = null;
+  let curr = head;
+  while (curr) {
+    const next = curr.next;
+    curr.next = prev;
+    prev = curr;
+    curr = next;
+  }
+  return prev;
+}`,
+        input: '[[1, 2, 3, 4, 5]]',
+      },
+      python: {
+        code: `def reverse_list(head):
+    prev = None
+    curr = head
+    while curr:
+        nxt = curr.next
+        curr.next = prev
+        prev = curr
+        curr = nxt
+    return prev`,
+        input: '[[1, 2, 3, 4, 5]]',
+      },
+    },
+  },
+  {
+    id: 'graph-dfs-traversal',
+    title: 'Graph DFS Traversal',
+    category: 'Graphs',
+    description: 'Explores as far as possible along each branch before backtracking using a recursion or explicit stack.',
+    timeComplexity: 'O(V + E)',
+    spaceComplexity: 'O(V)',
+    languages: {
+      javascript: {
+        code: `function dfsTraversal(adj, start = 0) {
+  const visited = new Array(adj.length).fill(false);
+  const order = [];
+
+  function dfs(u) {
+    visited[u] = true;
+    order.push(u);
+    for (const v of adj[u]) {
+      if (!visited[v]) {
+        dfs(v);
+      }
+    }
+  }
+
+  dfs(start);
+  return order;
+}`,
+        input: '[[[1, 2], [0, 2, 3], [0, 1, 3], [1, 2]]]',
+      },
+      python: {
+        code: `def dfs_traversal(adj, start=0):
+    visited = [False] * len(adj)
+    order = []
+
+    def dfs(u):
+        visited[u] = True
+        order.append(u)
+        for v in adj[u]:
+            if not visited[v]:
+                dfs(v)
+
+    dfs(start)
+    return order`,
+        input: '[[[1, 2], [0, 2, 3], [0, 1, 3], [1, 2]]]',
+      },
+    },
+  },
+  {
+    id: 'hash-table-frequency',
+    title: 'Hash Table Frequency Counter',
+    category: 'Arrays',
+    description: 'Counts the occurrences of each word or character using a dictionary / hash map.',
+    timeComplexity: 'O(n)',
+    spaceComplexity: 'O(k)',
+    languages: {
+      javascript: {
+        code: `function countFrequency(text) {
+  const words = text.split(' ');
+  const freq = {};
+  for (let i = 0; i < words.length; i++) {
+    const word = words[i];
+    freq[word] = (freq[word] || 0) + 1;
+  }
+  return freq;
+}`,
+        input: '["apple banana apple orange banana apple"]',
+      },
+      python: {
+        code: `def count_frequency(text):
+    words = text.split(' ')
+    freq = {}
+    for word in words:
+        freq[word] = freq.get(word, 0) + 1
+    return freq`,
+        input: '["apple banana apple orange banana apple"]',
+      },
+    },
+  },
 ];

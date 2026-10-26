@@ -170,7 +170,13 @@ def _safe_repr(val, depth=0):
 def _safe_clone(val, depth=0):
     if depth > 8:
         return "..."
-    if val is None or isinstance(val, (bool, int, float, str)):
+    if val is None or isinstance(val, (bool, int, str)):
+        return val
+    if isinstance(val, float):
+        if math.isinf(val):
+            return "Infinity" if val > 0 else "-Infinity"
+        if math.isnan(val):
+            return "NaN"
         return val
     if _is_list_node(val):
         nodes = []
@@ -179,8 +185,10 @@ def _safe_clone(val, depth=0):
         while curr and id(curr) not in visited and len(nodes) < 50:
             visited.add(id(curr))
             nodes.append({
+                "__id": f"node_{id(curr)}",
                 "val": curr.val,
-                "next": id(curr.next) if curr.next else None,
+                "next": f"node_{id(curr.next)}" if curr.next else None,
+                "nextId": f"node_{id(curr.next)}" if curr.next else None,
             })
             curr = curr.next
         return nodes
@@ -495,7 +503,11 @@ async function runPythonTrace(
     };
   }
 
-  const data = JSON.parse(rawJson) as {
+  const sanitized = (rawJson as string)
+    .replace(/:\s*Infinity\b/g, ': "Infinity"')
+    .replace(/:\s*-Infinity\b/g, ': "-Infinity"')
+    .replace(/:\s*NaN\b/g, ': "NaN"');
+  const data = JSON.parse(sanitized) as {
     steps: TraceResult['steps'];
     stdout: string;
     stderr: string;

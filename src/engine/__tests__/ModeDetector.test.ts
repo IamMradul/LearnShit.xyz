@@ -119,5 +119,29 @@ function lengthOfLongestSubstring(s) {
       expect(output).toContain('class Solution');
       expect(output).toContain('_sol.invertTree(..._converted_args)');
     });
+
+    it('unpacks cycle linked list input [[3, 2, 0, -4], 1] correctly', () => {
+      const code = `def hasCycle(head):\n    return False`;
+      const input = '[[3, 2, 0, -4], 1]';
+      const output = buildDriver(code, input, 'python');
+      expect(output).toContain('_raw_args = [[3,2,0,-4], 1]');
+      expect(output).toContain('_to_list_node(_raw_args[0], _raw_args[1])');
+    });
+
+    it('handles class with required __init__ parameter (e.g. UnionFind(n))', () => {
+      const code = `class UnionFind:\n    def __init__(self, n):\n        self.p = list(range(n))\n    def find(self, x):\n        return self.p[x]`;
+      const input = '[6]';
+      const output = buildDriver(code, input, 'python');
+      expect(output).toContain('_sol = UnionFind(_init_arg)');
+      expect(output).toContain('_sol.find(*_converted_args)');
+    });
+
+    it('detects top-level script statements as full-program', () => {
+      const pyCode = `class UnionFind:\n    def __init__(self, n):\n        self.p = list(range(n))\nuf = UnionFind(6)\nuf.find(0)`;
+      expect(detectMode(pyCode, 'python')).toBe('full-program');
+
+      const jsCode = `class UnionFind {\n  constructor(n) {}\n}\nconst uf = new UnionFind(6);`;
+      expect(detectMode(jsCode, 'javascript')).toBe('full-program');
+    });
   });
 });

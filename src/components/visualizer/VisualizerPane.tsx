@@ -9,6 +9,8 @@ import { LinkedListRenderer } from './renderers/LinkedListRenderer';
 import { GridRenderer } from './renderers/GridRenderer';
 import { GraphRenderer } from './renderers/GraphRenderer';
 import { RecursionTreeRenderer } from './renderers/RecursionTreeRenderer';
+import { HashMapRenderer } from './renderers/HashMapRenderer';
+import { GeometryRenderer } from './renderers/GeometryRenderer';
 import { PlaybackControls } from './playback/PlaybackControls';
 import { WalkthroughExplainer } from './WalkthroughExplainer';
 import { getAdapter } from '../../engine/adapters/AdapterRegistry';
@@ -59,6 +61,11 @@ function DSRenderer({
     case 'graph':
     case 'unionFind':
       return <GraphRenderer step={step} varName={varName} height={height} />;
+    case 'hashMap':
+    case 'hashSet':
+      return <HashMapRenderer step={step} varName={varName} height={height} />;
+    case 'geometry':
+      return <GeometryRenderer step={step} varName={varName} height={height} />;
     default:
       return (
         <div
@@ -763,6 +770,22 @@ export const VisualizerPane: React.FC = () => {
               padding: 3,
             }}
           >
+            <button
+              onClick={() => setActiveVisualizerTab('all')}
+              style={{
+                background: (!activeVisualizerTab || activeVisualizerTab === 'all') ? 'var(--accent)' : 'transparent',
+                border: 'none',
+                borderRadius: 16,
+                padding: '4px 10px',
+                color: (!activeVisualizerTab || activeVisualizerTab === 'all') ? '#F7F5EF' : 'var(--text-secondary)',
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: 11,
+                cursor: 'pointer',
+                fontWeight: 600,
+              }}
+            >
+              All Structures
+            </button>
             {detectedDS.map((ds) => (
               <button
                 key={ds.varName}
@@ -846,7 +869,7 @@ export const VisualizerPane: React.FC = () => {
             transformOrigin: 'center center',
             transition: 'transform 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
             width: '100%',
-            maxWidth: 1000,
+            maxWidth: 1100,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -854,6 +877,36 @@ export const VisualizerPane: React.FC = () => {
         >
           {visualizerMode === 'recursion' ? (
             <RecursionTreeRenderer steps={steps} currentIndex={currentIndex} height={340} />
+          ) : (activeVisualizerTab === 'all' || (!activeVisualizerTab && detectedDS.length > 1)) && detectedDS.length > 1 ? (
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: detectedDS.length === 2 ? 'repeat(auto-fit, minmax(360px, 1fr))' : '1fr',
+                gap: 20,
+                width: '100%',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              {detectedDS.map((ds) => (
+                <div
+                  key={ds.varName}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    width: '100%',
+                  }}
+                >
+                  <DSRenderer
+                    dsType={ds.dsType}
+                    step={currentStep}
+                    varName={ds.varName}
+                    height={detectedDS.length > 2 ? 260 : 320}
+                  />
+                </div>
+              ))}
+            </div>
           ) : activeDS ? (
             <DSRenderer
               dsType={activeDS.dsType}

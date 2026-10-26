@@ -50,6 +50,7 @@ export class JavaScriptAdapter implements LanguageAdapter {
       const mode =
         request.mode === 'auto' ? this.detectMode(request.code) : request.mode;
 
+      const userLineCount = request.code.split('\n').length;
       const code = buildDriver(request.code, request.input, 'javascript', mode);
 
       const worker = this.getWorker();
@@ -67,7 +68,7 @@ export class JavaScriptAdapter implements LanguageAdapter {
       };
 
       worker.addEventListener('message', handler);
-      worker.postMessage({ ...request, code, mode });
+      worker.postMessage({ ...request, code, userLineCount, mode });
     });
   }
 

@@ -9,8 +9,19 @@ export function detectMode(
   language: SupportedLanguage,
 ): 'function' | 'full-program' {
   const patterns: Record<SupportedLanguage, RegExp[]> = {
-    python: [/^\s*if\s+__name__\s*==\s*["']__main__["']/m, /^\s*def\s+main\s*\(/m],
-    javascript: [/\bfunction\s+main\s*\(/, /\bmain\s*\(\s*\)/, /process\.argv/, /readline/],
+    python: [
+      /^\s*if\s+__name__\s*==\s*["']__main__["']/m,
+      /^\s*def\s+main\s*\(/m,
+      /^[a-zA-Z_]\w*\s*(?:=|\+=|-=|\.\w+\s*\()/m, // Top-level statements outside class/def
+    ],
+    javascript: [
+      /\bfunction\s+main\s*\(/,
+      /\bmain\s*\(\s*\)/,
+      /process\.argv/,
+      /readline/,
+      /^(?:const|let|var)\s+\w+\s*=/m,
+      /^\w+\.\w+\s*\(/m,
+    ],
     cpp: [/int\s+main\s*\(/, /void\s+main\s*\(/],
     java: [/public\s+static\s+void\s+main\s*\(/],
     go: [/func\s+main\s*\(\s*\)/],
@@ -72,6 +83,10 @@ export function parseDriverArgs(input: string, paramCount: number = 0): unknown[
     const parsed = JSON.parse(trimmed);
     if (paramCount === 1) {
       if (Array.isArray(parsed)) {
+        // LeetCode linked list cycle format: [[3, 2, 0, -4], 1]
+        if (parsed.length === 2 && Array.isArray(parsed[0]) && typeof parsed[1] === 'number') {
+          return parsed;
+        }
         if (parsed.length === 1) {
           return parsed;
         }
@@ -102,6 +117,9 @@ export function parseDriverArgs(input: string, paramCount: number = 0): unknown[
     const parsed = JSON.parse(wrappedJson);
     if (paramCount === 1) {
       if (Array.isArray(parsed)) {
+        if (parsed.length === 2 && Array.isArray(parsed[0]) && typeof parsed[1] === 'number') {
+          return parsed;
+        }
         if (parsed.length === 1) {
           return parsed;
         }
@@ -148,6 +166,8 @@ export function inferDefaultInput(code: string): string | null {
 
   if (/\b(?:twoSum|two_sum)\b/.test(code)) return '[[2, 7, 11, 15], 9]';
   if (/\b(?:hasCycle|has_cycle)\b/.test(code)) return '[[3, 2, 0, -4], 1]';
+  if (/\b(?:bfsTraversal|bfs|dfsTraversal|dfs)\b/i.test(code)) return '[[[1, 2], [0, 2, 3], [0, 1, 3], [1, 2]], 0]';
+  if (/\b(?:frequencyMap|charCount|wordCount|countFreq|hashTable|firstUniqChar)\b/i.test(code)) return '["leetcode"]';
   if (/\b(?:reverseList|reverse_list)\b/.test(code)) return '[[1, 2, 3, 4, 5]]';
   if (/\b(?:maxSubArray|max_sub_array)\b/.test(code)) return '[[-2, 1, -3, 4, -1, 2, 1, -5, 4]]';
   if (/\b(?:addTwoNumbers|add_two_numbers)\b/.test(code)) return '[[2, 4, 3], [5, 6, 4]]';
@@ -240,7 +260,17 @@ function buildPythonDriver(code: string, input: string): string {
           targetClass = cName;
           methodName = m[1];
           paramNames = splitTopLevelParams(m[2] || '');
-          callerLines = [`_sol = ${targetClass}()`, `_result = _sol.${methodName}(*_converted_args)`];
+          const initMatch = afterClass.match(/def\s+__init__\s*\(\s*self\s*(?:,\s*([^)]*))?\)\s*:/);
+          const initParams = initMatch ? splitTopLevelParams(initMatch[1] || '') : [];
+          if (initParams.length > 0) {
+            callerLines = [
+              `_init_arg = _converted_args[0] if len(_converted_args) > 0 and isinstance(_converted_args[0], int) else 6`,
+              `_sol = ${targetClass}(_init_arg)`,
+              `_result = _sol.${methodName}(*_converted_args)`,
+            ];
+          } else {
+            callerLines = [`_sol = ${targetClass}()`, `_result = _sol.${methodName}(*_converted_args)`];
+          }
           break;
         }
       }
@@ -276,6 +306,7 @@ function buildPythonDriver(code: string, input: string): string {
 
 # ── AlgoLens generated driver ──────────────────────────
 import json as _json
+import math as _math
 
 def _is_list_node(obj):
     return obj is not None and (type(obj).__name__ == 'ListNode' or (hasattr(obj, 'val') and hasattr(obj, 'next')))
@@ -286,6 +317,8 @@ def _is_tree_node(obj):
 def _to_list_node(vals, pos=-1):
     if vals is None:
         return None
+    if isinstance(vals, (list, tuple)) and len(vals) == 2 and isinstance(vals[0], (list, tuple)) and isinstance(vals[1], int) and pos == -1:
+        vals, pos = vals[0], vals[1]
     if _is_list_node(vals):
         return vals
     if isinstance(vals, (int, float)):
@@ -346,8 +379,10 @@ def _convert_arg(arg, name_hint=""):
     is_scalar_num = any(k in hint for k in ['n', 'k', 'target', 'val', 'num', 'size', 'pos', 'index', 'idx'])
 
     if is_scalar_num and not (is_list_node or is_tree_node):
-        if isinstance(arg, (list, tuple)) and len(arg) == 1 and isinstance(arg[0], (int, float)):
+        if isinstance(arg, (list, tuple)) and len(arg) >= 1 and isinstance(arg[0], (int, float)):
             return arg[0]
+        if isinstance(arg, (int, float)):
+            return arg
 
     if 'edge' in hint or 'graph' in hint:
         if isinstance(arg, list) and len(arg) == 1 and isinstance(arg[0], list) and len(arg[0]) > 0 and isinstance(arg[0][0], list):
@@ -372,6 +407,12 @@ def _convert_arg(arg, name_hint=""):
 def _serialize(obj):
     if obj is None:
         return None
+    if isinstance(obj, float):
+        if _math.isinf(obj):
+            return "Infinity" if obj > 0 else "-Infinity"
+        if _math.isnan(obj):
+            return "NaN"
+        return obj
     if _is_list_node(obj):
         res = []
         curr = obj
@@ -416,6 +457,10 @@ while len(_converted_args) < len(_params_names):
         _converted_args.append(0)
     elif any(k in _p_name for k in ['target', 'k', 'val']):
         _converted_args.append(9)
+    elif any(k in _p_name for k in ['memo', 'cache', 'seen', 'map', 'dict']):
+        _converted_args.append({})
+    elif any(k in _p_name for k in ['visited', 'visited_set']):
+        _converted_args.append(set())
     else:
         _converted_args.append(None)
 
@@ -519,27 +564,31 @@ function buildJSDriver(code: string, input: string): string {
   return `${code}
 
 // ── AlgoLens generated driver ──────────────────────────
-class ListNode {
+const _ListNodeClass = typeof ListNode !== 'undefined' ? ListNode : class ListNode {
   constructor(val = 0, next = null) {
     this.val = val;
     this.next = next;
   }
-}
+};
 
-class TreeNode {
+const _TreeNodeClass = typeof TreeNode !== 'undefined' ? TreeNode : class TreeNode {
   constructor(val = 0, left = null, right = null) {
     this.val = val;
     this.left = left;
     this.right = right;
   }
-}
+};
 
 function _to_list_node(vals, pos = -1) {
   if (vals === null || vals === undefined) return null;
-  if (vals instanceof ListNode) return vals;
-  if (typeof vals === 'number') return new ListNode(vals);
+  if (Array.isArray(vals) && vals.length === 2 && Array.isArray(vals[0]) && typeof vals[1] === 'number' && pos === -1) {
+    pos = vals[1];
+    vals = vals[0];
+  }
+  if (vals instanceof _ListNodeClass || (typeof vals === 'object' && vals && 'val' in vals && 'next' in vals)) return vals;
+  if (typeof vals === 'number') return new _ListNodeClass(vals);
   if (!Array.isArray(vals) || !vals.length) return null;
-  const nodes = vals.map((v) => (v instanceof ListNode ? v : new ListNode(v)));
+  const nodes = vals.map((v) => (v instanceof _ListNodeClass || (typeof v === 'object' && v && 'val' in v) ? v : new _ListNodeClass(v)));
   for (let i = 0; i < nodes.length - 1; i++) {
     nodes[i].next = nodes[i + 1];
   }
@@ -551,19 +600,19 @@ function _to_list_node(vals, pos = -1) {
 
 function _to_tree_node(vals) {
   if (!Array.isArray(vals) || !vals.length || vals[0] == null) return null;
-  const root = new TreeNode(vals[0]);
+  const root = new _TreeNodeClass(vals[0]);
   const queue = [root];
   let i = 1;
   while (queue.length && i < vals.length) {
     const node = queue.shift();
     if (node) {
       if (i < vals.length && vals[i] != null) {
-        node.left = new TreeNode(vals[i]);
+        node.left = new _TreeNodeClass(vals[i]);
         queue.push(node.left);
       }
       i++;
       if (i < vals.length && vals[i] != null) {
-        node.right = new TreeNode(vals[i]);
+        node.right = new _TreeNodeClass(vals[i]);
         queue.push(node.right);
       }
       i++;
@@ -588,6 +637,10 @@ function _to_tree_node(vals) {
     const hint = (_param_names[idx] || '').toLowerCase();
     if (hint.includes('head') || hint.includes('listnode') || hint.includes('l1') || hint.includes('l2')) {
       _converted_args.push(_to_list_node(hint.includes('l2') ? [5, 6, 4] : [1, 2, 3]));
+    } else if (hint.includes('memo') || hint.includes('cache') || hint.includes('seen') || hint.includes('map') || hint.includes('dict')) {
+      _converted_args.push({});
+    } else if (hint.includes('visited')) {
+      _converted_args.push(new Set());
     } else {
       _converted_args.push(null);
     }

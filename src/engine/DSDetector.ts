@@ -1,6 +1,7 @@
 import type { DSType, TraceStep, DetectedDS } from './TraceTypes';
 
 const TYPE_PRIORITY: Record<DSType, number> = {
+  geometry: 11,
   graph: 10,
   unionFind: 9,
   linkedList: 8,
@@ -44,6 +45,11 @@ export function detectDataStructures(steps: TraceStep[]): DetectedDS[] {
   const results: DetectedDS[] = [];
 
   for (const [varName, info] of Object.entries(varMap)) {
+    // Ignore internal driver or engine variables
+    if (varName.startsWith('_') || varName === 'console' || varName === 'arguments' || varName === 'retVar') {
+      continue;
+    }
+
     // Pick the most informative non-null snapshot
     const sampleVal =
       info.snapshots.slice().reverse().find((s) => s !== null && s !== undefined && typeof s === 'object') ??
@@ -101,6 +107,17 @@ function heuristicDetect(
   if (types.some((t) => t === 'linkedList' || t === 'ListNode')) return 'linkedList';
   if (types.some((t) => t === 'binaryTree' || t === 'TreeNode')) return 'binaryTree';
   if (types.some((t) => t === 'graph')) return 'graph';
+  if (types.some((t) => t === 'hashMap' || t === 'Map')) return 'hashMap';
+  if (types.some((t) => t === 'hashSet' || t === 'Set')) return 'hashSet';
+
+  // Check serialized __type tag from tracer
+  if (sample && typeof sample === 'object') {
+    const sObj = sample as Record<string, unknown>;
+    if (sObj.__type === 'linkedList') return 'linkedList';
+    if (sObj.__type === 'binaryTree') return 'binaryTree';
+    if (sObj.__type === 'hashMap') return 'hashMap';
+    if (sObj.__type === 'hashSet') return 'hashSet';
+  }
 
   // 2. Linked list inspection
   if (isLinkedListNode(sample)) return 'linkedList';
@@ -124,12 +141,45 @@ function heuristicDetect(
 
     const inner = sample[0];
 
+    // Check if 2D planar geometry (points, polygon, convex hull)
+    if (
+      Array.isArray(inner) &&
+      /points|pts|polygon|hull|coords|vertices/i.test(lname) &&
+      sample.every(
+        (row) =>
+          Array.isArray(row) &&
+          row.length === 2 &&
+          typeof row[0] === 'number' &&
+          typeof row[1] === 'number',
+      )
+    ) {
+      return 'geometry';
+    }
+
+    // Check if suffix array / string pairs
+    if (/suffix|sa/i.test(lname)) {
+      return 'array';
+    }
+
+    // Check if distance / capacity matrix for graph algorithms (TSP, network flow, SSSP)
+    if (
+      Array.isArray(inner) &&
+      /dist|distance|capacity|cost|flow|matrix_graph/i.test(lname) &&
+      sample.length > 0 &&
+      sample.length === inner.length &&
+      sample.every((r) => Array.isArray(r) && r.every((c) => typeof c === 'number'))
+    ) {
+      return 'graph';
+    }
+
     // Explicit grid / matrix variable names
     if (/matrix|grid|board/i.test(lname)) return 'grid';
 
     // Check if edge list: e.g. [[0, 1], [1, 2]] or [[0, 1, 1], [1, 2, 2]]
     if (Array.isArray(inner)) {
+      const isGeometryName = /points|pts|polygon|hull|coords|vertices/i.test(lname);
       const isEdgeList =
+        !isGeometryName &&
         sample.length > 0 &&
         (/edge|graph|mst|links|connections/i.test(lname) ||
           (sample.every(
@@ -163,16 +213,21 @@ function heuristicDetect(
   // 5. Object / dict structures
   if (typeof sample === 'object' && sample !== null) {
     const obj = sample as Record<string, unknown>;
-    const keys = Object.keys(obj);
+    const keys = Object.keys(obj).filter((k) => !k.startsWith('__'));
 
     if (hasAll(keys, ['val', 'next'])) return 'linkedList';
-    if (hasAll(keys, ['val', 'left', 'right'])) return 'binaryTree';
+    if (hasAll(keys, ['val', 'left', 'right']) || (keys.includes('left') && keys.includes('right'))) return 'binaryTree';
     if (hasAll(keys, ['key', 'value'])) return 'hashMap';
     if (hasAll(keys, ['parent']) && Array.isArray(obj['parent'])) return 'unionFind';
 
     // Adjacency list: all values are arrays
-    const allArrayVals = keys.length > 0 && Object.values(obj).every((v) => Array.isArray(v));
+    const allArrayVals = keys.length > 0 && keys.every((k) => Array.isArray(obj[k]));
     if (allArrayVals) return 'graph';
+
+    // Plain object dictionary / hash map
+    if (/seen|map|dict|hash|table|freq|count|cache|lookup/i.test(lname)) return 'hashMap';
+    if (keys.length > 0 && !keys.includes('val')) return 'hashMap';
+    if (keys.length === 0) return 'hashMap';
   }
 
   // Name-based hints

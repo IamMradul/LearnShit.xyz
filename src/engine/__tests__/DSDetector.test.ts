@@ -80,4 +80,36 @@ describe('DSDetector', () => {
     expect(found).toBeDefined();
     expect(found?.confidence).toBe(1.0);
   });
+
+  it('detects 2D points as geometry', () => {
+    const steps = [makeStep({ points: [[1, 1], [2, 5], [3, 3], [5, 3]] })];
+    const ds = detectDataStructures(steps);
+    const found = ds.find((d) => d.varName === 'points');
+    expect(found).toBeDefined();
+    expect(found?.dsType).toBe('geometry');
+  });
+
+  it('detects square distance matrix as graph', () => {
+    const steps = [
+      makeStep({
+        dist: [
+          [0, 10, 15],
+          [10, 0, 35],
+          [15, 35, 0],
+        ],
+      }),
+    ];
+    const ds = detectDataStructures(steps);
+    const found = ds.find((d) => d.varName === 'dist');
+    expect(found).toBeDefined();
+    expect(found?.dsType).toBe('graph');
+  });
+
+  it('detects suffix list as array', () => {
+    const steps = [makeStep({ suffixes: [['banana', 0], ['anana', 1]] })];
+    const ds = detectDataStructures(steps);
+    const found = ds.find((d) => d.varName === 'suffixes');
+    expect(found).toBeDefined();
+    expect(found?.dsType).toBe('array');
+  });
 });
