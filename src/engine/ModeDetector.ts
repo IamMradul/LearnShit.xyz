@@ -61,8 +61,8 @@ export function splitTopLevelParams(raw: string): string[] {
   let depth = 0;
   for (let i = 0; i < raw.length; i++) {
     const ch = raw[i];
-    if (ch === '[' || ch === '(' || ch === '{') depth++;
-    else if (ch === ']' || ch === ')' || ch === '}') depth = Math.max(0, depth - 1);
+    if (ch === '[' || ch === '(' || ch === '{' || ch === '<') depth++;
+    else if (ch === ']' || ch === ')' || ch === '}' || ch === '>') depth = Math.max(0, depth - 1);
     else if (ch === ',' && depth === 0) {
       if (current.trim()) parts.push(current.trim());
       current = '';
@@ -183,11 +183,19 @@ export function inferDefaultInput(code: string): string | null {
   if (/\b(?:bubbleSort|bubble_sort|insertionSort|insertion_sort|selectionSort|selection_sort)\b/i.test(code)) return '[[64, 34, 25, 12, 22, 11, 90]]';
   if (/\b(?:binarySearch|binary_search|search)\b/i.test(code)) return '[[ -1, 0, 3, 5, 9, 12 ], 9]';
   if (/\b(?:insert|insertion|insert_at|insertAt|arrayInsertion|array_insertion)\b/i.test(code)) return '[[10, 20, 30, 40, 50], 2, 25]';
+  if (/\b(?:int|void)\s+main\s*\(/.test(code) || /\bcin\s*>>/.test(code)) return '[1, 5, 2, 3, 4]';
 
-  const methodMatch = code.match(/def\s+\w+\s*\(\s*(?:self\s*,\s*)?([^)]*)\)|function\s+\w+\s*\(([^)]*)\)/);
+  const methodMatch =
+    code.match(/def\s+\w+\s*\(\s*(?:self\s*,\s*)?([^)]*)\)|function\s+\w+\s*\(([^)]*)\)/) ||
+    code.match(/(?:(?:static|inline|virtual)\s+)*(?:void|int|long(?:\s+long)?|double|float|bool|char|string|auto|vector\s*<[^>]+>|ListNode\*?|TreeNode\*?)(?:\s+|(?<=[*>]))[a-zA-Z_]\w*\s*\(([^)]*)\)/);
+
   if (methodMatch) {
     const raw = methodMatch[1] || methodMatch[2] || '';
-    const params = splitTopLevelParams(raw).map((p) => p.split(':')[0].trim());
+    const params = splitTopLevelParams(raw).map((p) => {
+      const clean = p.split(':')[0].trim();
+      const m = clean.match(/([a-zA-Z_]\w*)\s*$/);
+      return m ? m[1] : clean;
+    });
     if (params.length === 1) {
       const p = params[0].toLowerCase();
       if (p.includes('arr') || p.includes('num') || p.includes('list')) return '[[64, 34, 25, 12, 22, 11, 90]]';
@@ -372,19 +380,32 @@ def _to_tree_node(vals):
             i += 1
     return root
 
+class _GraphList(list):
+    def get(self, key, default=None):
+        if isinstance(key, int) and 0 <= key < len(self):
+            return self[key]
+        return default
+
+def _make_gettable(obj):
+    if isinstance(obj, list) and not isinstance(obj, _GraphList):
+        return _GraphList([_make_gettable(x) for x in obj])
+    return obj
+
 def _convert_arg(arg, name_hint=""):
-    hint = name_hint.lower()
-    is_list_node = any(k in hint for k in ['head', 'listnode', 'l1', 'l2']) or hint == 'node'
-    is_tree_node = any(k in hint for k in ['root', 'treenode', 'tree'])
-    is_scalar_num = any(k in hint for k in ['n', 'k', 'target', 'val', 'num', 'size', 'pos', 'index', 'idx'])
+    hint = name_hint.strip().lower()
+    is_collection = any(k in hint for k in ['nums', 'arr', 'vals', 'values', 'list', 'items', 'elements', 'matrix', 'grid', 'queries', 'edges', 'nodes', 'points', 'intervals']) or (hint.endswith('s') and hint not in ('pos', 'radius'))
+    is_list_node = (any(k in hint for k in ['head', 'listnode', 'l1', 'l2']) or hint == 'node') and not is_collection
+    is_tree_node = (any(k in hint for k in ['root', 'treenode']) or (hint == 'tree' and not is_collection)) and not is_collection
+    scalar_names = {'n', 'k', 'target', 'val', 'num', 'size', 'pos', 'index', 'idx', 'p', 'start', 'end', 'src', 'dst', 'u', 'v', 'mask', 'root_val', 'x', 'y', 'z', 'mid', 'low', 'high', 'limit', 'threshold', 'capacity', 'radius', 'scale', 'multiplier', 'amount'}
+    is_scalar_num = not is_collection and (hint in scalar_names or hint.endswith(('_id', '_idx', '_val', '_index', '_num')))
 
     if is_scalar_num and not (is_list_node or is_tree_node):
-        if isinstance(arg, (list, tuple)) and len(arg) >= 1 and isinstance(arg[0], (int, float)):
-            return arg[0]
         if isinstance(arg, (int, float)):
             return arg
+        if isinstance(arg, (list, tuple)) and len(arg) == 1 and isinstance(arg[0], (int, float)):
+            return arg[0]
 
-    if 'edge' in hint or 'graph' in hint:
+    if ('edge' in hint or 'graph' in hint) and not is_collection:
         if isinstance(arg, list) and len(arg) == 1 and isinstance(arg[0], list) and len(arg[0]) > 0 and isinstance(arg[0][0], list):
             arg = arg[0]
 
@@ -401,6 +422,9 @@ def _convert_arg(arg, name_hint=""):
         if isinstance(arg, (int, float)):
             return TreeNode(int(arg))
         return _to_tree_node(arg)
+
+    if isinstance(arg, list):
+        return _make_gettable(arg)
 
     return arg
 
@@ -625,9 +649,10 @@ function _to_tree_node(vals) {
   const _raw_args = [${argsRepr}];
   const _param_names = ${JSON.stringify(paramNames)};
   const _converted_args = _raw_args.map((arg, idx) => {
-    const hint = (_param_names[idx] || '').toLowerCase();
-    const isListNode = hint.includes('head') || hint.includes('listnode') || hint.includes('l1') || hint.includes('l2');
-    const isTreeNode = hint.includes('root') || hint.includes('treenode') || hint.includes('tree');
+    const hint = (_param_names[idx] || '').trim().toLowerCase();
+    const isCollection = ['nums', 'arr', 'vals', 'values', 'list', 'items', 'elements'].some((k) => hint.includes(k)) || (hint.endsWith('s') && !['pos', 'radius'].includes(hint));
+    const isListNode = (hint.includes('head') || hint.includes('listnode') || hint.includes('l1') || hint.includes('l2')) && !isCollection;
+    const isTreeNode = (hint.includes('root') || hint.includes('treenode') || (hint === 'tree' && !isCollection)) && !isCollection;
     if (isListNode) return _to_list_node(arg);
     if (isTreeNode) return _to_tree_node(arg);
     return arg;

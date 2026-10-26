@@ -11,6 +11,7 @@ import { VisuAlgoDetailModal } from './VisuAlgoDetailModal';
 import { Play, Pause, SkipBack, ChevronLeft, ChevronRight, Shuffle, Upload } from 'lucide-react';
 import { useEditorStore } from '../../store/editorStore';
 import { useTraceStore } from '../../store/traceStore';
+import { useUIStore } from '../../store/uiStore';
 import { getAdapter } from '../../engine/adapters/AdapterRegistry';
 import type { DSMutation, TraceStep } from '../../engine/TraceTypes';
 
@@ -839,19 +840,26 @@ export const GallerySection: React.FC = () => {
     mode: 'overview' | 'training';
   } | null>(null);
 
-  const { setCode, setInput, setLanguage } = useEditorStore();
+  const { setCode, setInput, setLanguage, language } = useEditorStore();
   const { setResult, setRunning, setError } = useTraceStore();
 
   const [loadingItemId, setLoadingItemId] = useState<string | null>(null);
 
   const handleQuickLoad = async (item: VisuAlgoItem, customInput?: string) => {
-    const lang = item.sampleCode.python ? 'python' : 'javascript';
-    const code = item.sampleCode[lang] || '';
+    const lang = item.sampleCode[language]
+      ? language
+      : item.sampleCode.javascript
+        ? 'javascript'
+        : item.sampleCode.python
+          ? 'python'
+          : 'javascript';
+    const code = item.sampleCode[lang] || item.sampleCode.javascript || item.sampleCode.python || '';
     const input = customInput !== undefined ? customInput : item.sampleInput;
 
     setCode(code);
     setInput(input);
     setLanguage(lang);
+    useUIStore.getState().setCenterViewMode('ds');
 
     const visualizerEl =
       document.getElementById('ide-anchor') ||

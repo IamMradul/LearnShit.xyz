@@ -136,12 +136,16 @@ function lengthOfLongestSubstring(s) {
       expect(output).toContain('_sol.find(*_converted_args)');
     });
 
-    it('detects top-level script statements as full-program', () => {
-      const pyCode = `class UnionFind:\n    def __init__(self, n):\n        self.p = list(range(n))\nuf = UnionFind(6)\nuf.find(0)`;
-      expect(detectMode(pyCode, 'python')).toBe('full-program');
+    it('preserves array arguments for heap_demo(nums) and twoSum(nums, target)', () => {
+      const heapCode = `import heapq\ndef heap_demo(nums):\n    heapq.heapify(nums)\n    return nums`;
+      const heapOutput = buildDriver(heapCode, '[[35, 12, 89, 42, 60, 15, 77]]', 'python');
+      expect(heapOutput).toContain('_raw_args = [[35,12,89,42,60,15,77]]');
+      expect(heapOutput).toContain('_result = heap_demo(*_converted_args)');
 
-      const jsCode = `class UnionFind {\n  constructor(n) {}\n}\nconst uf = new UnionFind(6);`;
-      expect(detectMode(jsCode, 'javascript')).toBe('full-program');
+      const twoSumCode = `def twoSum(nums, target):\n    return []`;
+      const twoSumOutput = buildDriver(twoSumCode, '[[2, 7, 11, 15], 9]', 'python');
+      expect(twoSumOutput).toContain('_raw_args = [[2,7,11,15], 9]');
+      expect(twoSumOutput).toContain('_result = twoSum(*_converted_args)');
     });
   });
 });

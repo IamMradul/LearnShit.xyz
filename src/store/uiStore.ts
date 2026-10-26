@@ -11,6 +11,7 @@ interface UIStore {
   isCodeEditorOpen: boolean;
   visualizerZoom: number; // 50 to 200
   isVariablesWatchOpen: boolean;
+  centerViewMode: 'ds' | 'code' | 'split';
 
   toggleTheme: () => void;
   setTheme: (t: 'dark' | 'light') => void;
@@ -23,6 +24,7 @@ interface UIStore {
   toggleCodeEditor: () => void;
   setVisualizerZoom: (z: number) => void;
   toggleVariablesWatch: () => void;
+  setCenterViewMode: (mode: 'ds' | 'code' | 'split') => void;
   resetLayout: () => void;
 }
 
@@ -36,6 +38,7 @@ const DEFAULTS = {
   isCodeEditorOpen: true,
   visualizerZoom: 100,
   isVariablesWatchOpen: true,
+  centerViewMode: 'ds' as const,
 };
 
 export const useUIStore = create<UIStore>()(
@@ -64,6 +67,7 @@ export const useUIStore = create<UIStore>()(
       toggleCodeEditor: () => set((s) => ({ isCodeEditorOpen: !s.isCodeEditorOpen })),
       setVisualizerZoom: (visualizerZoom) => set({ visualizerZoom }),
       toggleVariablesWatch: () => set((s) => ({ isVariablesWatchOpen: !s.isVariablesWatchOpen })),
+      setCenterViewMode: (centerViewMode) => set({ centerViewMode }),
 
       resetLayout: () => set({ ...DEFAULTS }),
     }),

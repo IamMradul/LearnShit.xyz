@@ -3,6 +3,7 @@ import { useTraceStore } from '../../store/traceStore';
 import { useUIStore } from '../../store/uiStore';
 import { useEditorStore } from '../../store/editorStore';
 import { detectDataStructures } from '../../engine/DSDetector';
+import { detectLanguage } from '../../engine/LanguageDetector';
 import { ArrayRenderer } from './renderers/ArrayRenderer';
 import { TreeRenderer } from './renderers/TreeRenderer';
 import { LinkedListRenderer } from './renderers/LinkedListRenderer';
@@ -11,8 +12,10 @@ import { GraphRenderer } from './renderers/GraphRenderer';
 import { RecursionTreeRenderer } from './renderers/RecursionTreeRenderer';
 import { HashMapRenderer } from './renderers/HashMapRenderer';
 import { GeometryRenderer } from './renderers/GeometryRenderer';
+import { BitmaskRenderer } from './renderers/BitmaskRenderer';
 import { PlaybackControls } from './playback/PlaybackControls';
 import { WalkthroughExplainer } from './WalkthroughExplainer';
+import { AnimatedCodeVisualizer } from './AnimatedCodeVisualizer';
 import { getAdapter } from '../../engine/adapters/AdapterRegistry';
 import { ALGORITHM_PRESETS } from '../../engine/presets';
 import {
@@ -27,6 +30,7 @@ import {
   Sparkles,
   ArrowLeft,
   Loader2,
+  Layout,
 } from 'lucide-react';
 import type { DSType } from '../../engine/TraceTypes';
 
@@ -44,14 +48,18 @@ function DSRenderer({
   if (!step) return null;
 
   switch (dsType) {
+    case 'bitmask':
+      return <BitmaskRenderer step={step} varName={varName} height={height} />;
     case 'array':
-    case 'heap':
     case 'stack':
     case 'queue':
+    case 'fenwickTree':
       return <ArrayRenderer step={step} varName={varName} height={height} />;
     case 'binaryTree':
     case 'bst':
     case 'avl':
+    case 'segmentTree':
+    case 'heap':
       return <TreeRenderer step={step} varName={varName} height={height} />;
     case 'linkedList':
     case 'doublyLinkedList':
@@ -355,9 +363,9 @@ function FallbackStateRenderer({
                         whiteSpace: 'nowrap',
                       }}
                     >
-                      {typeof v.value === 'object' && v.value !== null
+                      {v.repr || (typeof v.value === 'object' && v.value !== null
                         ? JSON.stringify(v.value)
-                        : String(v.value)}
+                        : String(v.value))}
                     </span>
                   </div>
                 );
@@ -387,27 +395,31 @@ export const VisualizerPane: React.FC = () => {
     activeVisualizerTab,
     setActiveVisualizerTab,
     visualizerZoom,
-    isVariablesWatchOpen,
-    toggleVariablesWatch,
+    centerViewMode,
+    setCenterViewMode,
   } = useUIStore();
-  const { code, input, language, modeOverride, setCode, setInput } = useEditorStore();
-
-  const [isCodeTrackerOpen, setIsCodeTrackerOpen] = useState(true);
+  const { code, input, language, setLanguage, modeOverride, setCode, setInput } = useEditorStore();
 
   // Auto-initialize first trace on mount if code is present
   useEffect(() => {
     if (steps.length === 0 && code.trim().length > 0) {
       const runInit = async () => {
+        let effectiveLang = language;
+        const langDetect = detectLanguage(code);
+        if (langDetect.confidence >= 0.4 && langDetect.language !== language) {
+          effectiveLang = langDetect.language;
+          setLanguage(effectiveLang);
+        }
         setRunning(true);
         try {
-          const adapter = getAdapter(language);
+          const adapter = getAdapter(effectiveLang);
           const res = await adapter.trace({
             code,
             input,
             mode: modeOverride,
             maxSteps: 5000,
             timeoutMs: 10000,
-            language,
+            language: effectiveLang,
           });
           setResult(res);
         } catch {
@@ -435,9 +447,9 @@ export const VisualizerPane: React.FC = () => {
           !f.name.startsWith('__') &&
           f.name !== '<module>' &&
           f.name !== 'Solution' &&
-          f.name !== 'run_with_trace',
+          f.name !== 'run_with_trace' &&
+          f.name !== 'anonymous',
       );
-      if (userFrames.length > 1) return true;
       const names = userFrames.map((f) => f.name);
       return new Set(names).size < names.length;
     });
@@ -446,10 +458,13 @@ export const VisualizerPane: React.FC = () => {
   const [visualizerMode, setVisualizerMode] = useState<'ds' | 'recursion'>('ds');
 
   useEffect(() => {
-    if (hasRecursion && detectedDS.length === 0) {
+    const isOnlyHelperDS = detectedDS.every((d) =>
+      ['memo', 'cache', 'seen', 'visited', 'dp', 'table'].includes(d.varName.toLowerCase()) || d.dsType === 'hashMap',
+    );
+    if (hasRecursion && (detectedDS.length === 0 || isOnlyHelperDS)) {
       setVisualizerMode('recursion');
     }
-  }, [hasRecursion, detectedDS.length]);
+  }, [hasRecursion, detectedDS]);
 
   // Empirical Big-O & Profile metrics
   const profileMetrics = useMemo(() => {
@@ -473,19 +488,15 @@ export const VisualizerPane: React.FC = () => {
   }, [steps]);
 
   // Extract executing code lines for code tracker
-  const codeLines = useMemo(() => code.split('\n'), [code]);
-  const activeLineNum = currentStep?.line ?? 1;
-
-  // Extract snippet around active line (e.g. 5 lines)
-  const codeSnippet = useMemo(() => {
-    const start = Math.max(0, activeLineNum - 3);
-    const end = Math.min(codeLines.length, activeLineNum + 2);
-    return codeLines.slice(start, end).map((text, i) => ({
-      lineNo: start + i + 1,
-      text,
-      isActive: start + i + 1 === activeLineNum,
-    }));
-  }, [codeLines, activeLineNum]);
+  const codeLines = useMemo(() => (code ? code.split('\n') : []), [code]);
+  const activeLineNum = useMemo(() => {
+    if (!currentStep) return 1;
+    const l = currentStep.line;
+    if (typeof l === 'number' && l >= 1 && l <= codeLines.length) {
+      return l;
+    }
+    return 1;
+  }, [currentStep, codeLines.length]);
 
   // Extract event description
   const eventDesc = useMemo(() => {
@@ -562,7 +573,7 @@ export const VisualizerPane: React.FC = () => {
                 wordBreak: 'break-word',
               }}
             >
-              {error}
+              {typeof error === 'string' && error.trim() === '{}' ? 'Runtime execution error' : error}
             </div>
           </div>
           <button
@@ -638,572 +649,514 @@ export const VisualizerPane: React.FC = () => {
           </div>
         </div>
       )}
-      {/* ── Top Floating Operation HUD Banner (staying.fun signature) ──────── */}
-      {currentStep && (
-        <div
-          style={{
-            position: 'absolute',
-            top: 18,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            zIndex: 35,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 10,
-            padding: '6px 18px',
-            background: 'rgba(16, 18, 22, 0.85)',
-            backdropFilter: 'blur(14px)',
-            WebkitBackdropFilter: 'blur(14px)',
-            border: '1px solid rgba(247, 245, 239, 0.1)',
-            borderRadius: 30,
-            boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
-            maxWidth: '90%',
-          }}
-        >
-          <span
-            style={{
-              width: 7,
-              height: 7,
-              borderRadius: '50%',
-              background: 'var(--accent)',
-              boxShadow: '0 0 8px var(--accent)',
-              flexShrink: 0,
-            }}
-          />
-          <span
-            style={{
-              fontFamily: "'JetBrains Mono', monospace",
-              fontSize: 10,
-              background: 'rgba(214, 82, 58, 0.2)',
-              color: 'var(--accent)',
-              padding: '2px 6px',
-              borderRadius: 4,
-              fontWeight: 700,
-            }}
-          >
-            L{activeLineNum}
-          </span>
-          <span
-            style={{
-              fontFamily: "'Inter', sans-serif",
-              fontSize: 12,
-              fontWeight: 500,
-              color: '#F7F5EF',
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}
-          >
-            {eventDesc}
-          </span>
-        </div>
-      )}
-
-      {/* ── Top Tabs: Mode Switcher & Multiple Data Structures ───────────────── */}
+      {/* ── Top Unified Primary Bar (Mode Switcher, Operation Banner, Complexity HUD) ── */}
       <div
         style={{
           position: 'absolute',
-          top: 18,
-          left: 20,
+          top: 14,
+          left: 16,
+          right: 16,
           zIndex: 35,
           display: 'flex',
-          gap: 6,
           alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 12,
+          pointerEvents: 'none',
         }}
       >
-        {/* If recursion is detected, allow switching between Data Structure and Call Tree */}
-        {hasRecursion && (
-          <div
+        {/* Left: Mode Switcher Pills */}
+        <div
+          style={{
+            display: 'flex',
+            gap: 2,
+            background: 'rgba(16, 18, 22, 0.9)',
+            backdropFilter: 'blur(12px)',
+            border: '1px solid rgba(247, 245, 239, 0.12)',
+            borderRadius: 20,
+            padding: 3,
+            pointerEvents: 'auto',
+            flexShrink: 0,
+            boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+          }}
+        >
+          <button
+            onClick={() => setCenterViewMode('code')}
             style={{
+              background: centerViewMode === 'code' ? 'var(--accent)' : 'transparent',
+              border: 'none',
+              borderRadius: 16,
+              padding: '4px 12px',
+              color: centerViewMode === 'code' ? '#F7F5EF' : 'var(--text-secondary)',
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: 11,
+              cursor: 'pointer',
+              fontWeight: centerViewMode === 'code' ? 600 : 400,
               display: 'flex',
-              gap: 2,
-              background: 'rgba(16, 18, 22, 0.85)',
-              backdropFilter: 'blur(12px)',
-              border: '1px solid rgba(247, 245, 239, 0.12)',
-              borderRadius: 20,
-              padding: 2,
+              alignItems: 'center',
+              gap: 5,
             }}
           >
+            <Code2 size={12} />
+            <span>Code Execution</span>
+          </button>
+
+          {detectedDS.length > 0 && (
             <button
-              onClick={() => setVisualizerMode('ds')}
+              onClick={() => setCenterViewMode('ds')}
               style={{
-                background: visualizerMode === 'ds' ? 'var(--accent)' : 'transparent',
+                background: centerViewMode === 'ds' ? 'var(--accent)' : 'transparent',
                 border: 'none',
                 borderRadius: 16,
-                padding: '4px 10px',
-                color: visualizerMode === 'ds' ? '#F7F5EF' : 'var(--text-secondary)',
+                padding: '4px 12px',
+                color: centerViewMode === 'ds' ? '#F7F5EF' : 'var(--text-secondary)',
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: 11,
                 cursor: 'pointer',
+                fontWeight: centerViewMode === 'ds' ? 600 : 400,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 5,
               }}
             >
-              Data Structure
+              <Layers size={12} />
+              <span>Data Structure</span>
             </button>
+          )}
+
+          {detectedDS.length > 0 && (
             <button
-              onClick={() => setVisualizerMode('recursion')}
+              onClick={() => setCenterViewMode('split')}
               style={{
-                background: visualizerMode === 'recursion' ? 'var(--accent)' : 'transparent',
+                background: centerViewMode === 'split' ? 'var(--accent)' : 'transparent',
                 border: 'none',
                 borderRadius: 16,
-                padding: '4px 10px',
-                color: visualizerMode === 'recursion' ? '#F7F5EF' : 'var(--text-secondary)',
+                padding: '4px 12px',
+                color: centerViewMode === 'split' ? '#F7F5EF' : 'var(--text-secondary)',
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: 11,
                 cursor: 'pointer',
+                fontWeight: centerViewMode === 'split' ? 600 : 400,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 5,
+              }}
+            >
+              <Layout size={12} />
+              <span>Split View</span>
+            </button>
+          )}
+
+          {hasRecursion && (
+            <button
+              onClick={() => {
+                setCenterViewMode('ds');
+                setVisualizerMode('recursion');
+              }}
+              style={{
+                background: centerViewMode === 'ds' && visualizerMode === 'recursion' ? 'var(--accent)' : 'transparent',
+                border: 'none',
+                borderRadius: 16,
+                padding: '4px 12px',
+                color: centerViewMode === 'ds' && visualizerMode === 'recursion' ? '#F7F5EF' : 'var(--text-secondary)',
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: 11,
+                cursor: 'pointer',
+                fontWeight: centerViewMode === 'ds' && visualizerMode === 'recursion' ? 600 : 400,
               }}
             >
               Call Tree
             </button>
-          </div>
-        )}
+          )}
+        </div>
 
-        {/* Data Structure tabs */}
-        {visualizerMode === 'ds' && detectedDS.length > 1 && (
+        {/* Center: Operation HUD Banner */}
+        {currentStep && (
           <div
             style={{
               display: 'flex',
-              gap: 4,
+              alignItems: 'center',
+              gap: 8,
+              padding: '5px 14px',
               background: 'rgba(16, 18, 22, 0.85)',
-              backdropFilter: 'blur(12px)',
+              backdropFilter: 'blur(14px)',
               border: '1px solid rgba(247, 245, 239, 0.1)',
-              borderRadius: 20,
-              padding: 3,
+              borderRadius: 30,
+              boxShadow: '0 6px 20px rgba(0,0,0,0.5)',
+              minWidth: 0,
+              overflow: 'hidden',
+              pointerEvents: 'auto',
+              flexShrink: 1,
             }}
           >
-            <button
-              onClick={() => setActiveVisualizerTab('all')}
+            <span
               style={{
-                background: (!activeVisualizerTab || activeVisualizerTab === 'all') ? 'var(--accent)' : 'transparent',
-                border: 'none',
-                borderRadius: 16,
-                padding: '4px 10px',
-                color: (!activeVisualizerTab || activeVisualizerTab === 'all') ? '#F7F5EF' : 'var(--text-secondary)',
+                width: 6,
+                height: 6,
+                borderRadius: '50%',
+                background: 'var(--accent)',
+                boxShadow: '0 0 6px var(--accent)',
+                flexShrink: 0,
+              }}
+            />
+            <span
+              style={{
                 fontFamily: "'JetBrains Mono', monospace",
-                fontSize: 11,
-                cursor: 'pointer',
-                fontWeight: 600,
+                fontSize: 10,
+                background: 'rgba(214, 82, 58, 0.2)',
+                color: 'var(--accent)',
+                padding: '1px 5px',
+                borderRadius: 4,
+                fontWeight: 700,
+                flexShrink: 0,
               }}
             >
-              All Structures
-            </button>
-            {detectedDS.map((ds) => (
+              L{activeLineNum}
+            </span>
+            <span
+              style={{
+                fontFamily: "'Inter', sans-serif",
+                fontSize: 11.5,
+                fontWeight: 500,
+                color: '#F7F5EF',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+            >
+              {eventDesc}
+            </span>
+          </div>
+        )}
+
+        {/* Right: Empirical Big-O Complexity HUD */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            background: 'rgba(16, 18, 22, 0.9)',
+            backdropFilter: 'blur(12px)',
+            border: '1px solid rgba(247, 245, 239, 0.12)',
+            borderRadius: 20,
+            padding: '4px 12px',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+            pointerEvents: 'auto',
+            flexShrink: 0,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <Activity size={12} color="#D6523A" />
+            <span style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Time:</span>
+            <span style={{ fontSize: 11, fontWeight: 700, color: '#D6523A', fontFamily: "'JetBrains Mono', monospace" }}>{profileMetrics.bigO}</span>
+          </div>
+          <div style={{ width: 1, height: 12, background: 'rgba(247, 245, 239, 0.15)' }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <Layers size={12} color="#2ed573" />
+            <span style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Steps:</span>
+            <span style={{ fontSize: 11, fontWeight: 600, color: '#F7F5EF', fontFamily: "'JetBrains Mono', monospace" }}>
+              {steps.length > 0 ? currentIndex + 1 : 0}/{profileMetrics.totalSteps}
+            </span>
+          </div>
+          {profileMetrics.maxStackDepth > 1 && (
+            <>
+              <div style={{ width: 1, height: 12, background: 'rgba(247, 245, 239, 0.15)' }} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                <span style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Stack:</span>
+                <span style={{ fontSize: 11, fontWeight: 600, color: '#ffa502', fontFamily: "'JetBrains Mono', monospace" }}>
+                  {currentStep?.callStack?.length ?? 1}/{profileMetrics.maxStackDepth}
+                </span>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* ── Secondary Bar: Data Structure Sub-Tabs (when in DS/Split mode & multiple DS detected) ── */}
+      {(centerViewMode === 'ds' || centerViewMode === 'split') && detectedDS.length > 1 && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 54,
+            left: 16,
+            zIndex: 34,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 4,
+            background: 'rgba(16, 18, 22, 0.9)',
+            backdropFilter: 'blur(12px)',
+            border: '1px solid rgba(247, 245, 239, 0.1)',
+            borderRadius: 20,
+            padding: 3,
+            boxShadow: '0 4px 16px rgba(0,0,0,0.35)',
+          }}
+        >
+          <button
+            onClick={() => setActiveVisualizerTab('all')}
+            style={{
+              background: activeVisualizerTab === 'all' ? 'var(--accent)' : 'transparent',
+              border: 'none',
+              borderRadius: 16,
+              padding: '3px 10px',
+              color: activeVisualizerTab === 'all' ? '#F7F5EF' : 'var(--text-secondary)',
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: 10.5,
+              cursor: 'pointer',
+              fontWeight: 600,
+              transition: 'all 0.15s ease',
+            }}
+          >
+            All ({detectedDS.length})
+          </button>
+          {detectedDS.map((ds) => {
+            const isSelected =
+              (!activeVisualizerTab && ds.varName === detectedDS[0]?.varName) ||
+              activeVisualizerTab === ds.varName;
+            return (
               <button
                 key={ds.varName}
                 onClick={() => setActiveVisualizerTab(ds.varName)}
                 style={{
-                  background: activeVisualizerTab === ds.varName ? 'var(--accent)' : 'transparent',
+                  background: isSelected ? 'var(--accent)' : 'transparent',
                   border: 'none',
                   borderRadius: 16,
-                  padding: '4px 10px',
-                  color: activeVisualizerTab === ds.varName ? '#F7F5EF' : 'var(--text-secondary)',
+                  padding: '3px 10px',
+                  color: isSelected ? '#F7F5EF' : 'var(--text-secondary)',
                   fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: 11,
+                  fontSize: 10.5,
                   cursor: 'pointer',
+                  fontWeight: isSelected ? 600 : 400,
+                  transition: 'all 0.15s ease',
                 }}
               >
-                {ds.varName} ({ds.dsType})
+                {ds.varName}
+                <span style={{ opacity: 0.65, fontSize: 9.5, marginLeft: 3 }}>
+                  ({ds.dsType})
+                </span>
               </button>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* ── Top Right: Empirical Big-O Complexity HUD ───────────────────────── */}
-      <div
-        style={{
-          position: 'absolute',
-          top: 18,
-          right: 20,
-          zIndex: 35,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-          background: 'rgba(16, 18, 22, 0.85)',
-          backdropFilter: 'blur(12px)',
-          border: '1px solid rgba(247, 245, 239, 0.12)',
-          borderRadius: 20,
-          padding: '4px 12px',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-          <Activity size={12} color="#D6523A" />
-          <span style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Time:</span>
-          <span style={{ fontSize: 11, fontWeight: 700, color: '#D6523A', fontFamily: "'JetBrains Mono', monospace" }}>{profileMetrics.bigO}</span>
+            );
+          })}
         </div>
-        <div style={{ width: 1, height: 12, background: 'rgba(247, 245, 239, 0.15)' }} />
-        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-          <Layers size={12} color="#2ed573" />
-          <span style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Steps:</span>
-          <span style={{ fontSize: 11, fontWeight: 600, color: '#F7F5EF', fontFamily: "'JetBrains Mono', monospace" }}>
-            {steps.length > 0 ? currentIndex + 1 : 0}/{profileMetrics.totalSteps}
-          </span>
-        </div>
-        {profileMetrics.maxStackDepth > 1 && (
-          <>
-            <div style={{ width: 1, height: 12, background: 'rgba(247, 245, 239, 0.15)' }} />
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-              <span style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Stack:</span>
-              <span style={{ fontSize: 11, fontWeight: 600, color: '#ffa502', fontFamily: "'JetBrains Mono', monospace" }}>
-                {currentStep?.callStack?.length ?? 1}/{profileMetrics.maxStackDepth}
-              </span>
-            </div>
-          </>
-        )}
-      </div>
+      )}
 
-      {/* ── Center Canvas Stage with Zoom ──────────────────────────────────── */}
+      {/* ── Center Canvas Stage with Zoom & Docked Code Visualizer ────────── */}
       <div
         style={{
           flex: 1,
           display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '50px 24px 100px',
+          flexDirection: 'row',
           overflow: 'hidden',
+          position: 'relative',
+          minHeight: 0,
         }}
       >
         <div
           style={{
-            transform: `scale(${visualizerZoom / 100})`,
-            transformOrigin: 'center center',
-            transition: 'transform 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
-            width: '100%',
-            maxWidth: 1100,
+            flex: 1,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            padding:
+              centerViewMode === 'code'
+                ? '56px 20px 80px'
+                : (centerViewMode === 'ds' || centerViewMode === 'split') && detectedDS.length > 1
+                  ? '92px 24px 100px'
+                  : '56px 24px 100px',
+            overflow: 'auto',
+            minWidth: 0,
+            width: '100%',
+            height: '100%',
           }}
         >
-          {visualizerMode === 'recursion' ? (
-            <RecursionTreeRenderer steps={steps} currentIndex={currentIndex} height={340} />
-          ) : (activeVisualizerTab === 'all' || (!activeVisualizerTab && detectedDS.length > 1)) && detectedDS.length > 1 ? (
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: detectedDS.length === 2 ? 'repeat(auto-fit, minmax(360px, 1fr))' : '1fr',
-                gap: 20,
-                width: '100%',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              {detectedDS.map((ds) => (
-                <div
-                  key={ds.varName}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    width: '100%',
-                  }}
-                >
-                  <DSRenderer
-                    dsType={ds.dsType}
-                    step={currentStep}
-                    varName={ds.varName}
-                    height={detectedDS.length > 2 ? 260 : 320}
-                  />
-                </div>
-              ))}
-            </div>
-          ) : activeDS ? (
-            <DSRenderer
-              dsType={activeDS.dsType}
-              step={currentStep}
-              varName={activeDS.varName}
-              height={340}
-            />
-          ) : hasRecursion ? (
-            <RecursionTreeRenderer steps={steps} currentIndex={currentIndex} height={340} />
-          ) : steps.length > 0 ? (
-            <FallbackStateRenderer
-              step={currentStep}
-              currentIndex={currentIndex}
-              totalSteps={steps.length}
-            />
-          ) : (
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: 16,
-                color: 'var(--text-secondary)',
-                textAlign: 'center',
-                maxWidth: 440,
-                padding: '36px 28px',
-                background: 'rgba(16, 18, 22, 0.75)',
-                backdropFilter: 'blur(16px)',
-                WebkitBackdropFilter: 'blur(16px)',
-                borderRadius: 16,
-                border: '1px solid rgba(247, 245, 239, 0.1)',
-                boxShadow: '0 16px 40px rgba(0,0,0,0.6)',
-              }}
-            >
+          <div
+            style={{
+              transform: centerViewMode === 'code' ? undefined : `scale(${visualizerZoom / 100})`,
+              transformOrigin: 'center center',
+              transition: 'transform 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
+              width: '100%',
+              maxWidth: centerViewMode === 'split' ? 1280 : 1060,
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            {code.trim().length === 0 && steps.length === 0 ? (
               <div
                 style={{
-                  width: 52,
-                  height: 52,
-                  borderRadius: 14,
-                  background: 'rgba(214, 82, 58, 0.15)',
-                  border: '1px solid rgba(214, 82, 58, 0.35)',
                   display: 'flex',
+                  flexDirection: 'column',
                   alignItems: 'center',
-                  justifyContent: 'center',
+                  gap: 16,
+                  color: 'var(--text-secondary)',
+                  textAlign: 'center',
+                  maxWidth: 440,
+                  padding: '36px 28px',
+                  background: 'rgba(16, 18, 22, 0.75)',
+                  backdropFilter: 'blur(16px)',
+                  WebkitBackdropFilter: 'blur(16px)',
+                  borderRadius: 16,
+                  border: '1px solid rgba(247, 245, 239, 0.1)',
+                  boxShadow: '0 16px 40px rgba(0,0,0,0.6)',
                 }}
               >
-                <Code2 size={26} style={{ color: 'var(--accent)' }} />
-              </div>
-
-              <div>
-                <h3
-                  style={{
-                    fontFamily: "'Oswald', sans-serif",
-                    fontSize: 18,
-                    color: '#F7F5EF',
-                    margin: '0 0 6px',
-                    letterSpacing: '0.04em',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  Ready to Visualize
-                </h3>
-                <p
-                  style={{
-                    fontFamily: "'Inter', sans-serif",
-                    fontSize: 13,
-                    color: '#9B9A95',
-                    margin: 0,
-                    lineHeight: 1.5,
-                  }}
-                >
-                  Type or paste your code in the open editor on the left, then click{' '}
-                  <strong style={{ color: 'var(--accent)' }}>Run Code</strong> to watch your
-                  algorithm execute step by step.
-                </p>
-              </div>
-
-              <button
-                onClick={() => {
-                  const preset = ALGORITHM_PRESETS[0];
-                  const langData = preset.languages[language] ?? preset.languages.javascript;
-                  if (langData) {
-                    setCode(langData.code);
-                    setInput(langData.input);
-                  }
-                }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  background: 'rgba(247, 245, 239, 0.08)',
-                  border: '1px solid rgba(247, 245, 239, 0.16)',
-                  borderRadius: 20,
-                  padding: '7px 16px',
-                  color: '#F7F5EF',
-                  fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: 11,
-                  cursor: 'pointer',
-                  transition: 'all 0.18s ease',
-                }}
-              >
-                <Sparkles size={12} style={{ color: 'var(--accent)' }} />
-                <span>Load Sample (Bubble Sort)</span>
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* ── Floating Variables Watch Card (Top-Left) ───────────────────────── */}
-      {currentStep && Object.keys(currentStep.variables).length > 0 && (
-        <div
-          style={{
-            position: 'absolute',
-            top: 56,
-            left: 20,
-            zIndex: 35,
-            width: isVariablesWatchOpen ? 230 : 'auto',
-            background: 'rgba(16, 18, 22, 0.88)',
-            backdropFilter: 'blur(16px)',
-            WebkitBackdropFilter: 'blur(16px)',
-            border: '1px solid rgba(247, 245, 239, 0.12)',
-            borderRadius: 12,
-            boxShadow: '0 8px 30px rgba(0,0,0,0.5)',
-            overflow: 'hidden',
-          }}
-        >
-          <div
-            onClick={toggleVariablesWatch}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '8px 12px',
-              background: 'rgba(247, 245, 239, 0.04)',
-              cursor: 'pointer',
-              borderBottom: isVariablesWatchOpen ? '1px solid rgba(247, 245, 239, 0.08)' : 'none',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Layers size={13} style={{ color: 'var(--accent)' }} />
-              <span
-                style={{
-                  fontFamily: "'Oswald', sans-serif",
-                  fontSize: 11,
-                  letterSpacing: '0.05em',
-                  textTransform: 'uppercase',
-                  color: '#F7F5EF',
-                }}
-              >
-                Variables Watch
-              </span>
-            </div>
-            {isVariablesWatchOpen ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
-          </div>
-
-          {isVariablesWatchOpen && (
-            <div
-              style={{
-                padding: '8px 12px',
-                maxHeight: 140,
-                overflowY: 'auto',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 5,
-              }}
-            >
-              {Object.entries(currentStep.variables).map(([name, v]) => (
                 <div
-                  key={name}
+                  style={{
+                    width: 52,
+                    height: 52,
+                    borderRadius: 14,
+                    background: 'rgba(214, 82, 58, 0.15)',
+                    border: '1px solid rgba(214, 82, 58, 0.35)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Code2 size={26} style={{ color: 'var(--accent)' }} />
+                </div>
+
+                <div>
+                  <h3
+                    style={{
+                      fontFamily: "'Oswald', sans-serif",
+                      fontSize: 18,
+                      color: '#F7F5EF',
+                      margin: '0 0 6px',
+                      letterSpacing: '0.04em',
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    Ready to Visualize
+                  </h3>
+                  <p
+                    style={{
+                      fontFamily: "'Inter', sans-serif",
+                      fontSize: 13,
+                      color: '#9B9A95',
+                      margin: 0,
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    Type or paste your code in the open editor on the left, then click{' '}
+                    <strong style={{ color: 'var(--accent)' }}>Run Code</strong> to watch your
+                    algorithm execute step by step.
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => {
+                    const preset = ALGORITHM_PRESETS[0];
+                    const langData = preset.languages[language] ?? preset.languages.javascript;
+                    if (langData) {
+                      setCode(langData.code);
+                      setInput(langData.input);
+                    }
+                  }}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'space-between',
+                    gap: 6,
+                    background: 'rgba(247, 245, 239, 0.08)',
+                    border: '1px solid rgba(247, 245, 239, 0.16)',
+                    borderRadius: 20,
+                    padding: '7px 16px',
+                    color: '#F7F5EF',
                     fontFamily: "'JetBrains Mono', monospace",
                     fontSize: 11,
+                    cursor: 'pointer',
+                    transition: 'all 0.18s ease',
                   }}
                 >
-                  <span style={{ color: 'var(--accent)' }}>{name}</span>
-                  <span
-                    style={{
-                      color: '#F7F5EF',
-                      maxWidth: 130,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {Array.isArray(v.value)
-                      ? `[${v.value.slice(0, 5).join(', ')}${v.value.length > 5 ? '…' : ''}]`
-                      : String(v.value)}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ── Floating Active Code Tracker (Top-Right) ───────────────────────── */}
-      {currentStep && steps.length > 0 && (
-        <div
-          style={{
-            position: 'absolute',
-            top: 56,
-            right: 20,
-            zIndex: 35,
-            width: isCodeTrackerOpen ? 270 : 'auto',
-            background: 'rgba(16, 18, 22, 0.88)',
-            backdropFilter: 'blur(16px)',
-            WebkitBackdropFilter: 'blur(16px)',
-            border: '1px solid rgba(247, 245, 239, 0.12)',
-            borderRadius: 12,
-            boxShadow: '0 8px 30px rgba(0,0,0,0.5)',
-            overflow: 'hidden',
-          }}
-        >
-          <div
-            onClick={() => setIsCodeTrackerOpen(!isCodeTrackerOpen)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '8px 12px',
-              background: 'rgba(247, 245, 239, 0.04)',
-              cursor: 'pointer',
-              borderBottom: isCodeTrackerOpen ? '1px solid rgba(247, 245, 239, 0.08)' : 'none',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Code2 size={13} style={{ color: 'var(--accent)' }} />
-              <span
+                  <Sparkles size={12} style={{ color: 'var(--accent)' }} />
+                  <span>Load Sample (Bubble Sort)</span>
+                </button>
+              </div>
+            ) : centerViewMode === 'split' && detectedDS.length > 0 ? (
+              <div
                 style={{
-                  fontFamily: "'Oswald', sans-serif",
-                  fontSize: 11,
-                  letterSpacing: '0.05em',
-                  textTransform: 'uppercase',
-                  color: '#F7F5EF',
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: 16,
+                  width: '100%',
+                  height: '100%',
+                  alignItems: 'stretch',
                 }}
               >
-                Execution Tracker
-              </span>
-            </div>
-            {isCodeTrackerOpen ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
-          </div>
-
-          {isCodeTrackerOpen && (
-            <div
-              style={{
-                padding: '6px 8px',
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: 11,
-                lineHeight: 1.5,
-                background: '#0d0f12',
-              }}
-            >
-              {codeSnippet.map((line) => (
+                <AnimatedCodeVisualizer layoutMode="split" />
                 <div
-                  key={line.lineNo}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 8,
-                    padding: '2px 6px',
-                    borderRadius: 4,
-                    background: line.isActive ? 'rgba(214, 82, 58, 0.22)' : 'transparent',
-                    borderLeft: line.isActive ? '2px solid var(--accent)' : '2px solid transparent',
-                    color: line.isActive ? '#F7F5EF' : 'var(--text-muted)',
+                    justifyContent: 'center',
+                    background: 'rgba(16, 18, 22, 0.75)',
+                    borderRadius: 16,
+                    border: '1px solid rgba(247, 245, 239, 0.1)',
+                    padding: 16,
+                    overflow: 'hidden',
                   }}
                 >
-                  <span
-                    style={{
-                      fontSize: 9,
-                      color: line.isActive ? 'var(--accent)' : 'var(--text-muted)',
-                      minWidth: 16,
-                      textAlign: 'right',
-                      userSelect: 'none',
-                    }}
-                  >
-                    {line.lineNo}
-                  </span>
-                  <span
-                    style={{
-                      whiteSpace: 'pre',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      fontWeight: line.isActive ? 600 : 400,
-                    }}
-                  >
-                    {line.text}
-                  </span>
+                  {visualizerMode === 'recursion' ? (
+                    <RecursionTreeRenderer steps={steps} currentIndex={currentIndex} height={340} />
+                  ) : activeDS ? (
+                    <DSRenderer
+                      dsType={activeDS.dsType}
+                      step={currentStep}
+                      varName={activeDS.varName}
+                      height={340}
+                    />
+                  ) : null}
                 </div>
-              ))}
-            </div>
-          )}
+              </div>
+            ) : centerViewMode === 'ds' && activeDS ? (
+              <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+                {activeVisualizerTab === 'all' && detectedDS.length > 1 ? (
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns:
+                        detectedDS.length === 2 ? 'repeat(auto-fit, minmax(360px, 1fr))' : '1fr',
+                      gap: 20,
+                      width: '100%',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    {detectedDS.map((ds) => (
+                      <div
+                        key={ds.varName}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          width: '100%',
+                        }}
+                      >
+                        <DSRenderer
+                          dsType={ds.dsType}
+                          step={currentStep}
+                          varName={ds.varName}
+                          height={detectedDS.length > 2 ? 260 : 320}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                ) : visualizerMode === 'recursion' ? (
+                  <RecursionTreeRenderer steps={steps} currentIndex={currentIndex} height={340} />
+                ) : (
+                  <DSRenderer
+                    dsType={activeDS.dsType}
+                    step={currentStep}
+                    varName={activeDS.varName}
+                    height={340}
+                  />
+                )}
+              </div>
+            ) : (
+              /* DEFAULT / PRIMARY: Animated Code Visualizer Centered */
+              <AnimatedCodeVisualizer layoutMode="center" />
+            )}
+          </div>
         </div>
-      )}
+      </div>
 
       {/* ── Step-by-Step AI Walkthrough Narration & Profiler Trigger ────────── */}
       <WalkthroughExplainer />

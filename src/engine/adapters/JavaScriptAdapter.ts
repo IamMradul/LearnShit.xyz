@@ -33,7 +33,7 @@ export class JavaScriptAdapter implements LanguageAdapter {
       const errors: ValidationResult['errors'] = [];
       parse(code, {
         sourceType: 'script',
-        plugins: ['jsx'],
+        plugins: ['jsx', 'typescript'],
         errorRecovery: true,
       });
       return { valid: errors.length === 0, errors };

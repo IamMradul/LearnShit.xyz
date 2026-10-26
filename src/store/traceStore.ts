@@ -36,7 +36,7 @@ export const useTraceStore = create<TraceStore>((set, get) => ({
   steps: [],
   currentIndex: 0,
   status: 'idle',
-  speed: 300, // ms between steps
+  speed: 600, // ms between steps (0.5x default speed)
   isRunning: false,
   error: null,
   pyodideLoading: false,
@@ -47,7 +47,7 @@ export const useTraceStore = create<TraceStore>((set, get) => ({
       steps: result.steps,
       currentIndex: 0,
       status: result.steps.length > 0 ? 'paused' : 'idle',
-      error: result.error ?? null,
+      error: result.error && result.error.trim() !== '{}' ? result.error : (result.error ? 'Runtime execution error' : null),
     }),
 
   setCurrentIndex: (currentIndex) => set({ currentIndex }),

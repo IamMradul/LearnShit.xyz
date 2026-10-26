@@ -74,10 +74,9 @@ import heapq
 import bisect
 import random
 import traceback as _tb
+import types as _types
 import typing
-from typing import *
 import collections
-from collections import *
 
 # Pre-defined LeetCode data structures
 class ListNode:
@@ -165,6 +164,10 @@ def _safe_repr(val, depth=0):
     if isinstance(val, set):
         items = list(val)[:15]
         return "{" + ", ".join(_safe_repr(v, depth+1) for v in items) + "}"
+    if hasattr(val, '__dict__'):
+        cls_name = type(val).__name__
+        attrs = ", ".join(f"{k}={_safe_repr(v, depth+1)}" for k, v in val.__dict__.items() if not k.startswith('_'))
+        return f"{cls_name}({attrs})"
     return repr(val)[:200]
 
 def _safe_clone(val, depth=0):
@@ -204,6 +207,12 @@ def _safe_clone(val, depth=0):
         return {str(k): _safe_clone(v, depth+1) for k, v in list(val.items())[:20]}
     if isinstance(val, set):
         return list(val)[:20]
+    if hasattr(val, '__dict__'):
+        d = {"__class__": type(val).__name__}
+        for k, v in val.__dict__.items():
+            if not k.startswith('_'):
+                d[k] = _safe_clone(v, depth + 1)
+        return d
     return repr(val)[:200]
 
 def _get_type(val):
@@ -229,6 +238,16 @@ def _get_type(val):
         return "tuple"
     if isinstance(val, set):
         return "set"
+    if hasattr(val, '__dict__'):
+        cls_name = type(val).__name__
+        cls_lower = cls_name.lower()
+        if 'unionfind' in cls_lower or 'dsu' in cls_lower or 'disjoint' in cls_lower:
+            return "unionFind"
+        if 'fenwick' in cls_lower or 'bit' in cls_lower or 'binaryindexedtree' in cls_lower:
+            return "fenwickTree"
+        if 'segtree' in cls_lower or 'segmenttree' in cls_lower:
+            return "segmentTree"
+        return cls_name
     return type(val).__name__
 
 SKIP_VARS = frozenset({
@@ -236,16 +255,28 @@ SKIP_VARS = frozenset({
     '__builtins__', '__file__', '__cached__', '_tracer_fn',
     '_steps', '_stdout_capture', '_MAX_STEPS', '_TRUNCATED', '_TOTAL',
     '_safe_repr', '_safe_clone', '_get_type', '_is_list_node', '_is_tree_node',
-    'SKIP_VARS', 'self',
+    '_is_unwanted_var', 'SKIP_VARS', 'self',
     '_last_vars_snapshot', '_MAX_USER_LINE', 'ListNode', 'TreeNode', 'Node',
     '_to_list_node', '_to_tree_node', '_convert_arg', '_serialize',
     '_sol', '_result', '_raw_args', '_params_names', '_converted_args',
-    'sys', 'json', 'io', 'math', 'heapq', 'bisect', 'random', '_tb',
-    'typing', 'collections', 'Optional', 'List', 'Dict', 'Tuple', 'Set',
-    'Union', 'Any', 'Callable', 'Iterable', 'Iterator', 'Sequence',
-    'Mapping', 'TypeVar', 'Generic', 'deque', 'defaultdict', 'Counter',
-    'OrderedDict',
+    'sys', 'json', 'io', 'math', 'heapq', 'bisect', 'random', '_tb', '_types',
+    'typing', 'collections',
 })
+
+def _is_unwanted_var(k, v):
+    if k in SKIP_VARS or k.startswith('__') or k.startswith('_'):
+        return True
+    if isinstance(v, type):
+        return True
+    if callable(v) and not hasattr(v, '__dict__'):
+        return True
+    v_type_name = type(v).__name__
+    if 'GenericAlias' in v_type_name or v_type_name in ('TypeVar', 'Any'):
+        return True
+    mod = getattr(v, '__module__', '')
+    if mod and (mod.startswith(('typing', 'collections', 'abc', 'sys', 'io', 'math', 'json', 'bisect', 'random', 'types'))):
+        return True
+    return False
 
 def _tracer_fn(frame, event, arg):
     global _TRUNCATED, _TOTAL, _last_vars_snapshot, _MAX_USER_LINE
@@ -270,7 +301,7 @@ def _tracer_fn(frame, event, arg):
         return None
 
     # Build variables snapshot
-    local_vars = {k: v for k, v in frame.f_locals.items() if k not in SKIP_VARS}
+    local_vars = {k: v for k, v in frame.f_locals.items() if not _is_unwanted_var(k, v)}
     variables = {}
     for k, v in local_vars.items():
         variables[k] = {
@@ -284,18 +315,30 @@ def _tracer_fn(frame, event, arg):
     for k, v in local_vars.items():
         if isinstance(v, list):
             prev = _last_vars_snapshot.get(k)
-            if isinstance(prev, list) and len(prev) == len(v):
-                changed = [idx for idx in range(len(v)) if v[idx] != prev[idx]]
-                if len(changed) > 0:
-                    is_swap = len(changed) == 2 and v[changed[0]] == prev[changed[1]] and v[changed[1]] == prev[changed[0]]
+            if isinstance(prev, list):
+                if len(prev) == len(v):
+                    changed = [idx for idx in range(len(v)) if v[idx] != prev[idx]]
+                    if len(changed) > 0:
+                        is_swap = len(changed) == 2 and v[changed[0]] == prev[changed[1]] and v[changed[1]] == prev[changed[0]]
+                        mutations.append({
+                            "stepIndex": len(_steps),
+                            "op": "swap" if is_swap else "change",
+                            "dsType": "array",
+                            "dsId": k,
+                            "varName": k,
+                            "highlightIndices": changed,
+                            "description": f"Swapped {k}[{changed[0]}] ({v[changed[0]]}) and {k}[{changed[1]}] ({v[changed[1]]})" if is_swap else f"Updated {k} at {changed}"
+                        })
+                else:
+                    op = "push" if len(v) > len(prev) else "pop"
                     mutations.append({
                         "stepIndex": len(_steps),
-                        "op": "swap" if is_swap else "change",
+                        "op": op,
                         "dsType": "array",
                         "dsId": k,
                         "varName": k,
-                        "highlightIndices": changed,
-                        "description": f"Swapped {k}[{changed[0]}] ({v[changed[0]]}) and {k}[{changed[1]}] ({v[changed[1]]})" if is_swap else f"Updated {k} at {changed}"
+                        "highlightIndices": [len(v) - 1] if len(v) > len(prev) else [],
+                        "description": f"{op.capitalize()} on {k} (length {len(prev)} -> {len(v)})"
                     })
 
     if not mutations:
@@ -349,10 +392,21 @@ def _tracer_fn(frame, event, arg):
     f = frame
     while f is not None:
         if f.f_code.co_filename in ('<algolens>', '<string>'):
+            frame_locals = {}
+            arg_count = f.f_code.co_argcount
+            arg_names = f.f_code.co_varnames[:arg_count]
+            for arg_name in arg_names:
+                if arg_name in f.f_locals and not arg_name.startswith('_'):
+                    val = f.f_locals[arg_name]
+                    if not _is_unwanted_var(arg_name, val):
+                        frame_locals[arg_name] = {
+                            "repr": _safe_repr(val),
+                            "value": _safe_clone(val),
+                        }
             call_stack.append({
                 "name": f.f_code.co_name,
                 "line": f.f_lineno,
-                "locals": {},
+                "locals": frame_locals,
             })
         f = f.f_back
 
@@ -387,7 +441,7 @@ def _tracer_fn(frame, event, arg):
     return _tracer_fn
 
 
-def run_with_trace(user_code, max_steps=5000):
+def run_with_trace(user_code, max_steps=5000, user_input="", user_line_count=0):
     global _steps, _stdout_capture, _TRUNCATED, _TOTAL, _MAX_STEPS, _last_vars_snapshot, _MAX_USER_LINE
     _steps = []
     _stdout_capture = io.StringIO()
@@ -397,7 +451,9 @@ def run_with_trace(user_code, max_steps=5000):
     _last_vars_snapshot = {}
 
     driver_marker = '# ── AlgoLens generated driver'
-    if driver_marker in user_code:
+    if user_line_count and user_line_count > 0:
+        _MAX_USER_LINE = user_line_count
+    elif driver_marker in user_code:
         _MAX_USER_LINE = len(user_code.split(driver_marker)[0].splitlines())
     else:
         _MAX_USER_LINE = len(user_code.splitlines())
@@ -410,49 +466,63 @@ def run_with_trace(user_code, max_steps=5000):
     old_stderr = sys.stderr
     sys.stderr = stderr_capture
 
+    # Redirect stdin for competitive programming input() and sys.stdin
+    old_stdin = sys.stdin
+    stdin_lines = []
+    if user_input:
+        try:
+            parsed = json.loads(user_input)
+            def _extract_tokens(item):
+                if isinstance(item, (list, tuple)):
+                    return " ".join(str(x) for x in item)
+                return str(item)
+            if isinstance(parsed, list):
+                for elem in parsed:
+                    stdin_lines.append(_extract_tokens(elem))
+            else:
+                stdin_lines.append(str(parsed))
+        except Exception:
+            stdin_lines = [str(user_input)]
+    stdin_content = "\n".join(stdin_lines) + "\n" if stdin_lines else ""
+    sys.stdin = io.StringIO(stdin_content)
+
     error = None
     exec_globals = {
         "__name__": "__main__",
         "__builtins__": __builtins__,
-        "sys": sys,
-        "math": math,
-        "heapq": heapq,
-        "bisect": bisect,
-        "random": random,
-        "ListNode": ListNode,
-        "TreeNode": TreeNode,
-        "Node": Node,
-        "Optional": Optional,
-        "List": List,
-        "Dict": Dict,
-        "Tuple": Tuple,
-        "Set": Set,
-        "Union": Union,
-        "Any": Any,
-        "Callable": Callable,
-        "Iterable": Iterable,
-        "Iterator": Iterator,
-        "Sequence": Sequence,
-        "Mapping": Mapping,
-        "TypeVar": TypeVar,
-        "Generic": Generic,
-        "deque": deque,
-        "defaultdict": defaultdict,
-        "Counter": Counter,
-        "OrderedDict": OrderedDict,
     }
+    builtins_map = exec_globals["__builtins__"] if isinstance(exec_globals["__builtins__"], dict) else exec_globals["__builtins__"].__dict__
     for k in dir(typing):
         if not k.startswith('_'):
             try:
-                exec_globals[k] = getattr(typing, k)
+                builtins_map[k] = getattr(typing, k)
             except Exception:
                 pass
     for k in dir(collections):
         if not k.startswith('_'):
             try:
-                exec_globals[k] = getattr(collections, k)
+                builtins_map[k] = getattr(collections, k)
             except Exception:
                 pass
+    builtins_map["ListNode"] = ListNode
+    builtins_map["TreeNode"] = TreeNode
+    builtins_map["Node"] = Node
+    builtins_map["math"] = math
+    builtins_map["heapq"] = heapq
+    builtins_map["bisect"] = bisect
+    builtins_map["random"] = random
+
+    def _worker_input(prompt=""):
+        if prompt:
+            _stdout_capture.write(str(prompt))
+        line = sys.stdin.readline()
+        if not line:
+            return ""
+        if line.endswith('\n'):
+            line = line[:-1]
+        return line
+
+    builtins_map["input"] = _worker_input
 
     try:
         compiled = compile(user_code, '<algolens>', 'exec')
@@ -464,6 +534,7 @@ def run_with_trace(user_code, max_steps=5000):
         sys.settrace(None)
         sys.stdout = old_stdout
         sys.stderr = old_stderr
+        sys.stdin = old_stdin
 
     return json.dumps({
         "steps": _steps,
@@ -477,18 +548,20 @@ def run_with_trace(user_code, max_steps=5000):
 
 async function runPythonTrace(
   py: PyodideInterface,
-  request: TraceRequest,
+  request: TraceRequest & { userLineCount?: number },
 ): Promise<TraceResult> {
   // Install tracer once
   await py.runPythonAsync(TRACER_PYTHON_CODE);
 
   py.globals.set('__user_code_str__', request.code);
+  py.globals.set('__user_input_str__', request.input || '');
   py.globals.set('__max_steps__', request.maxSteps ?? 5000);
+  py.globals.set('__user_line_count__', request.userLineCount ?? 0);
 
   let rawJson: string;
   try {
     rawJson = (await py.runPythonAsync(
-      'run_with_trace(__user_code_str__, __max_steps__)',
+      'run_with_trace(__user_code_str__, __max_steps__, __user_input_str__, __user_line_count__)',
     )) as string;
   } catch (e) {
     return {

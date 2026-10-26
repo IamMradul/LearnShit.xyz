@@ -58,19 +58,21 @@ export class JavaAdapter implements LanguageAdapter {
         const transpiled = transpileJavaToJs(request.code);
         let runnableJs = transpiled.code;
 
+        const userLineCount = request.code.split('\n').length;
         if (mode === 'function') {
           const args = parseDriverArgs(request.input);
+          const argsRepr = args.map((a) => JSON.stringify(a)).join(', ');
           if (transpiled.isClassSolution) {
             const mName = transpiled.methodName || 'twoSum';
-            runnableJs += `\n\n// ─── AlgoLens Auto Driver ───\ntry {\n  const __sol = new Solution();\n  const __ret = __sol.${mName}(${args.join(', ')});\n  if (__ret !== undefined) console.log('Return value:', JSON.stringify(__ret));\n} catch(e) { console.error(e); }`;
+            runnableJs += `\n\n// ── AlgoLens generated driver\ntry {\n  const __sol = new Solution();\n  const __ret = __sol.${mName}(${argsRepr});\n  if (__ret !== undefined) console.log('Return value:', JSON.stringify(__ret));\n} catch(e) { console.error(e); }`;
           } else {
             const fnMatch = runnableJs.match(/function\s+([a-zA-Z_]\w*)\s*\(/);
             const fnName = fnMatch ? fnMatch[1] : 'solution';
-            runnableJs += `\n\n// ─── AlgoLens Auto Driver ───\ntry {\n  const __ret = ${fnName}(${args.join(', ')});\n  if (__ret !== undefined) console.log('Return value:', JSON.stringify(__ret));\n} catch(e) { console.error(e); }`;
+            runnableJs += `\n\n// ── AlgoLens generated driver\ntry {\n  const __ret = ${fnName}(${argsRepr});\n  if (__ret !== undefined) console.log('Return value:', JSON.stringify(__ret));\n} catch(e) { console.error(e); }`;
           }
         } else {
           if (/function\s+main\s*\(/.test(runnableJs)) {
-            runnableJs += '\n\ntry { main([]); } catch(e) { console.error(e); }';
+            runnableJs += '\n\n// ── AlgoLens generated driver\ntry { main([]); } catch(e) { console.error(e); }';
           }
         }
 
@@ -90,7 +92,7 @@ export class JavaAdapter implements LanguageAdapter {
         };
 
         worker.addEventListener('message', handler);
-        worker.postMessage({ ...request, code: runnableJs, mode });
+        worker.postMessage({ ...request, code: runnableJs, mode, userLineCount });
       } catch (err) {
         resolve({
           steps: [],

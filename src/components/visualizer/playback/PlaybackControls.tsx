@@ -65,7 +65,7 @@ export const PlaybackControls: React.FC = () => {
     [handleTrackClick, seekTo],
   );
 
-  const currentSpeed = SPEEDS.find((s) => s.ms === speed) ?? SPEEDS[2];
+  const currentSpeed = SPEEDS.find((s) => s.ms === speed) ?? SPEEDS[1];
 
   if (!total) return null;
 

@@ -77,6 +77,12 @@ export const CodeEditor: React.FC = () => {
     const step = steps[currentIndex];
     if (!step) return;
 
+    const lineCount = code ? code.split('\n').length : 0;
+    if (step.line < 1 || step.line > lineCount) {
+      decorationsRef.current = editor.deltaDecorations(decorationsRef.current, []);
+      return;
+    }
+
     decorationsRef.current = editor.deltaDecorations(decorationsRef.current, [
       {
         range: new monaco.Range(step.line, 1, step.line, 1),
@@ -93,7 +99,7 @@ export const CodeEditor: React.FC = () => {
 
     // Scroll to line
     editor.revealLineInCenterIfOutsideViewport(step.line, 1);
-  }, [currentIndex, steps]);
+  }, [currentIndex, steps, code]);
 
   // Inject highlight CSS once
   React.useEffect(() => {
@@ -147,7 +153,10 @@ export const CodeEditor: React.FC = () => {
         height="100%"
         language={monacoLanguage}
         value={code}
-        onChange={(val) => setCode(val ?? '')}
+        onChange={(val) => {
+          setCode(val ?? '');
+          useUIStore.getState().setCenterViewMode('code');
+        }}
         onMount={handleEditorDidMount}
         options={{
           fontSize,

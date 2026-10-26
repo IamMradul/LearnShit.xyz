@@ -8,12 +8,14 @@ interface TreeNode {
   left?: TreeNode | null;
   right?: TreeNode | null;
   id?: string;
+  indexLabel?: number | string;
   highlighted?: string;
 }
 
 interface D3TreeNode {
   id: string;
   val: number | string;
+  indexLabel?: number | string;
   highlight?: string;
   children?: D3TreeNode[];
 }
@@ -31,6 +33,7 @@ function buildD3Tree(node: TreeNode | null | undefined, id = 'root', activeVal?:
   const d: D3TreeNode = {
     id,
     val: node.val,
+    indexLabel: node.indexLabel,
     highlight: isCurrent ? 'current' : node.highlighted,
     children: [],
   };
@@ -45,38 +48,72 @@ function buildD3Tree(node: TreeNode | null | undefined, id = 'root', activeVal?:
   return d;
 }
 
+function arrayToBinaryTree(arr: unknown[], isOneIndexed = false): TreeNode | null {
+  if (!arr || !arr.length) return null;
+  const startIdx = isOneIndexed ? 1 : 0;
+  if (startIdx >= arr.length) return null;
+
+  function buildSubtree(idx: number): TreeNode | null {
+    if (idx >= arr.length || arr[idx] === null || arr[idx] === undefined) return null;
+    const leftIdx = isOneIndexed ? 2 * idx : 2 * idx + 1;
+    const rightIdx = isOneIndexed ? 2 * idx + 1 : 2 * idx + 2;
+    return {
+      id: `arr-node-${idx}`,
+      val: arr[idx] as number | string,
+      indexLabel: idx,
+      left: buildSubtree(leftIdx),
+      right: buildSubtree(rightIdx),
+    };
+  }
+
+  return buildSubtree(startIdx);
+}
+
 function extractTree(step: TraceStep, varName?: string): TreeNode | null {
-  const target = varName
-    ? step.variables[varName]
-    : Object.values(step.variables).find(
-        (v) =>
-          v.type === 'TreeNode' ||
-          v.type === 'binaryTree' ||
-          (typeof v.value === 'object' &&
-            v.value !== null &&
-            'left' in (v.value as Record<string, unknown>) &&
-            'right' in (v.value as Record<string, unknown>)),
-      );
+  let target = varName ? step.variables[varName] : undefined;
+  if (!target) {
+    const entries = Object.entries(step.variables);
+    const found =
+      entries.find(([k]) => /^(root|tree|seg_tree|segtree|heap|pq)$/i.test(k)) ||
+      entries.find(([, v]) => v.type === 'TreeNode' || v.type === 'binaryTree' || v.type === 'segmentTree' || v.type === 'heap');
+    if (found) target = found[1];
+  }
 
-  if (target?.value && typeof target.value === 'object') return target.value as TreeNode;
-
-  // Fallback: If root not in current step's scope (e.g. preamble), search trace steps
-  const allSteps = useTraceStore.getState().steps;
-  for (const s of allSteps) {
-    const t = varName
-      ? s.variables[varName]
-      : Object.values(s.variables).find(
-          (v) =>
-            v.type === 'TreeNode' ||
-            v.type === 'binaryTree' ||
-            (typeof v.value === 'object' &&
-              v.value !== null &&
-              'left' in (v.value as Record<string, unknown>) &&
-              'right' in (v.value as Record<string, unknown>)),
-        );
-    if (t?.value && typeof t.value === 'object') {
-      return t.value as TreeNode;
+  // Fallback: search all steps
+  if (!target?.value) {
+    const allSteps = useTraceStore.getState().steps;
+    for (const s of allSteps) {
+      const entries = Object.entries(s.variables);
+      const found =
+        entries.find(([k]) => (varName ? k === varName : /^(root|tree|seg_tree|segtree|heap|pq)$/i.test(k))) ||
+        entries.find(([, v]) => v.type === 'TreeNode' || v.type === 'binaryTree' || v.type === 'segmentTree' || v.type === 'heap');
+      if (found?.[1]?.value) {
+        target = found[1];
+        break;
+      }
     }
+  }
+
+  if (!target?.value) return null;
+
+  // Case 1: Pointer-based tree { val, left, right }
+  if (typeof target.value === 'object' && !Array.isArray(target.value)) {
+    const obj = target.value as Record<string, unknown>;
+    if ('left' in obj || 'right' in obj || 'val' in obj) {
+      return target.value as TreeNode;
+    }
+    // Custom class with .tree attribute
+    if (Array.isArray(obj.tree)) {
+      const isOneIndexed = obj.tree.length > 2 && (obj.tree[0] === 0 || /seg/i.test(String(varName)));
+      return arrayToBinaryTree(obj.tree, isOneIndexed);
+    }
+  }
+
+  // Case 2: Array-backed tree (Segment tree or Binary heap)
+  if (Array.isArray(target.value)) {
+    const arr = target.value;
+    const isOneIndexed = arr.length > 2 && (arr[0] === 0 || /seg|tree/i.test(String(varName)) || target.type === 'segmentTree');
+    return arrayToBinaryTree(arr, isOneIndexed);
   }
 
   return null;
@@ -206,6 +243,17 @@ export const TreeRenderer: React.FC<TreeRendererProps> = ({
       .attr('fill', '#F7F5EF')
       .attr('font-family', "'JetBrains Mono', monospace")
       .text((d) => String(d.data.val));
+
+    nodes
+      .filter((d) => d.data.indexLabel !== undefined)
+      .append('text')
+      .attr('text-anchor', 'middle')
+      .attr('y', r + 11)
+      .attr('font-size', 9)
+      .attr('font-weight', '600')
+      .attr('fill', 'var(--text-muted, #9B9A95)')
+      .attr('font-family', "'JetBrains Mono', monospace")
+      .text((d) => `[${d.data.indexLabel}]`);
   }, [step, propTreeData, varName, height, containerWidth]);
 
   return (

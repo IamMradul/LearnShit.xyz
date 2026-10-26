@@ -102,6 +102,8 @@ const DEFAULT_CODE: Record<SupportedLanguage, string> = {
   rust: RUST_SAMPLE,
 };
 
+import { identifyPlatform, type PlatformDetectionResult } from '../engine/PlatformDetector';
+
 interface EditorStore {
   language: SupportedLanguage;
   code: string;
@@ -110,6 +112,7 @@ interface EditorStore {
   modeOverride: 'auto' | 'function' | 'full-program';
   autoDetectedLang: SupportedLanguage | null;
   isAutoDetecting: boolean;
+  detectedPlatform: PlatformDetectionResult | null;
 
   setLanguage: (lang: SupportedLanguage) => void;
   setCode: (code: string) => void;
@@ -130,22 +133,33 @@ export const useEditorStore = create<EditorStore>()(
       modeOverride: 'auto',
       autoDetectedLang: null,
       isAutoDetecting: true,
+      detectedPlatform: sharedPayload?.code ? identifyPlatform(sharedPayload.code) : null,
 
       setLanguage: (lang) =>
         set({ language: lang, isAutoDetecting: false, autoDetectedLang: null }),
       setCode: (code) =>
         set((state) => {
           const updates: Partial<EditorStore> = { code };
-          if (state.isAutoDetecting && code.trim().length > 10) {
+          if (code.trim().length > 10) {
             const detected = detectLanguage(code);
-            if (detected.confidence >= 0.35) {
+            const platformInfo = identifyPlatform(code);
+            updates.detectedPlatform = platformInfo;
+
+            const shouldSwitch =
+              state.isAutoDetecting
+                ? detected.confidence >= 0.35
+                : detected.confidence >= 0.5 && detected.language !== state.language;
+
+            if (shouldSwitch) {
               updates.language = detected.language;
               updates.autoDetectedLang = detected.language;
             }
-          }
-          if (!state.input.trim() && code.trim().length > 10) {
-            const inferred = inferDefaultInput(code);
-            if (inferred) {
+
+            const inferred = platformInfo.defaultInput ?? inferDefaultInput(code);
+            const isNewProblem = Boolean(
+              platformInfo.problemName && platformInfo.problemName !== state.detectedPlatform?.problemName,
+            );
+            if (inferred && (!state.input.trim() || Object.values(DEFAULT_INPUTS).includes(state.input) || isNewProblem)) {
               updates.input = inferred;
             }
           }

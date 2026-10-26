@@ -35,10 +35,12 @@ export function detectLanguage(code: string): DetectionResult {
 
   const trimmed = code.trim();
 
-  // ── Python heuristics ──────────────────────────────────────────
   if (/class\s+Solution(?:\([^)]*\))?\s*:/m.test(code)) {
     scores.python += 50;
     reasons.python.push('class Solution:');
+  }
+  if (/class\s+\w+\s*\{/m.test(code)) {
+    scores.python -= 50;
   }
   if (/^\s*def\s+\w+\s*\(/m.test(code)) {
     scores.python += 40;
@@ -80,8 +82,34 @@ export function detectLanguage(code: string): DetectionResult {
     scores.python += 60;
     reasons.python.push('__main__ block');
   }
+  if (/\binput\s*\(|\bsys\.stdin\b|\bprint\s*\(/.test(code)) {
+    scores.python += 35;
+    reasons.python.push('input()/sys.stdin/print()');
+  }
 
   // ── JavaScript / TypeScript heuristics ─────────────────────────
+  const hasCppIndicators = /\b(?:public|private|protected)\s*:|\bvector\s*<|->(?:next|val|left|right)\b|#include\b|\bnullptr\b|\bfastio\b|\bcin\s*>>|\bcout\s*<</.test(code);
+  const hasJavaIndicators = /\bpublic\s+(?:int|void|boolean|String|ListNode|TreeNode|(?:int|long|String)\[\])\s+[a-zA-Z_]\w*\s*\(|\bpublic\s+class\b|\bnew\s+\w+\[[^\]]*\]|\bScanner\b|\bSystem\.out\b/.test(code);
+
+  if (/class\s+Solution\s*\{/m.test(code)) {
+    if (hasCppIndicators) {
+      scores.cpp += 60;
+      reasons.cpp.push('class Solution { with C++ features');
+    } else if (hasJavaIndicators) {
+      scores.java += 60;
+      reasons.java.push('class Solution { with Java features');
+    } else {
+      scores.javascript += 40;
+      scores.cpp += 20;
+      scores.java += 20;
+      reasons.javascript.push('class Solution {');
+    }
+  } else if (/class\s+[A-Z]\w*\s*\{/m.test(code)) {
+    if (!hasJavaIndicators && !hasCppIndicators) {
+      scores.javascript += 30;
+      reasons.javascript.push('class {');
+    }
+  }
   if (/\bfunction\s+\w+\s*\(/.test(code)) {
     scores.javascript += 35;
     reasons.javascript.push('function keyword');
@@ -120,6 +148,14 @@ export function detectLanguage(code: string): DetectionResult {
   }
 
   // ── C++ heuristics ─────────────────────────────────────────────
+  if (/\b(?:public|private|protected)\s*:/.test(code)) {
+    scores.cpp += 65;
+    reasons.cpp.push('C++ access specifier');
+  }
+  if (/->(?:next|val|left|right)\b/.test(code)) {
+    scores.cpp += 50;
+    reasons.cpp.push('C++ pointer arrow');
+  }
   if (/#include\s*<[a-zA-Z0-9_./]+>/.test(code)) {
     scores.cpp += 60;
     reasons.cpp.push('#include header');
@@ -130,10 +166,18 @@ export function detectLanguage(code: string): DetectionResult {
   }
   if (/\bstd::|cout\s*<<|cin\s*>>/.test(code)) {
     scores.cpp += 50;
-    reasons.cpp.push('std:: / cout <<');
+    reasons.cpp.push('std:: / cout << / cin >>');
   }
-  if (/\bvector<|\bunordered_map<|\bunordered_set<|\bpair</.test(code)) {
-    scores.cpp += 40;
+  if (/\bfastio\b|\bios_base::sync_with_stdio\b|cin\.tie\b/.test(code)) {
+    scores.cpp += 60;
+    reasons.cpp.push('fastio / cin.tie');
+  }
+  if (/\b(?:sort|reverse|fill)\s*\(\s*[a-zA-Z0-9_.]+\.(?:begin|rbegin)\s*\(\s*\)/.test(code)) {
+    scores.cpp += 50;
+    reasons.cpp.push('STL sort/reverse');
+  }
+  if (/\bvector<|\bunordered_map<|\bunordered_set<|\bpair<|\bqueue<|\bstack<|\bpriority_queue</.test(code)) {
+    scores.cpp += 45;
     reasons.cpp.push('STL template');
   }
   if (/\bnullptr\b/.test(code)) {
@@ -147,8 +191,12 @@ export function detectLanguage(code: string): DetectionResult {
 
   // ── Java heuristics ────────────────────────────────────────────
   if (/public\s+class\b/.test(code)) {
-    scores.java += 50;
+    scores.java += 55;
     reasons.java.push('public class');
+  }
+  if (/\bpublic\s+(?:int|void|boolean|String|ListNode|TreeNode|(?:int|long|String)\[\])\s+[a-zA-Z_]\w*\s*\(/.test(code)) {
+    scores.java += 60;
+    reasons.java.push('public Java method');
   }
   if (/public\s+static\s+void\s+main/.test(code)) {
     scores.java += 60;
@@ -159,11 +207,11 @@ export function detectLanguage(code: string): DetectionResult {
     reasons.java.push('System.out.println');
   }
   if (/\b(?:String|int|boolean|double|float)\[\]/.test(code)) {
-    scores.java += 30;
+    scores.java += 35;
     reasons.java.push('Java array type');
   }
-  if (/\bnew\s+(?:int|String|ArrayList|HashMap)\[?/.test(code)) {
-    scores.java += 30;
+  if (/\bnew\s+(?:int|String|ArrayList|HashMap|LinkedList|ArrayDeque|boolean)\[?/.test(code)) {
+    scores.java += 35;
     reasons.java.push('new keyword instantiation');
   }
 

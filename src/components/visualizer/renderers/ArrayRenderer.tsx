@@ -79,8 +79,15 @@ export const ArrayRenderer: React.FC<ArrayRendererProps> = ({
             (v) => v.type === 'list' || v.type === 'array',
           );
 
-      if (target?.value && Array.isArray(target.value)) {
-        arr = target.value as number[];
+      if (target?.value) {
+        if (Array.isArray(target.value)) {
+          arr = target.value as number[];
+        } else if (typeof target.value === 'object' && target.value !== null) {
+          const obj = target.value as Record<string, unknown>;
+          if (Array.isArray(obj.tree)) arr = obj.tree as number[];
+          else if (Array.isArray(obj.arr)) arr = obj.arr as number[];
+          else if (Array.isArray(obj.p)) arr = obj.p as number[];
+        }
       }
 
       // If array not yet in current step's scope (e.g. function preamble), search trace steps
@@ -90,11 +97,19 @@ export const ArrayRenderer: React.FC<ArrayRendererProps> = ({
           const t = varName
             ? s.variables[varName]
             : Object.values(s.variables).find(
-                (v) => v.type === 'list' || v.type === 'array',
+                (v) => v.type === 'list' || v.type === 'array' || v.type === 'fenwickTree',
               );
-          if (t?.value && Array.isArray(t.value) && t.value.length > 0) {
-            arr = t.value as number[];
-            break;
+          if (t?.value) {
+            if (Array.isArray(t.value) && t.value.length > 0) {
+              arr = t.value as number[];
+              break;
+            } else if (typeof t.value === 'object' && t.value !== null) {
+              const obj = t.value as Record<string, unknown>;
+              if (Array.isArray(obj.tree) && obj.tree.length > 0) {
+                arr = obj.tree as number[];
+                break;
+              }
+            }
           }
         }
       }
@@ -108,8 +123,8 @@ export const ArrayRenderer: React.FC<ArrayRendererProps> = ({
         }
       }
 
-      // Detect index pointers (e.g. i, j, mid, left, right, low, high, pivot)
-      const pointerKeys = ['i', 'j', 'k', 'low', 'high', 'mid', 'left', 'right', 'pivot'];
+      // Detect index pointers (e.g. i, j, k, idx, mid, left, right, low, high, pivot)
+      const pointerKeys = ['i', 'j', 'k', 'idx', 'low', 'high', 'mid', 'left', 'right', 'pivot'];
       for (const [vName, vObj] of Object.entries(step.variables)) {
         if (pointerKeys.includes(vName.toLowerCase()) && typeof vObj.value === 'number') {
           const idx = vObj.value;
@@ -142,7 +157,14 @@ export const ArrayRenderer: React.FC<ArrayRendererProps> = ({
 
     const BAR_GAP = Math.max(4, Math.min(10, Math.floor(W / (n * 5))));
     const barW = Math.max(minBarW, Math.min(maxBarW, (W - BAR_GAP * (n + 1)) / n));
-    const maxVal = Math.max(...arr.map((v: number) => Math.abs(v)), 1);
+    const maxVal = Math.max(
+      ...arr.map((v: unknown) => {
+        if (typeof v === 'number' && !isNaN(v)) return Math.abs(v);
+        if (Array.isArray(v)) return v.length || 1;
+        return 1;
+      }),
+      1,
+    );
 
     const bottomPadding = pointers.length > 0 ? 56 : 38;
     const topPadding = 42;
@@ -175,9 +197,17 @@ export const ArrayRenderer: React.FC<ArrayRendererProps> = ({
       .attr('stroke', 'rgba(247, 245, 239, 0.12)')
       .attr('stroke-width', 1);
 
+    // Helper to get scalar height for any type
+    const getScalarVal = (v: unknown) => {
+      if (typeof v === 'number' && !isNaN(v)) return Math.abs(v);
+      if (Array.isArray(v)) return v.length || 1;
+      return 1;
+    };
+
     // ── Bars ─────────────────────────────────────────────────────────────────
     const bars = svg
-      .selectAll<SVGRectElement, { v: number; i: number }>('rect.bar')
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .selectAll<SVGRectElement, { v: any; i: number }>('rect.bar')
       .data(barData, (d) => d.i);
 
     bars.exit().remove();
@@ -186,13 +216,14 @@ export const ArrayRenderer: React.FC<ArrayRendererProps> = ({
       .enter()
       .append('rect')
       .attr('class', 'bar')
-      .merge(bars as d3.Selection<SVGRectElement, { v: number; i: number }, SVGSVGElement, unknown>)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .merge(bars as d3.Selection<SVGRectElement, { v: any; i: number }, SVGSVGElement, unknown>)
       .transition()
       .duration(160)
       .attr('x', (d) => startX + d.i * (barW + BAR_GAP))
-      .attr('y', (d) => H - bottomPadding - yScale(Math.abs(d.v)))
+      .attr('y', (d) => H - bottomPadding - yScale(getScalarVal(d.v)))
       .attr('width', barW)
-      .attr('height', (d) => yScale(Math.abs(d.v)))
+      .attr('height', (d) => yScale(getScalarVal(d.v)))
       .attr('rx', Math.min(6, barW / 3))
       .attr('fill', (d) => getColor(highlightMap[d.i]))
       .attr('stroke', (d) => {
@@ -206,7 +237,8 @@ export const ArrayRenderer: React.FC<ArrayRendererProps> = ({
 
     // ── Value labels on top of bars ─────────────────────────────────────────
     const labels = svg
-      .selectAll<SVGTextElement, { v: number; i: number }>('text.val-label')
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .selectAll<SVGTextElement, { v: any; i: number }>('text.val-label')
       .data(barData, (d) => d.i);
 
     labels.exit().remove();
@@ -215,11 +247,12 @@ export const ArrayRenderer: React.FC<ArrayRendererProps> = ({
       .enter()
       .append('text')
       .attr('class', 'val-label')
-      .merge(labels as d3.Selection<SVGTextElement, { v: number; i: number }, SVGSVGElement, unknown>)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .merge(labels as d3.Selection<SVGTextElement, { v: any; i: number }, SVGSVGElement, unknown>)
       .transition()
       .duration(160)
       .attr('x', (d) => startX + d.i * (barW + BAR_GAP) + barW / 2)
-      .attr('y', (d) => H - bottomPadding - yScale(Math.abs(d.v)) - 7)
+      .attr('y', (d) => H - bottomPadding - yScale(getScalarVal(d.v)) - 7)
       .attr('text-anchor', 'middle')
       .attr('font-size', Math.min(12, Math.max(9, barW - 4)))
       .attr('font-weight', '600')
@@ -231,7 +264,10 @@ export const ArrayRenderer: React.FC<ArrayRendererProps> = ({
         return '#F7F5EF';
       })
       .attr('font-family', "'JetBrains Mono', monospace")
-      .text((d) => d.v);
+      .text((d) => {
+        if (Array.isArray(d.v)) return d.v.length === 0 ? '∅' : `[${d.v.join(',')}]`;
+        return String(d.v);
+      });
 
     // ── Index labels below baseline ─────────────────────────────────────────
     const idxLabels = svg

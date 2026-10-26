@@ -58,13 +58,14 @@ export class GoAdapter implements LanguageAdapter {
         const transpiled = transpileGoToJs(request.code);
         let runnableJs = transpiled.code;
 
+        const userLineCount = request.code.split('\n').length;
         if (mode === 'function') {
           const args = parseDriverArgs(request.input);
           const fnName = transpiled.entryPoint || 'solution';
-          runnableJs += `\n\n// ─── AlgoLens Auto Driver ───\ntry {\n  const __ret = ${fnName}(${args.join(', ')});\n  if (__ret !== undefined) console.log('Return value:', JSON.stringify(__ret));\n} catch(e) { console.error(e); }`;
+          runnableJs += `\n\n// ── AlgoLens generated driver\ntry {\n  const __ret = ${fnName}(${args.join(', ')});\n  if (__ret !== undefined) console.log('Return value:', JSON.stringify(__ret));\n} catch(e) { console.error(e); }`;
         } else {
           if (/function\s+main\s*\(/.test(runnableJs)) {
-            runnableJs += '\n\ntry { main(); } catch(e) { console.error(e); }';
+            runnableJs += '\n\n// ── AlgoLens generated driver\ntry { main(); } catch(e) { console.error(e); }';
           }
         }
 
@@ -84,7 +85,7 @@ export class GoAdapter implements LanguageAdapter {
         };
 
         worker.addEventListener('message', handler);
-        worker.postMessage({ ...request, code: runnableJs, mode });
+        worker.postMessage({ ...request, code: runnableJs, mode, userLineCount });
       } catch (err) {
         resolve({
           steps: [],

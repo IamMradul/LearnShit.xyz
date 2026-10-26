@@ -112,4 +112,75 @@ describe('DSDetector', () => {
     expect(found).toBeDefined();
     expect(found?.dsType).toBe('array');
   });
+
+  it('detects mask and subsets as bitmask and curr array as array', () => {
+    const steps = [
+      makeStep({
+        n: 3,
+        mask: 5,
+        curr: [0, 2],
+        subsets: [[], [0], [1], [0, 1], [2], [0, 2]],
+      }),
+    ];
+    const ds = detectDataStructures(steps);
+    const maskDs = ds.find((d) => d.varName === 'mask');
+    const subsetsDs = ds.find((d) => d.varName === 'subsets');
+    const currDs = ds.find((d) => d.varName === 'curr');
+
+    expect(maskDs).toBeDefined();
+    expect(maskDs?.dsType).toBe('bitmask');
+
+    expect(subsetsDs).toBeDefined();
+    expect(subsetsDs?.dsType).toBe('bitmask');
+
+    expect(currDs).toBeDefined();
+    expect(currDs?.dsType).toBe('array');
+  });
+
+  it('detects union find from object with p array', () => {
+    const steps = [
+      makeStep({
+        uf: { __class__: 'UnionFind', p: [0, 1, 2, 3, 4, 5] },
+      }),
+    ];
+    const ds = detectDataStructures(steps);
+    const ufDs = ds.find((d) => d.varName === 'uf');
+    expect(ufDs).toBeDefined();
+    expect(ufDs?.dsType).toBe('unionFind');
+  });
+
+  it('detects fenwick tree from ft instance', () => {
+    const steps = [
+      makeStep({
+        ft: { __class__: 'Fenwick', tree: [0, 3, 5, 2, 4] },
+      }),
+    ];
+    const ds = detectDataStructures(steps);
+    const ftDs = ds.find((d) => d.varName === 'ft');
+    expect(ftDs).toBeDefined();
+    expect(ftDs?.dsType).toBe('fenwickTree');
+  });
+
+  it('detects segment tree from tree array', () => {
+    const steps = [
+      makeStep({
+        arr: [1, 3, 5, 7],
+        tree: [0, 16, 4, 12, 1, 3, 5, 7],
+      }),
+    ];
+    const ds = detectDataStructures(steps);
+    const treeDs = ds.find((d) => d.varName === 'tree');
+    expect(treeDs).toBeDefined();
+    expect(treeDs?.dsType).toBe('segmentTree');
+  });
+
+  it('detects heap from heap_demo function call stack', () => {
+    const step = makeStep({ nums: [12, 35, 15, 42, 60, 89, 77] });
+    step.callStack = [{ name: 'heap_demo', line: 1, locals: {} }];
+    const ds = detectDataStructures([step]);
+    const heapDs = ds.find((d) => d.varName === 'nums');
+    expect(heapDs).toBeDefined();
+    expect(heapDs?.dsType).toBe('heap');
+  });
 });
+

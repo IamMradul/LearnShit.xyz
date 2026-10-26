@@ -20,6 +20,8 @@ import { getAdapter } from '../../engine/adapters/AdapterRegistry';
 import type { SupportedLanguage } from '../../engine/TraceTypes';
 import { ALGORITHM_PRESETS, type AlgorithmPreset } from '../../engine/presets';
 import { createShareUrl } from '../../utils/shareLink';
+import { detectLanguage } from '../../engine/LanguageDetector';
+import { identifyPlatform } from '../../engine/PlatformDetector';
 
 const LANGUAGES: { id: SupportedLanguage; label: string; dotColor: string }[] = [
   { id: 'javascript', label: 'JavaScript', dotColor: '#F7DF1E' },
@@ -48,6 +50,7 @@ export const VisualizerHeader: React.FC = () => {
     toggleCodeEditor,
     visualizerZoom,
     setVisualizerZoom,
+    setCenterViewMode,
   } = useUIStore();
   const { setResult, setStatus, setRunning, setError, isRunning, pyodideLoading, setPyodideLoading } =
     useTraceStore();
@@ -57,6 +60,7 @@ export const VisualizerHeader: React.FC = () => {
   const [copied, setCopied] = useState(false);
   const langMenuRef = useRef<HTMLDivElement>(null);
   const presetsMenuRef = useRef<HTMLDivElement>(null);
+  const platformInfo = React.useMemo(() => identifyPlatform(code, language), [code, language]);
 
   // Close dropdowns on outside click
   useEffect(() => {
@@ -88,22 +92,26 @@ export const VisualizerHeader: React.FC = () => {
       return;
     }
 
+    // Auto-correct language if code syntax definitively belongs to another language
+    let effectiveLang = language;
+    const detected = detectLanguage(code);
+    if (detected.confidence >= 0.4 && detected.language !== language) {
+      effectiveLang = detected.language;
+      setLanguage(effectiveLang);
+    }
+
     setRunning(true);
     setError(null);
 
-    if (language === 'python') {
-      setPyodideLoading(true);
-    }
-
     try {
-      const adapter = getAdapter(language);
+      const adapter = getAdapter(effectiveLang);
       const result = await adapter.trace({
         code,
         input,
         mode: modeOverride,
         maxSteps: 5000,
         timeoutMs: 10000,
-        language,
+        language: effectiveLang,
       });
 
       setResult(result);
@@ -117,30 +125,36 @@ export const VisualizerHeader: React.FC = () => {
       setRunning(false);
       setPyodideLoading(false);
     }
-  }, [language, code, input, modeOverride, isRunning, setResult, setStatus, setRunning, setError, setPyodideLoading]);
+  }, [language, code, input, modeOverride, isRunning, setResult, setStatus, setRunning, setError, setPyodideLoading, setLanguage]);
 
   // Load a preset algorithm and auto-run
   const handleSelectPreset = useCallback(
     async (preset: AlgorithmPreset) => {
       setShowPresetsMenu(false);
-      const langConfig = preset.languages[language] ?? preset.languages.javascript;
+      const availableLangs = Object.keys(preset.languages) as SupportedLanguage[];
+      const targetLang = preset.languages[language]
+        ? language
+        : availableLangs[0] || 'javascript';
+      const langConfig = preset.languages[targetLang];
       if (!langConfig) return;
 
+      setLanguage(targetLang);
       setCode(langConfig.code);
       setInput(langConfig.input);
+      setCenterViewMode('ds');
 
       // Trigger run automatically
       setRunning(true);
       setError(null);
       try {
-        const adapter = getAdapter(language);
+        const adapter = getAdapter(targetLang);
         const result = await adapter.trace({
           code: langConfig.code,
           input: langConfig.input,
           mode: modeOverride,
           maxSteps: 5000,
           timeoutMs: 10000,
-          language,
+          language: targetLang,
         });
         setResult(result);
         if (result.steps.length > 0) {
@@ -151,9 +165,10 @@ export const VisualizerHeader: React.FC = () => {
         setError(msg);
       } finally {
         setRunning(false);
+        setPyodideLoading(false);
       }
     },
-    [language, modeOverride, setCode, setInput, setError, setRunning, setResult, setStatus],
+    [language, modeOverride, setLanguage, setCode, setInput, setError, setRunning, setResult, setStatus, setPyodideLoading],
   );
 
   // Take snapshot of SVG visualizer
@@ -386,6 +401,34 @@ export const VisualizerHeader: React.FC = () => {
             </div>
           )}
         </div>
+
+        {/* Identified Coding Site Platform Badge */}
+        {code.trim().length > 10 && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 5,
+              padding: '4px 10px',
+              background: `${platformInfo.badgeColor}18`,
+              border: `1px solid ${platformInfo.badgeColor}40`,
+              borderRadius: 6,
+              color: platformInfo.badgeColor,
+              fontSize: 11,
+              fontFamily: "'JetBrains Mono', monospace",
+              fontWeight: 600,
+            }}
+            title={platformInfo.explanation}
+          >
+            <span>{platformInfo.badgeIcon}</span>
+            <span>{platformInfo.platformName}</span>
+            {platformInfo.problemName && (
+              <span style={{ color: '#F7F5EF', opacity: 0.9 }}>
+                • {platformInfo.problemName}
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Example codes dropdown (staying.fun style) */}
         <div ref={presetsMenuRef} style={{ position: 'relative' }}>

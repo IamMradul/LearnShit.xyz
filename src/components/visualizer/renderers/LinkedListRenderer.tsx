@@ -28,7 +28,12 @@ const POINTER_COLORS: Record<string, string> = {
 };
 
 function extractNodeId(val: unknown): string | null {
-  if (!val || typeof val !== 'object') return null;
+  if (!val) return null;
+  if (Array.isArray(val)) {
+    if (val.length === 0) return null;
+    return extractNodeId(val[0]);
+  }
+  if (typeof val !== 'object') return null;
   const obj = val as Record<string, unknown>;
   if (obj.__id) return String(obj.__id);
   if (obj.id) return String(obj.id);

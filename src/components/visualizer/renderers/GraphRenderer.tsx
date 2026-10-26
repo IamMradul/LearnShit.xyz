@@ -33,11 +33,11 @@ function parseGraph(step: TraceStep, varName?: string, width = 600, height = 340
   let target = varName ? step.variables[varName] : undefined;
   if (!target) {
     const entries = Object.entries(step.variables);
-    // Look for graph/adj/edges names first
+    // Look for graph/adj/edges/uf names first
     const found =
-      entries.find(([k]) => /^(graph|adj|edges|adj_list|edge_list|network)$/i.test(k)) ||
-      entries.find(([k]) => /adj|edge|graph/i.test(k)) ||
-      entries.find(([, v]) => v.type === 'graph');
+      entries.find(([k]) => /^(graph|adj|edges|adj_list|edge_list|network|uf|dsu)$/i.test(k)) ||
+      entries.find(([k]) => /adj|edge|graph|unionfind|dsu/i.test(k)) ||
+      entries.find(([, v]) => v.type === 'graph' || v.type === 'unionFind');
     if (found) target = found[1];
   }
 
@@ -47,9 +47,9 @@ function parseGraph(step: TraceStep, varName?: string, width = 600, height = 340
     for (const s of allSteps) {
       const entries = Object.entries(s.variables);
       const found =
-        entries.find(([k]) => /^(graph|adj|edges|adj_list|edge_list|network)$/i.test(k)) ||
-        entries.find(([k]) => /adj|edge|graph/i.test(k)) ||
-        entries.find(([, v]) => v.type === 'graph');
+        entries.find(([k]) => (varName ? k === varName : /^(graph|adj|edges|adj_list|edge_list|network|uf|dsu)$/i.test(k))) ||
+        entries.find(([k]) => /adj|edge|graph|unionfind|dsu/i.test(k)) ||
+        entries.find(([, v]) => v.type === 'graph' || v.type === 'unionFind');
       if (found?.[1]?.value) {
         target = found[1];
         break;
@@ -66,8 +66,26 @@ function parseGraph(step: TraceStep, varName?: string, width = 600, height = 340
   const edges: GraphEdge[] = [];
   let isDirected = false;
 
-  // Case A: 2D Array
-  if (Array.isArray(raw)) {
+  // Case UF: Disjoint Set / Union-Find parent array or class instance
+  const parentArr: number[] | null =
+    raw && typeof raw === 'object' && !Array.isArray(raw) && Array.isArray((raw as any).p)
+      ? (raw as any).p
+      : raw && typeof raw === 'object' && !Array.isArray(raw) && Array.isArray((raw as any).parent)
+      ? (raw as any).parent
+      : Array.isArray(raw) && (/^(p|parent)$/i.test(String(varName)) || target.type === 'unionFind')
+      ? (raw as number[])
+      : null;
+
+  if (parentArr && parentArr.length > 0 && parentArr.every((v) => typeof v === 'number')) {
+    isDirected = true;
+    for (let i = 0; i < parentArr.length; i++) {
+      nodesSet.add(String(i));
+      const p = parentArr[i];
+      if (typeof p === 'number' && p >= 0 && p < parentArr.length && p !== i) {
+        edges.push({ u: String(i), v: String(p), isDirected: true });
+      }
+    }
+  } else if (Array.isArray(raw)) {
     if (raw.length > 0 && Array.isArray(raw[0])) {
       // Check if it's an edge list: [[u, v], ...] or [[u, v, w], ...]
       const isEdgeList = raw.every(
@@ -95,14 +113,27 @@ function parseGraph(step: TraceStep, varName?: string, width = 600, height = 340
         const matrix = raw as number[][];
         const isSymmetric = matrix.every((r, i) => r.every((c, j) => c === matrix[j]?.[i]));
         isDirected = !isSymmetric;
+
+        // Check if there is an associated flow matrix in variables (e.g. flow[u][v] for Edmonds-Karp)
+        const flowVar = step.variables['flow']?.value;
+        const hasFlowMatrix =
+          Array.isArray(flowVar) &&
+          flowVar.length === matrix.length &&
+          flowVar.every((r) => Array.isArray(r) && r.length === matrix.length);
+
         for (let u = 0; u < raw.length; u++) {
           nodesSet.add(String(u));
           const startV = isSymmetric ? u + 1 : 0;
           for (let v = startV; v < raw.length; v++) {
             if (u === v) continue;
-            const w = raw[u][v];
-            if (typeof w === 'number' && w > 0 && w < 1e8) {
-              edges.push({ u: String(u), v: String(v), weight: w, isDirected: !isSymmetric });
+            const cap = raw[u][v];
+            if (typeof cap === 'number' && cap > 0 && cap < 1e8) {
+              let weightLabel: string | number = cap;
+              if (hasFlowMatrix) {
+                const f = (flowVar as number[][])[u]?.[v] ?? 0;
+                weightLabel = `${f}/${cap}`;
+              }
+              edges.push({ u: String(u), v: String(v), weight: weightLabel, isDirected: !isSymmetric });
             }
           }
         }
@@ -279,6 +310,29 @@ export const GraphRenderer: React.FC<GraphRendererProps> = ({
       }
     }
 
+    // Check if steiner edges or mst edges exist
+    const steinerEdgesVar = step.variables['steiner_edges']?.value;
+    const steinerEdgeSet = new Set<string>();
+    if (Array.isArray(steinerEdgesVar)) {
+      for (const item of steinerEdgesVar) {
+        if (Array.isArray(item) && item.length >= 2) {
+          steinerEdgeSet.add(`${item[0]}-${item[1]}`);
+          steinerEdgeSet.add(`${item[1]}-${item[0]}`);
+        }
+      }
+    }
+
+    // Check if terminals exist (e.g. terminals = [0, 2, 4])
+    const terminalsVar = step.variables['terminals']?.value;
+    const terminalNodes = new Set<string>();
+    if (Array.isArray(terminalsVar)) {
+      for (const t of terminalsVar) {
+        if (typeof t === 'number' || typeof t === 'string') {
+          terminalNodes.add(String(t));
+        }
+      }
+    }
+
     // Check if active edge (u, v) is being traversed
     const uVal = step.variables['u']?.value;
     const vVal = step.variables['v']?.value;
@@ -321,11 +375,14 @@ export const GraphRenderer: React.FC<GraphRendererProps> = ({
       const target = nodeMap.get(edge.v);
       if (!source || !target) return;
 
+      const isSteiner =
+        steinerEdgeSet.has(`${edge.u}-${edge.v}`) || steinerEdgeSet.has(`${edge.v}-${edge.u}`);
       const isEdgeActive =
-        activeEdgeU !== null &&
-        activeEdgeV !== null &&
-        ((edge.u === activeEdgeU && edge.v === activeEdgeV) ||
-          (!edge.isDirected && edge.u === activeEdgeV && edge.v === activeEdgeU));
+        isSteiner ||
+        (activeEdgeU !== null &&
+          activeEdgeV !== null &&
+          ((edge.u === activeEdgeU && edge.v === activeEdgeV) ||
+            (!edge.isDirected && edge.u === activeEdgeV && edge.v === activeEdgeU)));
 
       // Edge line
       edgesGroup
@@ -344,12 +401,14 @@ export const GraphRenderer: React.FC<GraphRendererProps> = ({
         const midY = (source.y + target.y) / 2;
 
         const badge = edgesGroup.append('g').attr('transform', `translate(${midX}, ${midY})`);
+        const labelStr = String(edge.weight);
+        const badgeW = Math.max(28, labelStr.length * 8 + 12);
 
         badge
           .append('rect')
-          .attr('x', -14)
+          .attr('x', -badgeW / 2)
           .attr('y', -9)
-          .attr('width', 28)
+          .attr('width', badgeW)
           .attr('height', 18)
           .attr('rx', 6)
           .attr('fill', isEdgeActive ? 'rgba(214, 82, 58, 0.9)' : 'rgba(16, 18, 22, 0.92)')
@@ -366,7 +425,7 @@ export const GraphRenderer: React.FC<GraphRendererProps> = ({
           .attr('font-weight', 700)
           .attr('fill', '#F7F5EF')
           .attr('font-family', "'JetBrains Mono', monospace")
-          .text(String(edge.weight));
+          .text(labelStr);
       }
     });
 

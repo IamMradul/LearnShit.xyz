@@ -45,10 +45,6 @@ export const EditorToolbar: React.FC = () => {
     setRunning(true);
     setError(null);
 
-    if (language === 'python') {
-      setPyodideLoading(true);
-    }
-
     try {
       const adapter = getAdapter(language);
       const result = await adapter.trace({

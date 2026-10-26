@@ -107,4 +107,22 @@ func main() {
     expect(result.language).toBe('rust');
     expect(result.confidence).toBeGreaterThanOrEqual(0.8);
   });
+
+  it('does not classify class Solution { as Python', () => {
+    const jsCode = `class Solution {
+    twoSum(nums, target) {
+        const map = new Map();
+        for (let i = 0; i < nums.length; i++) {
+            const comp = target - nums[i];
+            if (map.has(comp)) return [map.get(comp), i];
+            map.set(nums[i], i);
+        }
+        return [];
+    }
+}`;
+    const result = detectLanguage(jsCode);
+    expect(result.language).not.toBe('python');
+    expect(result.language).toBe('javascript');
+  });
 });
+

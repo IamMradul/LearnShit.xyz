@@ -42,6 +42,7 @@ describe('traceStore', () => {
     expect(state.currentIndex).toBe(0);
     expect(state.currentStep()).toBeNull();
     expect(state.progress()).toBe(0);
+    expect(state.speed).toBe(600);
   });
 
   it('updates steps and status when setResult is called', () => {

@@ -28,7 +28,8 @@ export type DSType =
   | 'segmentTree'
   | 'fenwickTree'
   | 'recursionTree'
-  | 'geometry';
+  | 'geometry'
+  | 'bitmask';
 
 export interface TraceValue {
   type: string;

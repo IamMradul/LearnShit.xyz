@@ -163,6 +163,10 @@ export function safeRepr(val: unknown, depth = 0): string {
   if (val === undefined) return 'undefined';
   if (typeof val === 'string') return `"${val}"`;
   if (typeof val === 'number' || typeof val === 'boolean') return String(val);
+  if (val instanceof Error || (typeof val === 'object' && val !== null && ('message' in val || 'stack' in val))) {
+    const err = val as { name?: string; message?: string; stack?: string };
+    return `${err.name || 'Error'}: ${err.message || ''}`;
+  }
   if (isListNode(val)) return `Node(${(val as { val: unknown }).val})`;
   if (isTreeNode(val)) return `TreeNode(${(val as { val: unknown }).val})`;
   if (Array.isArray(val)) {
@@ -218,12 +222,32 @@ export function instrumentCode(code: string, maxUserLine: number): string {
   try {
     ast = parser.parse(code, {
       sourceType: 'script',
-      plugins: ['jsx'],
+      plugins: ['jsx', 'typescript'],
       errorRecovery: true,
     });
   } catch (err) {
     throw new Error(`Syntax error: ${err}`);
   }
+
+  // 0. Strip TypeScript type annotations, interfaces, and type assertions
+  traverse(ast, {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    TSTypeAnnotation(path: any) { path.remove(); },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    TSTypeParameterDeclaration(path: any) { path.remove(); },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    TSTypeParameterInstantiation(path: any) { path.remove(); },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    TSAsExpression(path: any) { path.replaceWith(path.node.expression); },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    TSTypeAssertion(path: any) { path.replaceWith(path.node.expression); },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    TSNonNullExpression(path: any) { path.replaceWith(path.node.expression); },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    TSInterfaceDeclaration(path: any) { path.remove(); },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    TSTypeAliasDeclaration(path: any) { path.remove(); },
+  });
 
   // 1. Wrap functions to track callStack
   traverse(ast, {
@@ -240,6 +264,11 @@ export function instrumentCode(code: string, maxUserLine: number): string {
         fnName = node.id.name;
       } else if (path.parentPath?.isVariableDeclarator() && t.isIdentifier(path.parentPath.node.id)) {
         fnName = path.parentPath.node.id.name;
+      }
+
+      // Do not track unnamed inline arrow callbacks (e.g. inside .filter, .map, Array.from) in call stack
+      if (fnName === 'anonymous' && t.isArrowFunctionExpression(node)) {
+        return;
       }
 
       const startLine = node.loc.start.line;
@@ -458,6 +487,9 @@ export async function runTrace(
     rawVars: Record<string, unknown>,
     retVal?: unknown,
   ) {
+    if (line > maxUserLine || line < 1) {
+      return;
+    }
     totalSteps++;
     if (stepCount >= maxSteps) {
       truncated = true;
@@ -653,7 +685,7 @@ export async function runTrace(
     });
   }
 
-  // Ensure global classes are accessible
+  // Ensure global classes and C++ helpers are accessible
   if (typeof globalThis !== 'undefined') {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (globalThis as any).ListNode = (globalThis as any).ListNode || GlobalListNode;
@@ -661,8 +693,109 @@ export async function runTrace(
     (globalThis as any).TreeNode = (globalThis as any).TreeNode || GlobalTreeNode;
   }
 
+  const __CPP_END__ = { __is_end__: true };
+  if (!('find' in Object.prototype)) {
+    Object.defineProperty(Object.prototype, 'find', {
+      value: function (key: string | number) {
+        return key in this ? (this as Record<string | number, unknown>)[key] : __CPP_END__;
+      },
+      writable: true,
+      configurable: true,
+    });
+  }
+  if (!('end' in Object.prototype)) {
+    Object.defineProperty(Object.prototype, 'end', {
+      value: function () {
+        return __CPP_END__;
+      },
+      writable: true,
+      configurable: true,
+    });
+  }
+  if (!('count' in Object.prototype)) {
+    Object.defineProperty(Object.prototype, 'count', {
+      value: function (key: string | number) {
+        return key in this ? 1 : 0;
+      },
+      writable: true,
+      configurable: true,
+    });
+  }
+
+  // C++ Vector polyfills on Array.prototype
+  if (!('size' in Array.prototype)) {
+    Object.defineProperty(Array.prototype, 'size', {
+      value: function () {
+        return this.length;
+      },
+      writable: true,
+      configurable: true,
+    });
+  }
+  if (!('empty' in Array.prototype)) {
+    Object.defineProperty(Array.prototype, 'empty', {
+      value: function () {
+        return this.length === 0;
+      },
+      writable: true,
+      configurable: true,
+    });
+  }
+  if (!('push_back' in Array.prototype)) {
+    Object.defineProperty(Array.prototype, 'push_back', {
+      value: function (x: unknown) {
+        return this.push(x);
+      },
+      writable: true,
+      configurable: true,
+    });
+  }
+  if (!('pop_back' in Array.prototype)) {
+    Object.defineProperty(Array.prototype, 'pop_back', {
+      value: function () {
+        return this.pop();
+      },
+      writable: true,
+      configurable: true,
+    });
+  }
+
+  // Token stream for competitive programming cin >>
+  const rawInput = typeof request.input === 'string' ? request.input : JSON.stringify(request.input || '');
+  let cinTokens: (number | string)[] = [];
+  try {
+    const p = JSON.parse(rawInput);
+    const flat: (number | string)[] = [];
+    const walk = (item: unknown) => {
+      if (Array.isArray(item)) item.forEach(walk);
+      else if (typeof item === 'number' || typeof item === 'string') flat.push(item);
+    };
+    walk(p);
+    if (flat.length > 0) cinTokens = flat;
+  } catch {
+    // not JSON
+  }
+  if (cinTokens.length === 0) {
+    cinTokens = rawInput
+      .replace(/[[\],]/g, ' ')
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((tok) => {
+        const num = Number(tok);
+        return isNaN(num) ? tok : num;
+      });
+  }
+  if (cinTokens.length === 0) {
+    cinTokens = [1, 5, 2, 3, 4];
+  }
+  const cinStream = [...cinTokens];
+
   // Sandbox Globals
   const sandboxGlobals: Record<string, unknown> = {
+    __cin_next: () => {
+      return cinStream.length > 0 ? cinStream.shift() : 0;
+    },
     __enterFunc__: (name: string, line: number) => {
       callStack.push({ name, line });
     },
@@ -754,7 +887,8 @@ export async function runTrace(
     if (err instanceof Error && err.message !== '__TRUNCATED__') {
       const msg = err.message || String(err);
       stderr += `\nRuntime error: ${msg}`;
-      const lastLine = steps.length > 0 ? steps[steps.length - 1].line : 1;
+      const rawLast = steps.length > 0 ? steps[steps.length - 1].line : 1;
+      const lastLine = Math.max(1, Math.min(rawLast, maxUserLine));
       steps.push({
         index: stepCount++,
         line: lastLine,

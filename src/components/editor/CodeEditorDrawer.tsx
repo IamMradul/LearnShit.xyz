@@ -6,11 +6,14 @@ import { useTraceStore } from '../../store/traceStore';
 import { CodeEditor } from './CodeEditor';
 import { detectMode, inferDefaultInput } from '../../engine/ModeDetector';
 import { getAdapter } from '../../engine/adapters/AdapterRegistry';
+import { detectLanguage } from '../../engine/LanguageDetector';
+import { identifyPlatform } from '../../engine/PlatformDetector';
 
 export const CodeEditorDrawer: React.FC = () => {
   const { isCodeEditorOpen, toggleCodeEditor } = useUIStore();
   const {
     language,
+    setLanguage,
     code,
     input,
     setInput,
@@ -34,6 +37,7 @@ export const CodeEditorDrawer: React.FC = () => {
 
   const detected = detectMode(code, language);
   const effectiveMode = modeOverride === 'auto' ? detected : modeOverride;
+  const platformInfo = React.useMemo(() => identifyPlatform(code, language), [code, language]);
 
   const handleRun = async () => {
     if (isRunning) return;
@@ -41,13 +45,23 @@ export const CodeEditorDrawer: React.FC = () => {
       setError('Please paste or write your algorithm code in the editor.');
       return;
     }
+    // Auto-correct language if code syntax definitively belongs to another language
+    let effectiveLang = language;
+    const langDetect = detectLanguage(code);
+    if (langDetect.confidence >= 0.35 && langDetect.language !== language) {
+      if (
+        (language === 'python' && (/class\s+\w+\s*\{/.test(code) || /#include\b|public\s+class\b|\bfunction\b|\b(?:const|let|var)\b/.test(code))) ||
+        (language === 'javascript' && (/def\s+\w+\s*\(|class\s+Solution.*:/.test(code)))
+      ) {
+        effectiveLang = langDetect.language;
+        setLanguage(effectiveLang);
+      }
+    }
+
     setRunning(true);
     setError(null);
-    if (language === 'python') {
-      setPyodideLoading(true);
-    }
     try {
-      const adapter = getAdapter(language);
+      const adapter = getAdapter(effectiveLang);
       const inferred = inferDefaultInput(code);
       let effectiveInput = input.trim();
       if (!effectiveInput) {
@@ -55,9 +69,12 @@ export const CodeEditorDrawer: React.FC = () => {
         setInput(effectiveInput);
       } else if (
         inferred &&
-        (code.includes('addTwoNumbers') || code.includes('add_two_numbers') || code.includes('mergeTwoLists')) &&
-        !effectiveInput.includes('], [') &&
-        !effectiveInput.includes('l2')
+        (
+          ((code.includes('addTwoNumbers') || code.includes('add_two_numbers') || code.includes('mergeTwoLists')) &&
+            !effectiveInput.includes('], [') && !effectiveInput.includes('l2')) ||
+          ((code.includes('twoSum') || code.includes('two_sum')) &&
+            effectiveInput.startsWith('[[['))
+        )
       ) {
         effectiveInput = inferred;
         setInput(effectiveInput);
@@ -69,7 +86,7 @@ export const CodeEditorDrawer: React.FC = () => {
         mode: effectiveMode,
         maxSteps: 5000,
         timeoutMs: 10000,
-        language,
+        language: effectiveLang,
       });
 
       setResult(result);
@@ -79,8 +96,8 @@ export const CodeEditorDrawer: React.FC = () => {
         if (el) el.scrollIntoView({ behavior: 'smooth' });
       }
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : String(e);
-      setError(msg);
+      const msg = e instanceof Error ? e.message : (typeof e === 'object' && e ? JSON.stringify(e) : String(e));
+      setError(msg === '{}' ? 'Runtime execution error' : msg);
     } finally {
       setRunning(false);
       setPyodideLoading(false);
@@ -175,6 +192,44 @@ export const CodeEditorDrawer: React.FC = () => {
           <X size={18} />
         </button>
       </div>
+
+      {/* ── Platform & Problem Auto-Identification Banner ───────────────────── */}
+      {code.trim().length > 10 && (
+        <div
+          style={{
+            padding: '7px 14px',
+            background: `${platformInfo.badgeColor}12`,
+            borderBottom: `1px solid ${platformInfo.badgeColor}30`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            fontSize: 11,
+            fontFamily: "'JetBrains Mono', monospace",
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+            <span>{platformInfo.badgeIcon}</span>
+            <span style={{ fontWeight: 700, color: platformInfo.badgeColor }}>
+              {platformInfo.platformName}
+            </span>
+            {platformInfo.problemName && (
+              <span
+                style={{
+                  color: '#F7F5EF',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                • {platformInfo.problemName}
+              </span>
+            )}
+          </div>
+          <span style={{ fontSize: 9.5, color: 'var(--text-muted)', flexShrink: 0 }}>
+            {platformInfo.patternType || 'Ready to Run'}
+          </span>
+        </div>
+      )}
 
       {/* ── Monaco Editor ─────────────────────────────────────────────────── */}
       <div style={{ flex: 1, minHeight: 0, position: 'relative' }}>

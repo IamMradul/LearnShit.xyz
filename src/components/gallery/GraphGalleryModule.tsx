@@ -182,7 +182,8 @@ def ${algo.toLowerCase()}_traversal(graph, start):
     while queue:
         node = queue.popleft()
         visited.append(node)
-        for neighbor in graph.get(node, []):
+        neighbors = graph.get(node, []) if isinstance(graph, dict) else (graph[node] if isinstance(node, int) and 0 <= node < len(graph) else [])
+        for neighbor in neighbors:
             if neighbor not in seen:
                 seen.add(neighbor)
                 queue.append(neighbor)`
@@ -190,7 +191,8 @@ def ${algo.toLowerCase()}_traversal(graph, start):
     def dfs(node):
         seen.add(node)
         visited.append(node)
-        for neighbor in graph.get(node, []):
+        neighbors = graph.get(node, []) if isinstance(graph, dict) else (graph[node] if isinstance(node, int) and 0 <= node < len(graph) else [])
+        for neighbor in neighbors:
             if neighbor not in seen:
                 dfs(neighbor)
     dfs(start)`

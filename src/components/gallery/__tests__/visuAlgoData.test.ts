@@ -54,6 +54,31 @@ describe('VisuAlgo 26 Gallery Topics', () => {
       expect(item.spaceComplexity).toBeTruthy();
       expect(item.sampleInput).toBeTruthy();
       expect(typeof item.renderThumbnail).toBe('function');
+      expect(item.sampleCode.javascript).toBeTruthy();
+    }
+  });
+
+  it('successfully traces all 26 topics with JSTracer without crashing or throwing errors', async () => {
+    const { runTrace } = await import('../../../engine/JSTracer');
+    const { buildDriver } = await import('../../../engine/ModeDetector');
+
+    for (const item of VISUALGO_ITEMS) {
+      const code = item.sampleCode.javascript!;
+      const input = item.sampleInput;
+      const driverCode = buildDriver(code, input, 'javascript', 'function');
+      
+      const res = await runTrace({
+        code: driverCode,
+        input,
+        mode: 'auto',
+        maxSteps: 500,
+        timeoutMs: 3000,
+        language: 'javascript',
+      });
+
+      expect(res.error, `Error in VisuAlgo item '${item.id}' (${item.title}): ${res.error}`).toBeUndefined();
+      expect(res.steps.length, `Expected at least 1 step in '${item.id}'`).toBeGreaterThan(0);
     }
   });
 });
+

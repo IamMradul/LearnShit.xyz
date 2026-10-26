@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { HeroAnimatedBG } from './HeroAnimatedBG';
 import { useEditorStore } from '../../store/editorStore';
 import { useTraceStore } from '../../store/traceStore';
+import { useUIStore } from '../../store/uiStore';
 import { ALGORITHM_PRESETS } from '../../engine/presets';
 import { getAdapter } from '../../engine/adapters/AdapterRegistry';
 import {
@@ -71,6 +72,7 @@ export function HeroSection({ onEnterApp }: { onEnterApp: () => void }) {
     if (langData) {
       setCode(langData.code);
       setInput(langData.input);
+      useUIStore.getState().setCenterViewMode('ds');
 
       // Trigger immediate trace run
       setRunning(true);

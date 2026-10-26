@@ -93,10 +93,14 @@ export function transpileJavaToJs(javaCode: string): JavaTranspileResult {
       line = line.replace(/System\.out\.print(ln)?\s*\(/g, 'console.log(');
     }
 
+    // return new int[] { a, b }; -> return [a, b];
+    line = line.replace(/\breturn\s+new\s+\w+\[\]\s*\{([^}]*)\}\s*;/g, 'return [$1];');
+    line = line.replace(/\breturn\s+new\s+\w+\[\s*0?\s*\]\s*;/g, 'return [];');
+
     // Array allocations:
     // int[] ans = new int[2]; -> let ans = new Array(2).fill(0);
     line = line.replace(
-      /\b(?:int|long|double|float|char|boolean|String)\s*\[\]\s+([a-zA-Z_]\w*)\s*=\s*new\s+\w+\[([^\]]+)\]\s*;/g,
+      /\b(?:int|long|double|float|char|boolean|String)\s*(?:\[\s*\])+\s+([a-zA-Z_]\w*)\s*=\s*new\s+\w+\[([^\]]+)\](?:\s*\[\s*\])?\s*;/g,
       'let $1 = new Array($2).fill(0);',
     );
 
@@ -112,27 +116,39 @@ export function transpileJavaToJs(javaCode: string): JavaTranspileResult {
       'let $1 = [$2];',
     );
 
-    // List / Map instantiations
+    // List / Map / Queue instantiations
     // Map<Integer, Integer> map = new HashMap<>(); -> let map = new Map();
     line = line.replace(
-      /\bMap\s*<[^>]+>\s+([a-zA-Z_]\w*)\s*=\s*new\s+HashMap\s*(?:<[^>]*>)?\s*\(\)\s*;/g,
+      /\b(?:Map|HashMap)\s*(?:<[^>]+>)?\s+([a-zA-Z_]\w*)\s*=\s*new\s+HashMap\s*(?:<[^>]*>)?\s*\(\)\s*;/g,
       'let $1 = new Map();',
     );
 
     // List<Integer> list = new ArrayList<>(); -> let list = [];
     line = line.replace(
-      /\bList\s*<[^>]+>\s+([a-zA-Z_]\w*)\s*=\s*new\s+ArrayList\s*(?:<[^>]*>)?\s*\(\)\s*;/g,
+      /\b(?:List|ArrayList)\s*(?:<[^>]+>)?\s+([a-zA-Z_]\w*)\s*=\s*new\s+ArrayList\s*(?:<[^>]*>)?\s*\(\)\s*;/g,
       'let $1 = [];',
     );
 
-    // Variable declarations: int n = ...; -> let n = ...;
+    // Queue<Integer> queue = new LinkedList<>(); -> let queue = [];
     line = line.replace(
-      /\b(?:int|long|double|float|boolean|char|String)\s+([a-zA-Z_]\w*)\s*(=|;)/g,
+      /\b(?:Queue|Deque)\s*(?:<[^>]+>)?\s+([a-zA-Z_]\w*)\s*=\s*new\s+(?:LinkedList|ArrayDeque)\s*(?:<[^>]*>)?\s*\(\)\s*;/g,
+      'let $1 = [];',
+    );
+
+    // Variable declarations: int n = ...; ListNode curr = ...;
+    line = line.replace(
+      /\b(?:int|long|double|float|boolean|char|String|ListNode|TreeNode|[A-Z]\w*)\s+([a-zA-Z_]\w*)\s*(=|;)/g,
       'let $1 $2',
     );
 
     // for (int i = 0; ...) -> for (let i = 0; ...)
     line = line.replace(/\bfor\s*\(\s*int\s+/g, 'for (let ');
+
+    // Enhanced for loop: for (int v : graph[u]) -> for (let v of graph[u])
+    line = line.replace(
+      /\bfor\s*\(\s*(?:int|long|double|float|boolean|char|String|ListNode|TreeNode|[A-Z]\w*)\s+([a-zA-Z_]\w*)\s*:\s*([^)]+)\)/g,
+      'for (let $1 of $2)',
+    );
 
     // map.put(k, v) -> map.set(k, v)
     line = line.replace(/\.put\s*\(/g, '.set(');
@@ -140,8 +156,14 @@ export function transpileJavaToJs(javaCode: string): JavaTranspileResult {
     // map.containsKey(k) -> map.has(k)
     line = line.replace(/\.containsKey\s*\(/g, '.has(');
 
-    // list.add(x) -> list.push(x)
-    line = line.replace(/\.add\s*\(/g, '.push(');
+    // list.add(x) / queue.add(x) / queue.offer(x) -> list.push(x)
+    line = line.replace(/\.(?:add|offer)\s*\(/g, '.push(');
+
+    // queue.poll() -> queue.shift()
+    line = line.replace(/\.poll\s*\(\)/g, '.shift()');
+
+    // queue.isEmpty() -> queue.length === 0
+    line = line.replace(/\.isEmpty\s*\(\)/g, '.length === 0');
 
     // .length() -> .length (for Strings)
     line = line.replace(/\.length\(\)/g, '.length');
