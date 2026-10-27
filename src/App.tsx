@@ -54,6 +54,8 @@ export default function App() {
         <GallerySection />
       </div>
 
+      {/* ── Vercel Web Analytics ── */}
+      <Analytics />
     </div>
   );
 }
