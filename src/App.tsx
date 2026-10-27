@@ -1,12 +1,14 @@
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { MainLayout } from './components/layout/MainLayout';
 import { GallerySection } from './components/gallery/GallerySection';
+import { ResourcesSection } from './components/resources/ResourcesSection';
 import { HeroSection } from './components/landing/HeroSection';
 import { useUIStore } from './store/uiStore';
 import { Analytics } from "@vercel/analytics/react";
 
 export default function App() {
   const { theme } = useUIStore();
+  const [showResources, setShowResources] = useState(false);
   const ideRef = useRef<HTMLDivElement>(null);
 
   // Apply theme class to <html> on mount and whenever it changes
@@ -18,6 +20,10 @@ export default function App() {
     ideRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
 
+  if (showResources) {
+    return <ResourcesSection onBack={() => setShowResources(false)} />;
+  }
+
   return (
     <div
       style={{
@@ -28,7 +34,7 @@ export default function App() {
       }}
     >
       {/* ── Hero landing (100vh) ── */}
-      <HeroSection onEnterApp={handleEnterApp} />
+      <HeroSection onEnterApp={handleEnterApp} onOpenResources={() => setShowResources(true)} />
 
       {/* ── IDE workspace (100vh) ── */}
       <div
@@ -47,6 +53,7 @@ export default function App() {
       <div id="gallery-anchor">
         <GallerySection />
       </div>
+
     </div>
   );
 }

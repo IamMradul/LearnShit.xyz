@@ -46,7 +46,7 @@ function AccentMark() {
 }
 
 /* ─── HeroSection ────────────────────────────────────────────────── */
-export function HeroSection({ onEnterApp }: { onEnterApp: () => void }) {
+export function HeroSection({ onEnterApp, onOpenResources }: { onEnterApp: () => void; onOpenResources: () => void }) {
   const { setCode, setInput, setLanguage, language } = useEditorStore();
   const { setResult, setRunning, setError } = useTraceStore();
 
@@ -537,6 +537,12 @@ export function HeroSection({ onEnterApp }: { onEnterApp: () => void }) {
               }}
             >
               Algorithm Catalog
+            </button>
+            <button
+              className="hero-nav-btn"
+              onClick={onOpenResources}
+            >
+              Resources
             </button>
             <button className="hero-nav-btn hero-nav-btn-primary" onClick={onEnterApp}>
               Open Visualizer
