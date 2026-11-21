@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useCallback } from 'react';
 import { MainLayout } from './components/layout/MainLayout';
 import { GallerySection } from './components/gallery/GallerySection';
 import { HeroSection } from './components/landing/HeroSection';
+import { Footer } from './components/layout/Footer';
 import { useUIStore } from './store/uiStore';
 import { Analytics } from "@vercel/analytics/react";
 
@@ -47,6 +48,11 @@ export default function App() {
       <div id="gallery-anchor">
         <GallerySection />
       </div>
+
+      {/* ── Platform Footer & Contact ── */}
+      <Footer />
+
+      <Analytics />
     </div>
   );
 }
