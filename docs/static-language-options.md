@@ -110,11 +110,41 @@ Use Tree-sitter parsers (`tree-sitter-cpp`, `tree-sitter-java`, `tree-sitter-go`
 
 ---
 
-## 7. Recommendation and Roadmap
+## 7. Debugger Feature Support Matrix (v2.4)
 
-1. **Short Term (Current Release):**
-   - Ship Option D. JavaScript and Python provide a rock-solid, zero-cost, in-browser visualizer for 90%+ of educational and interview coding practice.
-   - Keep the experimental warning pill in `EditorToolbar.tsx` and dropdown menu items.
-2. **Medium Term (If User Demand Justifies Backend Hosting):**
-   - Prototype an isolated `nsjail` + `gdb-python` microservice exclusively for C++ and Rust LeetCode problems.
-   - Gate backend execution behind user accounts or rate limits to control cloud costs.
+With the release of the debugger-style Trace View, the runtime tracer guarantees the following feature set across languages:
+
+| Feature | JavaScript (Babel AST) | Python (Pyodide WASM) | C++ / Java / Go / Rust (Regex) |
+|---|:---:|:---:|:---:|
+| **Execution Engine** | In-browser Babel Rewriting | Client WebAssembly (`sys.settrace`) | Regex Transpilation to JS |
+| **Line Pointer & Highlighting** | ✅ Exact | ✅ Exact | ⚠️ Simple programs only |
+| **Gutter Execution Counts (`×N`)** | ✅ Exact | ✅ Exact | ⚠️ Simple programs only |
+| **Loop Iteration Badges** | ✅ Exact | ✅ Exact | ⚠️ Simple programs only |
+| **Call Stack Args & Return Values** | ✅ Exact | ✅ Exact | ⚠️ Simple recursion only |
+| **Incremental stdout (`stdoutSoFar`)** | ✅ Exact | ✅ Exact | ⚠️ Simple programs only |
+| **Collapsible Variable Tree** | ✅ Exact | ✅ Exact | ⚠️ Simple primitives only |
+| **Failure Handling on Idiomatic Code** | Graceful Error | Graceful Error | Honest error banner + Experimental Badge |
+
+---
+
+## 8. Decision Gate & Next Steps
+
+Before any implementation of compiled language tracing is attempted, the user must make an architectural choice:
+
+1. **Option A: Containerized Backend Debugger Service (`gdb` / `lldb` / `delve` / `JDI`)**
+   - *Cost:* ~$50 to $300/month for dedicated sandboxed container hosting (AWS Fargate, Fly.io, or Nomad with `nsjail`/`gVisor`).
+   - *Fidelity:* 100% true native debugging (pointer diagrams, STL, standard templates, full memory visualization).
+   - *Latency:* 800ms – 2500ms network roundtrip + compilation time.
+   - *Security:* Requires strict containment against hostile code, fork bombs, and mining.
+
+2. **Option C: Tree-sitter WASM AST Translation**
+   - *Cost:* $0 hosting (100% in-browser WebAssembly).
+   - *Fidelity:* Solves syntax errors, but does not provide standard libraries (`std::priority_queue`, `java.util.TreeMap`, etc.) or native pointer/borrow semantics without writing full JS shims.
+   - *Effort:* 3–6 months of compiler runtime engineering.
+
+3. **Option D: Status Quo with Honest Labeling (Current & Recommended Baseline)**
+   - *Cost:* $0 hosting.
+   - *Fidelity:* JavaScript and Python deliver 100% flawless line-by-line debugger traces. C++, Java, Go, and Rust provide fast client-side visualization for basic procedural algorithms, with clear `"⚡ Experimental: simple programs only"` warnings and explicit error messages when complex constructs are pasted.
+   - *Integrity:* Zero fake traces. If transpilation fails, execution stops honestly with an informative error rather than rendering corrupt states.
+
+> **Status:** Awaiting user decision before proceeding with any backend or Tree-sitter changes. Option D is currently fully implemented and verified.

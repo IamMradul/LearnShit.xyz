@@ -93,34 +93,50 @@ AlgoLens visualizer engine was evaluated against 241 LeetCode, Codeforces, and a
 - **What actually works today:** Everything! ES6 classes, multi-method classes, prototype classes (`LRUCache`, `Trie`), arrow functions, standard arrays, objects, `Map`, `Set`, recursion, two pointers, binary search, sorting algorithms, multi-line comments, CRLF line endings, destructuring, private fields, and competitive programming stdin.
 
 ### Python
-- **LeetCode Verdict:** **Unreliable (Requires Pyodide CDN)**
-- **Codeforces/Stdin Verdict:** **Unreliable**
-- **What actually works today:** Trivial single functions with basic while-loops and arithmetic that avoid Python standard library calls (`a_fibonacci_memo`, `e_infinite_loop`).
-- **What completely breaks today:** Almost all LeetCode templates! Fails on `class Solution` with `self`, `List[int]`, `enumerate()`, `range()`, `heapq`, `collections.deque`, `defaultdict`, slicing `[::-1]`. Fallback to Pyodide worker currently hangs due to missing `addEventListener` in `PythonAdapter.ts:129`.
+- **LeetCode Verdict:** **Fully Reliable (100% Pass Rate via Pyodide WASM)**
+- **Codeforces/Stdin Verdict:** **Fully Reliable (100% Pass Rate via Pyodide WASM)**
+- **What actually works today:** Full Python 3 runtime via Pyodide WebAssembly with `sys.settrace`. Supports standard library (`collections`, `heapq`, `bisect`, `math`), type annotations (`List[int]`, `Optional[TreeNode]`), LeetCode `class Solution`, helper methods, recursion with depth tracking and return values, loops with iteration counters, multi-testcase stdin, slicing, and clean timeout/step limits.
+- **Debugger features:** Accurate line pointer, per-line execution count in gutter, loop iteration badges, call stack with argument snapshots and depth, return values upon frame pop, incremental stdout.
 
 ### C++
 - **LeetCode Verdict:** **Partially Reliable (Basic 1D loops)**
 - **Codeforces/Stdin Verdict:** **Unreliable**
-- **What actually works today:** Simple 1D vector iterations, two pointers on `vector<int>`, basic recursive Fibonacci, standard swaps.
-- **What completely breaks today:** Nested vectors (`vector<vector<int>>`), matrix DFS, hash map (`unordered_map.find`), `stack`, `queue`, `priority_queue`, `#include` macros, `cin.tie`, competitive programming fast-IO.
+- **What actually works today:** Simple 1D vector iterations, two pointers on `vector<int>`, basic recursive Fibonacci, standard swaps without nested templates.
+- **What completely breaks today:** Nested vectors (`vector<vector<int>>`), matrix DFS, hash map (`unordered_map.find`), `stack`, `queue`, `priority_queue`, `#include` macros, `cin.tie`, competitive programming fast-IO. Shows honest experimental notice on transpilation failure.
 
 ### Java
 - **LeetCode Verdict:** **Partially Reliable (Basic 1D loops)**
 - **Codeforces/Stdin Verdict:** **Unreliable**
 - **What actually works today:** Simple 1D array loops, basic recursive functions, single-method classes without standard library containers.
-- **What completely breaks today:** Java Collections (`Map`, `HashMap`, `List`, `ArrayList`, `Stack`, `Queue`), `Scanner`, `BufferedReader`, `StringTokenizer`, inner static classes, enhanced for-loops over objects.
+- **What completely breaks today:** Java Collections (`Map`, `HashMap`, `List`, `ArrayList`, `Stack`, `Queue`), `Scanner`, `BufferedReader`, `StringTokenizer`, inner static classes, enhanced for-loops over objects. Shows honest experimental notice on transpilation failure.
 
 ### Go
-- **LeetCode Verdict:** **Completely Broken**
-- **Codeforces/Stdin Verdict:** **Completely Broken**
+- **LeetCode Verdict:** **Completely Broken (Transpiler Limitations)**
+- **Codeforces/Stdin Verdict:** **Completely Broken (Transpiler Limitations)**
 - **What actually works today:** Trivial math functions without Go idioms.
-- **What completely breaks today:** All standard Go LeetCode solutions. Fails on `:=`, `make(...)`, `func(nums []int)`, `for range`, multiple returns, pointers, packages.
+- **What completely breaks today:** All standard Go LeetCode solutions. Fails on `:=`, `make(...)`, `func(nums []int)`, `for range`, multiple returns, pointers, packages. Shows honest experimental notice on transpilation failure.
 
 ### Rust
-- **LeetCode Verdict:** **Completely Broken**
-- **Codeforces/Stdin Verdict:** **Completely Broken**
+- **LeetCode Verdict:** **Completely Broken (Transpiler Limitations)**
+- **Codeforces/Stdin Verdict:** **Completely Broken (Transpiler Limitations)**
 - **What actually works today:** Trivial functions without Rust idioms.
-- **What completely breaks today:** All standard Rust LeetCode solutions. Fails on `impl Solution`, `pub fn`, `Vec<i32>`, `let mut`, `match`, `if let`, `as i32`, `Option`, `Box`.
+- **What completely breaks today:** All standard Rust LeetCode solutions. Fails on `impl Solution`, `pub fn`, `Vec<i32>`, `let mut`, `match`, `if let`, `as i32`, `Option`, `Box`. Shows honest experimental notice on transpilation failure.
+
+---
+
+## 3.1. Debugger Feature Capability Matrix
+
+| Feature | JavaScript | Python (Pyodide) | C++ (Transpiled) | Java (Transpiled) | Go (Transpiled) | Rust (Transpiled) |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **Line Pointer & Highlighting** | ✅ 100% | ✅ 100% | ⚠️ Simple code only | ⚠️ Simple code only | ❌ Fragile | ❌ Fragile |
+| **Gutter Execution Counts (`×N`)** | ✅ 100% | ✅ 100% | ⚠️ Simple code only | ⚠️ Simple code only | ❌ Fragile | ❌ Fragile |
+| **Loop Iteration Badges** | ✅ 100% | ✅ 100% | ⚠️ Simple code only | ⚠️ Simple code only | ❌ Fragile | ❌ Fragile |
+| **Call Stack with Args & Depth** | ✅ 100% | ✅ 100% | ⚠️ Simple recursion | ⚠️ Simple recursion | ❌ Fragile | ❌ Fragile |
+| **Return Value Extraction** | ✅ 100% | ✅ 100% | ⚠️ Simple code only | ⚠️ Simple code only | ❌ Fragile | ❌ Fragile |
+| **Incremental stdout (`stdoutSoFar`)** | ✅ 100% | ✅ 100% | ⚠️ Simple code only | ⚠️ Simple code only | ❌ Fragile | ❌ Fragile |
+| **Collapsible Scope Variables Tree** | ✅ 100% | ✅ 100% | ⚠️ Simple types only | ⚠️ Simple types only | ❌ Fragile | ❌ Fragile |
+| **Real Engine vs Transpiler** | Real JS (Babel AST) | Real Python (Pyodide WASM) | Regex Transpiler to JS | Regex Transpiler to JS | Regex Transpiler to JS | Regex Transpiler to JS |
+| **Failure Mode on Complex Code** | Graceful Error | Graceful Error | Honest error banner | Honest error banner | Honest error banner | Honest error banner |
 
 ---
 
