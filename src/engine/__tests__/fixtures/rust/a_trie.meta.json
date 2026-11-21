@@ -1,0 +1,7 @@
+{
+  "mode": "function",
+  "testInput": "[[\"apple\", \"app\"]]",
+  "stdin": "",
+  "expectedStdout": "[true,false]",
+  "expectedDS": []
+}

@@ -108,6 +108,7 @@ interface EditorStore {
   language: SupportedLanguage;
   code: string;
   input: string;
+  stdin: string;
   fontSize: number;
   modeOverride: 'auto' | 'function' | 'full-program';
   autoDetectedLang: SupportedLanguage | null;
@@ -117,6 +118,7 @@ interface EditorStore {
   setLanguage: (lang: SupportedLanguage) => void;
   setCode: (code: string) => void;
   setInput: (input: string) => void;
+  setStdin: (stdin: string) => void;
   setFontSize: (size: number) => void;
   setModeOverride: (mode: 'auto' | 'function' | 'full-program') => void;
   loadSample: (language: SupportedLanguage) => void;
@@ -129,6 +131,7 @@ export const useEditorStore = create<EditorStore>()(
       language: sharedPayload?.language ?? 'javascript',
       code: sharedPayload?.code ?? '',
       input: sharedPayload?.input ?? '',
+      stdin: '',
       fontSize: 14,
       modeOverride: 'auto',
       autoDetectedLang: null,
@@ -166,6 +169,7 @@ export const useEditorStore = create<EditorStore>()(
           return updates;
         }),
       setInput: (input) => set({ input }),
+      setStdin: (stdin) => set({ stdin }),
       setFontSize: (fontSize) => set({ fontSize }),
       setModeOverride: (modeOverride) => set({ modeOverride }),
       loadSample: (language) =>
@@ -194,6 +198,7 @@ export const useEditorStore = create<EditorStore>()(
         language: s.language,
         code: s.code,
         input: s.input,
+        stdin: s.stdin,
         fontSize: s.fontSize,
         isAutoDetecting: s.isAutoDetecting,
       }),

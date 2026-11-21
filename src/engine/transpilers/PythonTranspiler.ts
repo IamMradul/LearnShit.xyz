@@ -86,6 +86,19 @@ function transformPythonExpr(expr: string): string {
   res = res.replace(/\bmax\s*\(/g, 'Math.max(');
   res = res.replace(/\babs\s*\(/g, 'Math.abs(');
 
+  // Stdin helpers (fast path — same shims as JSTracer)
+  res = res.replace(/\bsys\.stdin\.readline\s*\(\s*\)/g, 'prompt()');
+  res = res.replace(/\bsys\.stdin\.read\s*\(\s*\)/g, 'sys.stdin.read()');
+  res = res.replace(
+    /\bmap\s*\(\s*int\s*,\s*input\s*\(\s*\)\s*\.\s*split\s*\(\s*\)\s*\)/g,
+    'prompt().trim().split(/\\s+/).filter(Boolean).map(Number)',
+  );
+  res = res.replace(/\binput\s*\(\s*\)\s*\.\s*split\s*\(\s*\)/g, 'prompt().trim().split(/\\s+/)');
+  res = res.replace(/\bint\s*\(\s*input\s*\(\s*\)\s*\)/g, 'parseInt(prompt(), 10)');
+  res = res.replace(/\binput\s*\(/g, 'prompt(');
+  res = res.replace(/\bprint\s*\(/g, 'console.log(');
+  res = res.replace(/\bint\s*\(/g, 'parseInt(');
+
   // Integer division: a // b -> Math.floor((a) / (b))
   res = res.replace(/([a-zA-Z0-9_[\].()]+)\s*\/\/\s*([a-zA-Z0-9_[\].()]+)/g, 'Math.floor(($1) / ($2))');
 

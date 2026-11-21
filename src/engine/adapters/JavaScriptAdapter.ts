@@ -4,7 +4,7 @@ import type {
   TraceResult,
   ValidationResult,
 } from '../TraceTypes';
-import { detectMode, buildDriver } from '../ModeDetector';
+import { detectMode, buildDriver, effectiveStdin } from '../ModeDetector';
 
 export class JavaScriptAdapter implements LanguageAdapter {
   readonly language = 'javascript';
@@ -52,6 +52,7 @@ export class JavaScriptAdapter implements LanguageAdapter {
 
       const userLineCount = request.code.split('\n').length;
       const code = buildDriver(request.code, request.input, 'javascript', mode);
+      const stdin = effectiveStdin({ ...request, mode });
 
       const worker = this.getWorker();
 
@@ -68,7 +69,7 @@ export class JavaScriptAdapter implements LanguageAdapter {
       };
 
       worker.addEventListener('message', handler);
-      worker.postMessage({ ...request, code, userLineCount, mode });
+      worker.postMessage({ ...request, code, userLineCount, mode, stdin });
     });
   }
 

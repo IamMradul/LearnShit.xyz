@@ -1,0 +1,9 @@
+{
+  "mode": "function",
+  "testInput": "[{\"Val\":1,\"Next\":{\"Val\":2,\"Next\":{\"Val\":3,\"Next\":null}}}]",
+  "stdin": "",
+  "expectedStdout": "{\"Val\":3",
+  "expectedDS": [
+    "linkedList"
+  ]
+}

@@ -164,30 +164,31 @@ function transpileSingleStatement(
   line = line.replace(/std::/g, '');
   line = line.replace(/\bfastio\s*;?/g, '/* fastio */');
 
+  // Inline cin/cout so `int n; cin >> n;` and `for (...) cin >> a[i];` still
+  // go through the later type / for-loop rewrites instead of returning early.
   if (/\bcin\s*>>/.test(line)) {
-    const indent = line.match(/^\s*/)?.[0] || '';
-    const vars = line
-      .replace(/^\s*cin\s*>>\s*/, '')
-      .replace(/;\s*$/, '')
-      .split(/>>\s*/)
-      .map((v) => v.trim())
-      .filter(Boolean);
-    const assignments = vars.map((v) => `${v} = __cin_next()`).join('; ');
-    return { js: `${indent}${assignments};` };
+    line = line.replace(/\bcin\s*((?:>>\s*[^;]+)+)/g, (_m, rest: string) => {
+      const vars = String(rest)
+        .split(/>>/)
+        .map((v) => v.trim())
+        .filter(Boolean);
+      return vars.map((v) => `${v} = __cin_next()`).join('; ');
+    });
   }
 
-  if (/\bcout\s*<<\s*/.test(line)) {
-    const indent = line.match(/^\s*/)?.[0] || '';
-    const rawContent = line.replace(/^\s*cout\s*<<\s*/, '').replace(/;\s*$/, '');
-    const rawTokens = splitCoutTokens(rawContent)
-      .map((p) => p.trim())
-      .filter((p) => p && p !== 'endl');
-    const processedTokens = rawTokens.map((tok) =>
-      tok
-        .replace(/\b(?<!\.)min\s*\(\s*\{([^}]+)\}\s*\)/g, 'Math.min($1)')
-        .replace(/\b(?<!\.)max\s*\(\s*\{([^}]+)\}\s*\)/g, 'Math.max($1)'),
-    );
-    return { js: `${indent}console.log(${processedTokens.join(', ')});` };
+  if (/\bcout\s*<</.test(line)) {
+    line = line.replace(/\bcout\s*((?:<<[^;]+)+)/g, (_m, chain: string) => {
+      const rawContent = String(chain).replace(/^<</, '').replace(/;\s*$/, '');
+      const rawTokens = splitCoutTokens(rawContent)
+        .map((p) => p.trim())
+        .filter((p) => p && p !== 'endl');
+      const processedTokens = rawTokens.map((tok) =>
+        tok
+          .replace(/\b(?<!\.)min\s*\(\s*\{([^}]+)\}\s*\)/g, 'Math.min($1)')
+          .replace(/\b(?<!\.)max\s*\(\s*\{([^}]+)\}\s*\)/g, 'Math.max($1)'),
+      );
+      return `console.log(${processedTokens.join(', ')})`;
+    });
   }
 
   line = line.replace(/->/g, '.');

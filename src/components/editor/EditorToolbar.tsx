@@ -22,7 +22,7 @@ const LANGUAGES: { id: SupportedLanguage; label: string; phase: number }[] = [
 const MODE_OPTIONS = ['auto', 'function', 'full-program'] as const;
 
 export const EditorToolbar: React.FC = () => {
-  const { language, setLanguage, code, input, fontSize, setFontSize, modeOverride, setModeOverride } =
+  const { language, setLanguage, code, input, stdin, fontSize, setFontSize, modeOverride, setModeOverride } =
     useEditorStore();
   const { theme, toggleTheme, resetLayout } = useUIStore();
   const { setResult, setStatus, setRunning, setError, isRunning, pyodideLoading, setPyodideLoading } =
@@ -50,6 +50,7 @@ export const EditorToolbar: React.FC = () => {
       const result = await adapter.trace({
         code,
         input,
+        stdin,
         mode: modeOverride,
         maxSteps: 5000,
         timeoutMs: 10000,
@@ -67,7 +68,7 @@ export const EditorToolbar: React.FC = () => {
       setRunning(false);
       setPyodideLoading(false);
     }
-  }, [language, code, input, modeOverride, isRunning, setResult, setStatus, setRunning, setError, setPyodideLoading]);
+  }, [language, code, input, stdin, modeOverride, isRunning, setResult, setStatus, setRunning, setError, setPyodideLoading]);
 
   return (
     <div

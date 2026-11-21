@@ -5,7 +5,8 @@ import type {
   ValidationResult,
 } from '../TraceTypes';
 import { transpileJavaToJs } from '../transpilers/JavaTranspiler';
-import { parseDriverArgs } from '../ModeDetector';
+import { parseDriverArgs, effectiveStdin } from '../ModeDetector';
+import { parseOrPartial } from '../partialLang';
 
 export class JavaAdapter implements LanguageAdapter {
   readonly language = 'java';
@@ -49,62 +50,49 @@ export class JavaAdapter implements LanguageAdapter {
     }
   }
 
-  trace(request: TraceRequest): Promise<TraceResult> {
-    return new Promise((resolve, reject) => {
-      try {
-        const mode =
-          request.mode === 'auto' ? this.detectMode(request.code) : request.mode;
-
-        const transpiled = transpileJavaToJs(request.code);
-        let runnableJs = transpiled.code;
-
-        const userLineCount = request.code.split('\n').length;
-        if (mode === 'function') {
-          const args = parseDriverArgs(request.input);
-          const argsRepr = args.map((a) => JSON.stringify(a)).join(', ');
-          if (transpiled.isClassSolution) {
-            const mName = transpiled.methodName || 'twoSum';
-            runnableJs += `\n\n// ── AlgoLens generated driver\ntry {\n  const __sol = new Solution();\n  const __ret = __sol.${mName}(${argsRepr});\n  if (__ret !== undefined) console.log('Return value:', JSON.stringify(__ret));\n} catch(e) { console.error(e); }`;
-          } else {
-            const fnMatch = runnableJs.match(/function\s+([a-zA-Z_]\w*)\s*\(/);
-            const fnName = fnMatch ? fnMatch[1] : 'solution';
-            runnableJs += `\n\n// ── AlgoLens generated driver\ntry {\n  const __ret = ${fnName}(${argsRepr});\n  if (__ret !== undefined) console.log('Return value:', JSON.stringify(__ret));\n} catch(e) { console.error(e); }`;
-          }
-        } else {
-          if (/function\s+main\s*\(/.test(runnableJs)) {
-            runnableJs += '\n\n// ── AlgoLens generated driver\ntry { main([]); } catch(e) { console.error(e); }';
-          }
-        }
-
-        const worker = this.getWorker();
-        const timeout = setTimeout(() => {
-          reject(new Error('Java execution worker timed out'));
-        }, request.timeoutMs + 2000);
-
-        const handler = (e: MessageEvent) => {
-          if (e.data.type === 'result') {
-            clearTimeout(timeout);
-            worker.removeEventListener('message', handler);
-            const res = e.data.result as TraceResult;
-            res.language = 'java';
-            resolve(res);
-          }
-        };
-
-        worker.addEventListener('message', handler);
-        worker.postMessage({ ...request, code: runnableJs, mode, userLineCount });
-      } catch (err) {
-        resolve({
-          steps: [],
-          language: 'java',
-          mode: 'function',
-          truncated: false,
-          totalSteps: 0,
-          stdout: '',
-          stderr: String(err),
-          error: String(err),
-        });
+  async trace(request: TraceRequest): Promise<TraceResult> {
+    const mode =
+      request.mode === 'auto' ? this.detectMode(request.code) : request.mode;
+    const stdin = effectiveStdin({ ...request, mode });
+    const transpiled = transpileJavaToJs(request.code);
+    let runnableJs = transpiled.code;
+    const userLineCount = request.code.split('\n').length;
+    if (mode === 'function') {
+      const args = parseDriverArgs(request.input);
+      const argsRepr = args.map((a) => JSON.stringify(a)).join(', ');
+      if (transpiled.isClassSolution) {
+        const mName = transpiled.methodName || 'twoSum';
+        runnableJs += `\n\n// ── AlgoLens generated driver\ntry {\n  const __sol = new Solution();\n  const __ret = __sol.${mName}(${argsRepr});\n  if (__ret !== undefined) console.log('Return value:', JSON.stringify(__ret));\n} catch(e) { console.error(e); }`;
+      } else {
+        const fnMatch = runnableJs.match(/function\s+([a-zA-Z_]\w*)\s*\(/);
+        const fnName = fnMatch ? fnMatch[1] : 'solution';
+        runnableJs += `\n\n// ── AlgoLens generated driver\ntry {\n  const __ret = ${fnName}(${argsRepr});\n  if (__ret !== undefined) console.log('Return value:', JSON.stringify(__ret));\n} catch(e) { console.error(e); }`;
       }
+    } else if (/function\s+main\s*\(/.test(runnableJs)) {
+      runnableJs += '\n\n// ── AlgoLens generated driver\ntry { main([]); } catch(e) { console.error(e); }';
+    }
+
+    const parseFail = await parseOrPartial(runnableJs, 'java');
+    if (parseFail) return parseFail;
+
+    return new Promise((resolve, reject) => {
+      const worker = this.getWorker();
+      const timeout = setTimeout(() => {
+        reject(new Error('Java execution worker timed out'));
+      }, request.timeoutMs + 2000);
+
+      const handler = (e: MessageEvent) => {
+        if (e.data.type === 'result') {
+          clearTimeout(timeout);
+          worker.removeEventListener('message', handler);
+          const res = e.data.result as TraceResult;
+          res.language = 'java';
+          resolve(res);
+        }
+      };
+
+      worker.addEventListener('message', handler);
+      worker.postMessage({ ...request, code: runnableJs, mode, userLineCount, stdin });
     });
   }
 

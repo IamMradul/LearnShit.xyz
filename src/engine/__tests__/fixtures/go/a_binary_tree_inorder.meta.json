@@ -1,0 +1,10 @@
+{
+  "mode": "function",
+  "testInput": "[{\"Val\":1,\"Left\":null,\"Right\":{\"Val\":2,\"Left\":{\"Val\":3,\"Left\":null,\"Right\":null},\"Right\":null}}]",
+  "stdin": "",
+  "expectedStdout": "[1,3,2]",
+  "expectedDS": [
+    "binaryTree",
+    "array"
+  ]
+}

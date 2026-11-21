@@ -1,35 +1,197 @@
 import type { SupportedLanguage } from './TraceTypes';
 
 /**
+ * Strips line and block comments from source code while preserving exact line
+ * counts and character offsets (replacing comment text with spaces).
+ * String-aware: preserves literals in single, double, and backtick quotes.
+ */
+export function stripCommentsPreservingLines(code: string): string {
+  let result = '';
+  let inString: string | null = null;
+  let inLineComment = false;
+  let inBlockComment = false;
+  let inDocstring: string | null = null;
+
+  for (let i = 0; i < code.length; i++) {
+    const ch = code[i];
+    const next = i + 1 < code.length ? code[i + 1] : '';
+    const next2 = i + 2 < code.length ? code[i + 2] : '';
+
+    if (inLineComment) {
+      if (ch === '\n') {
+        inLineComment = false;
+        result += '\n';
+      } else if (ch === '\r') {
+        result += '\r';
+      } else {
+        result += ' ';
+      }
+      continue;
+    }
+
+    if (inBlockComment) {
+      if (ch === '*' && next === '/') {
+        inBlockComment = false;
+        result += '  ';
+        i++;
+      } else if (ch === '\n') {
+        result += '\n';
+      } else if (ch === '\r') {
+        result += '\r';
+      } else {
+        result += ' ';
+      }
+      continue;
+    }
+
+    if (inDocstring) {
+      if (ch === inDocstring[0] && next === inDocstring[0] && next2 === inDocstring[0]) {
+        inDocstring = null;
+        result += '   ';
+        i += 2;
+      } else if (ch === '\n') {
+        result += '\n';
+      } else if (ch === '\r') {
+        result += '\r';
+      } else {
+        result += ' ';
+      }
+      continue;
+    }
+
+    if (inString) {
+      result += ch;
+      if (ch === '\\') {
+        if (i + 1 < code.length) {
+          result += code[i + 1];
+          i++;
+        }
+      } else if (ch === inString) {
+        inString = null;
+      }
+      continue;
+    }
+
+    // Check for comment starts
+    if (ch === '/' && next === '/') {
+      inLineComment = true;
+      result += '  ';
+      i++;
+      continue;
+    }
+    if (ch === '/' && next === '*') {
+      inBlockComment = true;
+      result += '  ';
+      i++;
+      continue;
+    }
+    if (ch === '#') {
+      inLineComment = true;
+      result += ' ';
+      continue;
+    }
+    if ((ch === '"' || ch === "'") && next === ch && next2 === ch) {
+      inDocstring = ch + ch + ch;
+      result += '   ';
+      i += 2;
+      continue;
+    }
+    if (ch === '"' || ch === "'" || ch === '`') {
+      inString = ch;
+      result += ch;
+      continue;
+    }
+
+    result += ch;
+  }
+
+  return result;
+}
+
+/**
  * Detects whether code is "function-only" (LeetCode style) or
  * "full-program" (Codeforces style, has a main/entry-point).
+ */
+const STDIN_PATTERNS: Record<SupportedLanguage, RegExp[]> = {
+  python: [/\binput\s*\(/, /\bsys\.stdin/, /\bstdin\.readline/],
+  javascript: [
+    /\brequire\s*\(\s*['"](?:fs|readline)['"]\s*\)/,
+    /\bprocess\.(?:stdin|argv|stdout)/,
+    /\bfs\.readFileSync/,
+    /\breadline\b/,
+    /\bprompt\s*\(/,
+  ],
+  cpp: [/\bcin\s*>>/, /\bscanf\s*\(/],
+  java: [/\bScanner\b/, /\bSystem\.in\b/],
+  go: [/\bfmt\.Scan/, /\bbufio\b/, /\bos\.Stdin/],
+  rust: [/\bstd::io/, /\bstdin\s*\(/],
+};
+
+const MAIN_PATTERNS: Record<SupportedLanguage, RegExp[]> = {
+  python: [/^\s*if\s+__name__\s*==\s*["']__main__["']/m, /^\s*def\s+main\s*\(/m],
+  javascript: [
+    /\bfunction\s+main\s*\(/,
+    /\b(?:const|let|var)\s+main\s*=/,
+  ],
+  cpp: [/int\s+main\s*\(/, /void\s+main\s*\(/],
+  java: [/public\s+static\s+void\s+main\s*\(/],
+  go: [/func\s+main\s*\(\s*\)/],
+  rust: [/fn\s+main\s*\(\s*\)/],
+};
+
+function hasJsCallableEntry(code: string): boolean {
+  if (/\bclass\s+Solution\b/.test(code)) return true;
+  if (/\bfunction\s+(?!main\b)[A-Za-z_$]\w*\s*\(/.test(code)) return true;
+  if (
+    /\b(?:export\s+)?(?:async\s+)?(?:var|let|const)\s+(?!main\b)[A-Za-z_$]\w*\s*=\s*(?:async\s+)?(?:function\b|\([^)]*\)\s*=>|[A-Za-z_$][\w]*\s*=>)/.test(
+      code,
+    )
+  ) {
+    return true;
+  }
+  return false;
+}
+
+function hasPythonCallableEntry(code: string): boolean {
+  if (/\bclass\s+Solution\b/.test(code)) return true;
+  return /^def\s+(?!main\b)[A-Za-z_]\w*\s*\(/m.test(code);
+}
+
+/**
+ * Function mode = LeetCode-style entry (function, arrow, var fn = function, class Solution).
+ * Full-program = main(), stdin usage, or no callable entry (run from the top).
  */
 export function detectMode(
   code: string,
   language: SupportedLanguage,
 ): 'function' | 'full-program' {
-  const patterns: Record<SupportedLanguage, RegExp[]> = {
-    python: [
-      /^\s*if\s+__name__\s*==\s*["']__main__["']/m,
-      /^\s*def\s+main\s*\(/m,
-      /^[a-zA-Z_]\w*\s*(?:=|\+=|-=|\.\w+\s*\()/m, // Top-level statements outside class/def
-    ],
-    javascript: [
-      /\bfunction\s+main\s*\(/,
-      /\bmain\s*\(\s*\)/,
-      /process\.argv/,
-      /readline/,
-      /^(?:const|let|var)\s+\w+\s*=/m,
-      /^\w+\.\w+\s*\(/m,
-    ],
-    cpp: [/int\s+main\s*\(/, /void\s+main\s*\(/],
-    java: [/public\s+static\s+void\s+main\s*\(/],
-    go: [/func\s+main\s*\(\s*\)/],
-    rust: [/fn\s+main\s*\(\s*\)/],
-  };
+  const cleanCode = stripCommentsPreservingLines(code);
+  const mains = MAIN_PATTERNS[language] ?? [];
+  if (mains.some((rx) => rx.test(cleanCode))) return 'full-program';
 
-  const checks = patterns[language] ?? [];
-  return checks.some((rx) => rx.test(code)) ? 'full-program' : 'function';
+  const stdins = STDIN_PATTERNS[language] ?? [];
+  if (stdins.some((rx) => rx.test(cleanCode))) return 'full-program';
+
+  if (language === 'javascript') {
+    return hasJsCallableEntry(cleanCode) ? 'function' : 'full-program';
+  }
+  if (language === 'python') {
+    return hasPythonCallableEntry(cleanCode) ? 'function' : 'full-program';
+  }
+  if (language === 'cpp' || language === 'java') {
+    if (/\bclass\s+Solution\b/.test(cleanCode)) return 'function';
+  }
+  return 'function';
+}
+
+export function effectiveStdin(request: {
+  stdin?: string;
+  input: string;
+  mode: 'function' | 'full-program' | 'auto';
+}): string {
+  if (typeof request.stdin === 'string' && request.stdin.length > 0) return request.stdin;
+  if (request.mode === 'full-program') return request.input || '';
+  return '';
 }
 
 /**
@@ -171,11 +333,11 @@ export function inferDefaultInput(code: string): string | null {
   if (/\b(?:reverseList|reverse_list)\b/.test(code)) return '[[1, 2, 3, 4, 5]]';
   if (/\b(?:maxSubArray|max_sub_array)\b/.test(code)) return '[[-2, 1, -3, 4, -1, 2, 1, -5, 4]]';
   if (/\b(?:addTwoNumbers|add_two_numbers)\b/.test(code)) return '[[2, 4, 3], [5, 6, 4]]';
-  if (/\b(?:twoSum|two_sum)\b/.test(code)) return '[[2, 7, 11, 15], 9]';
-  if (/\b(?:reverseList|reverse_list)\b/.test(code)) return '[[1, 2, 3, 4, 5]]';
   if (/\b(?:mergeTwoLists|merge_two_lists)\b/.test(code)) return '[[1, 2, 4], [1, 3, 4]]';
   if (/\b(?:climbStairs|climb_stairs)\b/.test(code)) return '[5]';
   if (/\b(?:isValid|is_valid)\b/.test(code)) return '["()[]{}"]';
+  if (/\b(?:inorderTraversal|inorder_traversal|inorder|preorderTraversal|postorderTraversal)\b/i.test(code)) return '[[1, null, 2, 3]]';
+  if (/\b(?:numIslands|num_islands|maxAreaOfIsland)\b/i.test(code)) return '[[["1","1","1","1","0"],["1","1","0","1","0"],["1","1","0","0","0"],["0","0","0","0","0"]]]';
   if (/\b(?:lengthOfLongestSubstring|length_of_longest_substring)\b/.test(code)) return '["abcabcbb"]';
   if (/\b(?:isPalindrome|is_palindrome)\b/.test(code)) return '["A man, a plan, a canal: Panama"]';
   if (/\b(?:coinChange|coin_change)\b/.test(code)) return '[[1, 2, 5], 11]';
@@ -523,6 +685,58 @@ function buildJSFullProgramDriver(code: string): string {
   return driver;
 }
 
+function isTopLevelMatch(code: string, matchIndex: number): boolean {
+  let depth = 0;
+  let inString: string | null = null;
+  let inLineComment = false;
+  let inBlockComment = false;
+
+  for (let i = 0; i < matchIndex; i++) {
+    const ch = code[i];
+    const next = code[i + 1];
+
+    if (inLineComment) {
+      if (ch === '\n') inLineComment = false;
+      continue;
+    }
+    if (inBlockComment) {
+      if (ch === '*' && next === '/') {
+        inBlockComment = false;
+        i++;
+      }
+      continue;
+    }
+    if (inString) {
+      if (ch === '\\') {
+        i++;
+      } else if (ch === inString) {
+        inString = null;
+      }
+      continue;
+    }
+
+    if (ch === '/' && next === '/') {
+      inLineComment = true;
+      i++;
+      continue;
+    }
+    if (ch === '/' && next === '*') {
+      inBlockComment = true;
+      i++;
+      continue;
+    }
+    if (ch === '"' || ch === "'" || ch === '`') {
+      inString = ch;
+      continue;
+    }
+
+    if (ch === '{') depth++;
+    else if (ch === '}') depth = Math.max(0, depth - 1);
+  }
+
+  return depth === 0;
+}
+
 // ─── JavaScript driver ────────────────────────────────────────────────────────
 
 function buildJSDriver(code: string, input: string): string {
@@ -537,25 +751,69 @@ function buildJSDriver(code: string, input: string): string {
   if (classMatch) {
     className = classMatch[1];
     const classBody = classMatch[2];
-    const methodMatch = classBody.match(/(?:async\s+)?([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\(([^)]*)\)\s*\{/);
-    if (methodMatch && methodMatch[1] !== 'constructor') {
+    const methodRegex = /(?:async\s+)?([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\(([^)]*)\)\s*\{/g;
+    const methods: Array<{ name: string; rawParams: string }> = [];
+    let mm: RegExpExecArray | null;
+    while ((mm = methodRegex.exec(classBody)) !== null) {
+      if (mm[1] !== 'constructor') {
+        methods.push({ name: mm[1], rawParams: mm[2] || '' });
+      }
+    }
+    if (methods.length > 0) {
       isSolutionClass = true;
-      methodName = methodMatch[1];
-      const rawParams = methodMatch[2] || '';
-      paramNames = splitTopLevelParams(rawParams);
+      let chosen = methods[0];
+      const knownProblem = methods.find((m) =>
+        /^(?:twoSum|reverseList|isValid|inorderTraversal|preorderTraversal|postorderTraversal|numIslands|maxSubArray|climbStairs|mergeTwoLists|lengthOfLongestSubstring|isPalindrome|coinChange|invertTree|hasCycle|search|binarySearch)$/i.test(m.name),
+      );
+      if (knownProblem) {
+        chosen = knownProblem;
+      } else if (methods.length > 1) {
+        const nonHelper = methods.find(
+          (m) => !/^(?:_|helper|dfs|bfs|solve|inorder$|preorder$|postorder$)/i.test(m.name),
+        );
+        if (nonHelper) chosen = nonHelper;
+      }
+      methodName = chosen.name;
+      paramNames = splitTopLevelParams(chosen.rawParams);
     }
   }
 
   // Top-level function or function expression
   if (!isSolutionClass) {
-    const fnMatch = code.match(
-      /(?:function\s+(\w+)\s*\(([^)]*)\)|(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s+)?\(([^)]*)\)\s*=>|(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s+)?function\s*\(([^)]*)\))/,
-    );
-    fnName = fnMatch?.[1] ?? fnMatch?.[3] ?? fnMatch?.[5] ?? '';
-    if (!fnName) return code;
+    const candidates: Array<{ name: string; rawParams: string }> = [];
+    const fnRegex =
+      /(?:(?:export\s+)?(?:async\s+)?function\s+([A-Za-z_$]\w*)\s*\(([^)]*)\)|(?:export\s+)?(?:const|let|var)\s+([A-Za-z_$]\w*)\s*=\s*(?:async\s+)?(?:function(?:\s+[A-Za-z_$]\w*)?\s*\(([^)]*)\)|(?:\(([^)]*)\)|([A-Za-z_$]\w*))\s*=>))/g;
+    let m: RegExpExecArray | null;
+    while ((m = fnRegex.exec(code)) !== null) {
+      const name = m[1] || m[3] || '';
+      const rawParams = m[2] || m[4] || m[5] || m[6] || '';
+      if (
+        name &&
+        name !== 'main' &&
+        name !== 'ListNode' &&
+        name !== 'TreeNode' &&
+        name !== 'Node' &&
+        isTopLevelMatch(code, m.index)
+      ) {
+        candidates.push({ name, rawParams });
+      }
+    }
+    if (candidates.length === 0) return code;
 
-    const rawParams = fnMatch?.[2] ?? fnMatch?.[4] ?? fnMatch?.[6] ?? '';
-    paramNames = splitTopLevelParams(rawParams);
+    let chosen = candidates[candidates.length - 1];
+    const knownProblem = candidates.find((c) =>
+      /^(?:twoSum|reverseList|isValid|inorderTraversal|preorderTraversal|postorderTraversal|numIslands|maxSubArray|climbStairs|mergeTwoLists|lengthOfLongestSubstring|isPalindrome|coinChange|invertTree|hasCycle|search|binarySearch|bubbleSort|insertionSort|selectionSort|dfsTraversal|dfs|bfsTraversal|bfs)$/i.test(c.name),
+    );
+    if (knownProblem) {
+      chosen = knownProblem;
+    } else {
+      const nonHelper = candidates.find(
+        (c) => !/^(?:_|helper|swap|partition)/i.test(c.name),
+      );
+      if (nonHelper) chosen = nonHelper;
+    }
+    fnName = chosen.name;
+    paramNames = splitTopLevelParams(chosen.rawParams);
   }
 
   const effectiveInput = input && input.trim() ? input : (inferDefaultInput(code) ?? '');

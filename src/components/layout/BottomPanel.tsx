@@ -15,7 +15,7 @@ const TABS = [
 export const BottomPanel: React.FC = () => {
   const { activeBottomTab, setActiveBottomTab, bottomPanelOpen, setBottomPanelOpen, bottomPanelHeight, setBottomPanelHeight } =
     useUIStore();
-  const { input, setInput } = useEditorStore();
+  const { input, setInput, stdin, setStdin } = useEditorStore();
   const { result, steps, currentIndex } = useTraceStore();
 
   const step = steps[currentIndex] ?? null;
@@ -94,25 +94,93 @@ export const BottomPanel: React.FC = () => {
       {bottomPanelOpen && (
         <div style={{ flex: 1, overflow: 'auto', padding: 12 }}>
           {activeBottomTab === 'input' && (
-            <textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              id="input-textarea"
-              placeholder="JSON array of args for function mode, e.g. [[1,2,3], 6]&#10;Or stdin for full-program mode"
+            <div
               style={{
-                width: '100%',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                gap: 12,
                 height: '100%',
-                background: 'var(--bg-tertiary)',
-                border: '1px solid var(--border)',
-                borderRadius: 6,
-                color: 'var(--text-primary)',
-                fontSize: 13,
-                fontFamily: 'JetBrains Mono, monospace',
-                padding: 10,
-                resize: 'none',
-                outline: 'none',
+                minHeight: 120,
               }}
-            />
+            >
+              {/* Test Input (function arguments) */}
+              <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                  <label
+                    htmlFor="input-textarea"
+                    style={{
+                      fontFamily: "'Oswald', sans-serif",
+                      fontSize: 11,
+                      letterSpacing: '0.04em',
+                      textTransform: 'uppercase',
+                      color: 'var(--accent)',
+                      fontWeight: 600,
+                    }}
+                  >
+                    Test Input (function arguments)
+                  </label>
+                  <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>JSON format</span>
+                </div>
+                <textarea
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  id="input-textarea"
+                  placeholder="e.g. [[2, 7, 11, 15], 9] or [1, 2, 3, 4, 5]"
+                  style={{
+                    flex: 1,
+                    width: '100%',
+                    background: 'var(--bg-tertiary)',
+                    border: '1px solid var(--border)',
+                    borderRadius: 6,
+                    color: 'var(--text-primary)',
+                    fontSize: 12.5,
+                    fontFamily: 'JetBrains Mono, monospace',
+                    padding: 8,
+                    resize: 'none',
+                    outline: 'none',
+                  }}
+                />
+              </div>
+
+              {/* Custom Input (stdin) */}
+              <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                  <label
+                    htmlFor="stdin-textarea"
+                    style={{
+                      fontFamily: "'Oswald', sans-serif",
+                      fontSize: 11,
+                      letterSpacing: '0.04em',
+                      textTransform: 'uppercase',
+                      color: '#2ed573',
+                      fontWeight: 600,
+                    }}
+                  >
+                    Custom Input (stdin)
+                  </label>
+                  <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>Raw text stream</span>
+                </div>
+                <textarea
+                  value={stdin}
+                  onChange={(e) => setStdin(e.target.value)}
+                  id="stdin-textarea"
+                  placeholder="Standard input lines for prompt, readline, fs.readFileSync(0), cin, or input()"
+                  style={{
+                    flex: 1,
+                    width: '100%',
+                    background: 'var(--bg-tertiary)',
+                    border: '1px solid var(--border)',
+                    borderRadius: 6,
+                    color: 'var(--text-primary)',
+                    fontSize: 12.5,
+                    fontFamily: 'JetBrains Mono, monospace',
+                    padding: 8,
+                    resize: 'none',
+                    outline: 'none',
+                  }}
+                />
+              </div>
+            </div>
           )}
 
           {activeBottomTab === 'output' && (

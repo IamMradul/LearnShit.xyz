@@ -1,0 +1,9 @@
+{
+  "mode": "function",
+  "testInput": "[[10, 20, 30], {\"nested\": {\"val\": 42}}]",
+  "stdin": "",
+  "expectedStdout": "[\"item_10_42\",2,3]",
+  "expectedDS": [
+    "array"
+  ]
+}

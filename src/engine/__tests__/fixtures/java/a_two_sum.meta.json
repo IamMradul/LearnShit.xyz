@@ -1,0 +1,10 @@
+{
+  "mode": "function",
+  "testInput": "[[2, 7, 11, 15], 9]",
+  "stdin": "",
+  "expectedStdout": "[0,1]",
+  "expectedDS": [
+    "array",
+    "hashMap"
+  ]
+}

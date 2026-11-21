@@ -1,0 +1,7 @@
+{
+  "mode": "function",
+  "testInput": "[1]",
+  "stdin": "",
+  "expectedStdout": "\"count=2_i=12\"",
+  "expectedDS": []
+}

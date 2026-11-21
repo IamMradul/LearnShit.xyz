@@ -35,7 +35,7 @@ export function detectDataStructures(steps: TraceStep[]): DetectedDS[] {
   );
 
   // Accumulate all variable snapshots and reported types
-  const varMap: Record<string, { snapshots: unknown[]; types: string[] }> = {};
+  const varMap: Record<string, { snapshots: unknown[]; types: string[] }> = Object.create(null);
 
   for (const step of steps) {
     for (const [name, tv] of Object.entries(step.variables)) {

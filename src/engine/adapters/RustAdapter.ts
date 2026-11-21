@@ -5,7 +5,8 @@ import type {
   ValidationResult,
 } from '../TraceTypes';
 import { transpileRustToJs } from '../transpilers/RustTranspiler';
-import { parseDriverArgs } from '../ModeDetector';
+import { parseDriverArgs, effectiveStdin } from '../ModeDetector';
+import { parseOrPartial } from '../partialLang';
 
 export class RustAdapter implements LanguageAdapter {
   readonly language = 'rust';
@@ -49,26 +50,29 @@ export class RustAdapter implements LanguageAdapter {
     }
   }
 
-  trace(request: TraceRequest): Promise<TraceResult> {
+  async trace(request: TraceRequest): Promise<TraceResult> {
+    const mode =
+      request.mode === 'auto' ? this.detectMode(request.code) : request.mode;
+    const stdin = effectiveStdin({ ...request, mode });
+    const transpiled = transpileRustToJs(request.code);
+    let runnableJs = transpiled.code;
+    const userLineCount = request.code.split('\n').length;
+
+    if (mode === 'function') {
+      const args = parseDriverArgs(request.input);
+      const fnName = transpiled.entryPoint || 'solution';
+      runnableJs += `\n\n// ── AlgoLens generated driver\ntry {\n  const __ret = ${fnName}(${args.join(', ')});\n  if (__ret !== undefined) console.log('Return value:', JSON.stringify(__ret));\n} catch(e) { console.error(e); }`;
+    } else {
+      if (/function\s+main\s*\(/.test(runnableJs)) {
+        runnableJs += '\n\n// ── AlgoLens generated driver\ntry { main(); } catch(e) { console.error(e); }';
+      }
+    }
+
+    const parseFail = await parseOrPartial(runnableJs, 'rust');
+    if (parseFail) return parseFail;
+
     return new Promise((resolve, reject) => {
       try {
-        const mode =
-          request.mode === 'auto' ? this.detectMode(request.code) : request.mode;
-
-        const transpiled = transpileRustToJs(request.code);
-        let runnableJs = transpiled.code;
-
-        const userLineCount = request.code.split('\n').length;
-        if (mode === 'function') {
-          const args = parseDriverArgs(request.input);
-          const fnName = transpiled.entryPoint || 'solution';
-          runnableJs += `\n\n// ── AlgoLens generated driver\ntry {\n  const __ret = ${fnName}(${args.join(', ')});\n  if (__ret !== undefined) console.log('Return value:', JSON.stringify(__ret));\n} catch(e) { console.error(e); }`;
-        } else {
-          if (/function\s+main\s*\(/.test(runnableJs)) {
-            runnableJs += '\n\n// ── AlgoLens generated driver\ntry { main(); } catch(e) { console.error(e); }';
-          }
-        }
-
         const worker = this.getWorker();
         const timeout = setTimeout(() => {
           reject(new Error('Rust execution worker timed out'));
@@ -85,7 +89,7 @@ export class RustAdapter implements LanguageAdapter {
         };
 
         worker.addEventListener('message', handler);
-        worker.postMessage({ ...request, code: runnableJs, mode, userLineCount });
+        worker.postMessage({ ...request, code: runnableJs, mode, userLineCount, stdin });
       } catch (err) {
         resolve({
           steps: [],

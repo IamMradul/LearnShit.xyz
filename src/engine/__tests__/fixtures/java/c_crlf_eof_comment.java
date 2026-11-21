@@ -1,0 +1,1 @@
+public class Solution {\r\n    public int addOne(int x) {\r\n        return x + 1;\r\n    }\r\n}\r\n// EOF comment without trailing newline

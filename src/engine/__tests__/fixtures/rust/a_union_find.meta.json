@@ -1,0 +1,10 @@
+{
+  "mode": "function",
+  "testInput": "[5, [[0, 1], [1, 2], [3, 4]]]",
+  "stdin": "",
+  "expectedStdout": "2",
+  "expectedDS": [
+    "unionFind",
+    "array"
+  ]
+}

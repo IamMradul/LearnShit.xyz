@@ -11,7 +11,7 @@ interface UIStore {
   isCodeEditorOpen: boolean;
   visualizerZoom: number; // 50 to 200
   isVariablesWatchOpen: boolean;
-  centerViewMode: 'ds' | 'code' | 'split';
+  centerViewMode: 'ds' | 'code' | 'split' | 'trace';
 
   toggleTheme: () => void;
   setTheme: (t: 'dark' | 'light') => void;
@@ -24,7 +24,7 @@ interface UIStore {
   toggleCodeEditor: () => void;
   setVisualizerZoom: (z: number) => void;
   toggleVariablesWatch: () => void;
-  setCenterViewMode: (mode: 'ds' | 'code' | 'split') => void;
+  setCenterViewMode: (mode: 'ds' | 'code' | 'split' | 'trace') => void;
   resetLayout: () => void;
 }
 

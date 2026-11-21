@@ -1,0 +1,1 @@
+package main\r\n\r\nfunc addOne(x int) int {\r\n    return x + 1\r\n}\r\n// EOF comment without trailing newline

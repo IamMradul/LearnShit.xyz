@@ -5,6 +5,7 @@ import {
   RotateCcw,
   ChevronLeft,
   ChevronRight,
+  ChevronsRight,
   Volume2,
   VolumeX,
 } from 'lucide-react';
@@ -21,7 +22,7 @@ const SPEEDS = [
 
 export const PlaybackControls: React.FC = () => {
   const { steps, currentIndex, status, speed } = useTraceStore();
-  const { togglePlay, stepForward, stepBackward, jumpToStart, seekTo, setSpeed } =
+  const { togglePlay, stepForward, stepBackward, jumpToStart, jumpToEnd, seekTo, setSpeed } =
     usePlayback();
 
   const [soundEnabled, setSoundEnabled] = useState(false);
@@ -180,6 +181,27 @@ export const PlaybackControls: React.FC = () => {
           }}
         >
           <ChevronRight size={18} />
+        </button>
+
+        {/* Jump to end */}
+        <button
+          onClick={jumpToEnd}
+          disabled={currentIndex >= total - 1}
+          title="Jump to end"
+          style={{
+            background: 'transparent',
+            border: 'none',
+            color: currentIndex >= total - 1 ? 'var(--text-muted)' : 'var(--text-primary)',
+            cursor: currentIndex >= total - 1 ? 'not-allowed' : 'pointer',
+            padding: 6,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '50%',
+            transition: 'color 0.15s, background 0.15s',
+          }}
+        >
+          <ChevronsRight size={17} />
         </button>
 
         {/* Step counter */}

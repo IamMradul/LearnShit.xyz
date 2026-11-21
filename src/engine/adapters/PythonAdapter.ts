@@ -4,7 +4,7 @@ import type {
   TraceResult,
   ValidationResult,
 } from '../TraceTypes';
-import { detectMode, buildDriver, parseDriverArgs } from '../ModeDetector';
+import { detectMode, buildDriver, parseDriverArgs, effectiveStdin } from '../ModeDetector';
 import { useTraceStore } from '../../store/traceStore';
 import { transpilePythonToJs } from '../transpilers/PythonTranspiler';
 import { runTrace } from '../JSTracer';
@@ -67,6 +67,9 @@ export class PythonAdapter implements LanguageAdapter {
 
   async trace(request: TraceRequest): Promise<TraceResult> {
     const userLineCount = request.code.split('\n').length;
+    const mode =
+      request.mode === 'auto' ? this.detectMode(request.code) : request.mode;
+    const stdin = effectiveStdin({ ...request, mode });
 
     // 1. Instant Fast Path: In-browser line-preserving transpilation to JS
     // Runs in < 5ms with zero network or Pyodide downloading delay!
@@ -83,9 +86,9 @@ export class PythonAdapter implements LanguageAdapter {
   return item in container;
 }`;
 
-      if (transpiled.className && transpiled.methodName) {
+      if (mode === 'function' && transpiled.className && transpiled.methodName) {
         runnableJs += `\n\n// ── AlgoLens generated driver${helper}\ntry {\n  const __sol = new ${transpiled.className}();\n  const __ret = __sol.${transpiled.methodName}(${argsRepr});\n  if (__ret !== undefined) console.log('Return value:', JSON.stringify(__ret));\n} catch(e) { const msg = e && (e.stack || e.message) ? (e.name ? e.name + ': ' + e.message : e.message) : String(e); console.error(msg); }`;
-      } else if (transpiled.methodName) {
+      } else if (mode === 'function' && transpiled.methodName) {
         runnableJs += `\n\n// ── AlgoLens generated driver${helper}\ntry {\n  const __ret = ${transpiled.methodName}(${argsRepr});\n  if (__ret !== undefined) console.log('Return value:', JSON.stringify(__ret));\n} catch(e) { const msg = e && (e.stack || e.message) ? (e.name ? e.name + ': ' + e.message : e.message) : String(e); console.error(msg); }`;
       } else {
         runnableJs += `\n\n// ── AlgoLens generated driver${helper}\n`;
@@ -94,9 +97,10 @@ export class PythonAdapter implements LanguageAdapter {
       const fastResult = await runTrace({
         code: runnableJs,
         input: request.input,
-        mode: 'function',
-        maxSteps: request.maxSteps || 5000,
-        timeoutMs: 3000,
+        stdin,
+        mode,
+        maxSteps: request.maxSteps || 10000,
+        timeoutMs: request.timeoutMs || 10000,
         language: 'javascript',
         userLineCount,
       });
@@ -112,8 +116,6 @@ export class PythonAdapter implements LanguageAdapter {
     // 2. Fallback Path: Full WebAssembly Pyodide sandbox in background worker
     return new Promise((resolve, reject) => {
       useTraceStore.getState().setPyodideLoading(true);
-      const mode =
-        request.mode === 'auto' ? this.detectMode(request.code) : request.mode;
 
       const code = buildDriver(request.code, request.input, 'python', mode);
       const worker = this.getWorker();
@@ -133,7 +135,7 @@ export class PythonAdapter implements LanguageAdapter {
         }
       };
 
-      worker.postMessage({ ...request, code, mode, userLineCount });
+      worker.postMessage({ ...request, code, mode, userLineCount, stdin, input: stdin || request.input });
     });
   }
 

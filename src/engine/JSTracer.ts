@@ -11,7 +11,9 @@ import * as parser from '@babel/parser';
 import _traverse from '@babel/traverse';
 import _generate from '@babel/generator';
 import * as t from '@babel/types';
-import type { TraceRequest, TraceResult, TraceStep, DSMutation } from './TraceTypes';
+import type { TraceRequest, TraceResult, TraceStep, DSMutation, StackFrame } from './TraceTypes';
+import { createIoShims } from './ioShims';
+import { normalizeTraceResult } from './normalizeTrace';
 
 // Babel ESM interop
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -262,8 +264,25 @@ export function instrumentCode(code: string, maxUserLine: number): string {
       let fnName = 'anonymous';
       if (t.isFunctionDeclaration(node) && node.id) {
         fnName = node.id.name;
+      } else if (t.isFunctionExpression(node) && node.id) {
+        fnName = node.id.name;
+      } else if (
+        (t.isClassMethod(node) || t.isObjectMethod(node)) &&
+        t.isIdentifier(node.key)
+      ) {
+        fnName = node.key.name;
+      } else if (
+        (path.parentPath?.isClassProperty() || path.parentPath?.isClassPrivateProperty()) &&
+        t.isIdentifier(path.parentPath.node.key as any)
+      ) {
+        fnName = (path.parentPath.node.key as t.Identifier).name;
       } else if (path.parentPath?.isVariableDeclarator() && t.isIdentifier(path.parentPath.node.id)) {
         fnName = path.parentPath.node.id.name;
+      } else if (
+        path.parentPath?.isAssignmentExpression() &&
+        t.isIdentifier(path.parentPath.node.left)
+      ) {
+        fnName = path.parentPath.node.left.name;
       }
 
       // Do not track unnamed inline arrow callbacks (e.g. inside .filter, .map, Array.from) in call stack
@@ -283,10 +302,24 @@ export function instrumentCode(code: string, maxUserLine: number): string {
           t.numericLiteral(startLine),
         ]),
       );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (enterCall as any)._stepInstrumented = true;
+
+      const entrySnap = t.expressionStatement(
+        t.callExpression(t.identifier('__step__'), [
+          t.numericLiteral(startLine),
+          t.stringLiteral('call'),
+          buildVarSnapshot(path),
+        ]),
+      );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (entrySnap as any)._stepInstrumented = true;
 
       const exitCall = t.expressionStatement(
         t.callExpression(t.identifier('__exitFunc__'), []),
       );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (exitCall as any)._stepInstrumented = true;
 
       const tryFinally = t.tryStatement(
         t.blockStatement(node.body.body),
@@ -294,7 +327,7 @@ export function instrumentCode(code: string, maxUserLine: number): string {
         t.blockStatement([exitCall]),
       );
 
-      node.body = t.blockStatement([enterCall, tryFinally]);
+      node.body = t.blockStatement([enterCall, entrySnap, tryFinally]);
     },
   });
 
@@ -400,16 +433,19 @@ export function instrumentCode(code: string, maxUserLine: number): string {
           varSnapshot,
         ]),
       );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (stepCall as any)._stepInstrumented = true;
 
       try {
+        // Snapshot AFTER the statement so `const x = ...` is visible (not TDZ).
         if (path.parentPath?.isBlockStatement() || path.parentPath?.isProgram()) {
-          path.insertBefore(stepCall);
+          path.insertAfter(stepCall);
         } else if (
           path.parentPath?.isIfStatement() ||
           path.parentPath?.isWhileStatement() ||
           path.parentPath?.isForStatement()
         ) {
-          path.replaceWith(t.blockStatement([stepCall, path.node]));
+          path.replaceWith(t.blockStatement([path.node, stepCall]));
         }
       } catch {
         // Skip if insertion fails
@@ -477,9 +513,10 @@ export async function runTrace(
   }
 
   const registry = new ObjectRegistry();
-  const callStack: Array<{ name: string; line: number }> = [];
+  const callStack: Array<{ name: string; line: number; locals: StackFrame['locals'] }> = [];
   let stepCount = 0;
   let lastVarsSnapshot: Record<string, unknown> = {};
+  let timedOut = false;
 
   function recordStep(
     line: number,
@@ -498,11 +535,19 @@ export async function runTrace(
 
     const variables: TraceStep['variables'] = {};
     for (const [k, v] of Object.entries(rawVars)) {
+      if (typeof v === 'function') continue;
+      if (k === 'Solution' || k.startsWith('__')) continue;
       variables[k] = {
         type: getType(v),
         repr: safeRepr(v),
         value: serializeValue(v, registry),
+        dsHint: undefined,
       };
+    }
+    if (callStack.length > 0) {
+      const top = callStack[callStack.length - 1];
+      top.locals = variables;
+      top.line = line;
     }
 
     // ─── Detect Mutations ───────────────────────────────────────────────────
@@ -677,7 +722,7 @@ export async function runTrace(
       callStack: callStack.map((f) => ({
         name: f.name,
         line: f.line,
-        locals: {},
+        locals: f.locals ?? {},
       })),
       mutations,
       returnValue: retVal !== undefined ? serializeValue(retVal, registry) : undefined,
@@ -761,10 +806,12 @@ export async function runTrace(
   }
 
   // Token stream for competitive programming cin >>
+  const rawStdin = typeof request.stdin === 'string' ? request.stdin : '';
   const rawInput = typeof request.input === 'string' ? request.input : JSON.stringify(request.input || '');
+  const rawForCin = rawStdin || rawInput;
   let cinTokens: (number | string)[] = [];
   try {
-    const p = JSON.parse(rawInput);
+    const p = JSON.parse(rawForCin);
     const flat: (number | string)[] = [];
     const walk = (item: unknown) => {
       if (Array.isArray(item)) item.forEach(walk);
@@ -776,7 +823,7 @@ export async function runTrace(
     // not JSON
   }
   if (cinTokens.length === 0) {
-    cinTokens = rawInput
+    cinTokens = rawForCin
       .replace(/[[\],]/g, ' ')
       .trim()
       .split(/\s+/)
@@ -786,10 +833,11 @@ export async function runTrace(
         return isNaN(num) ? tok : num;
       });
   }
-  if (cinTokens.length === 0) {
-    cinTokens = [1, 5, 2, 3, 4];
-  }
   const cinStream = [...cinTokens];
+
+  const io = createIoShims(rawStdin || (request.mode === 'full-program' ? rawInput : ''), (s) => {
+    stdout += s;
+  });
 
   // Sandbox Globals
   const sandboxGlobals: Record<string, unknown> = {
@@ -797,7 +845,7 @@ export async function runTrace(
       return cinStream.length > 0 ? cinStream.shift() : 0;
     },
     __enterFunc__: (name: string, line: number) => {
-      callStack.push({ name, line });
+      callStack.push({ name, line, locals: {} });
     },
     __exitFunc__: () => {
       callStack.pop();
@@ -823,15 +871,23 @@ export async function runTrace(
     },
     console: {
       log: (...args: unknown[]) => {
-        stdout += args.map((a) => safeRepr(a)).join(' ') + '\n';
+        stdout += args.map((a) => (typeof a === 'string' ? a : safeRepr(a))).join(' ') + '\n';
       },
       error: (...args: unknown[]) => {
-        stderr += args.map((a) => safeRepr(a)).join(' ') + '\n';
+        stderr += args.map((a) => (typeof a === 'string' ? a : safeRepr(a))).join(' ') + '\n';
       },
       warn: (...args: unknown[]) => {
-        stdout += '[warn] ' + args.map((a) => safeRepr(a)).join(' ') + '\n';
+        stdout += '[warn] ' + args.map((a) => (typeof a === 'string' ? a : safeRepr(a))).join(' ') + '\n';
       },
     },
+    prompt: io.prompt,
+    print: (...args: unknown[]) => {
+      stdout += args.map((a) => (typeof a === 'string' ? a : safeRepr(a))).join(' ') + '\n';
+    },
+    sys: io.sys,
+    process: io.process,
+    require: io.require,
+    __name__: '__main__',
     // Block unsafe globals
     fetch: undefined,
     XMLHttpRequest: undefined,
@@ -872,7 +928,7 @@ export async function runTrace(
             `"use strict";\n${instrumented}`,
           );
           fn(...Object.values(sandboxGlobals));
-          resolve();
+          void io.flush().then(() => resolve()).catch(() => resolve());
         } catch (err: unknown) {
           if (err instanceof Error && err.message === '__TRUNCATED__') {
             resolve();
@@ -886,6 +942,10 @@ export async function runTrace(
   } catch (err: unknown) {
     if (err instanceof Error && err.message !== '__TRUNCATED__') {
       const msg = err.message || String(err);
+      if (msg.includes('timed out')) {
+        timedOut = true;
+        truncated = true;
+      }
       stderr += `\nRuntime error: ${msg}`;
       const rawLast = steps.length > 0 ? steps[steps.length - 1].line : 1;
       const lastLine = Math.max(1, Math.min(rawLast, maxUserLine));
@@ -894,21 +954,23 @@ export async function runTrace(
         line: lastLine,
         event: 'exception',
         variables: steps.length > 0 ? steps[steps.length - 1].variables : {},
-        callStack: callStack.map((f) => ({ name: f.name, line: f.line, locals: {} })),
+        callStack: callStack.map((f) => ({ name: f.name, line: f.line, locals: f.locals ?? {} })),
         mutations: [],
-        exception: { type: 'RuntimeError', message: msg },
+        exception: { type: timedOut ? 'Timeout' : 'RuntimeError', message: msg },
       });
     }
   }
 
-  return {
+  return normalizeTraceResult({
     steps,
     language: 'javascript',
     mode: request.mode === 'auto' ? 'function' : request.mode,
     truncated,
+    truncatedReason: timedOut ? 'timeout' : truncated ? 'max-steps' : undefined,
+    timedOut,
     totalSteps,
     stdout,
     stderr,
     error: stderr || undefined,
-  };
+  });
 }

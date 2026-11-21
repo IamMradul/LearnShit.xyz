@@ -1,0 +1,9 @@
+{
+  "mode": "full-program",
+  "testInput": "",
+  "stdin": "3\n10 20 30\n",
+  "expectedStdout": "60",
+  "expectedDS": [
+    "array"
+  ]
+}

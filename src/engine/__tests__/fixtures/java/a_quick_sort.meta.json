@@ -1,0 +1,9 @@
+{
+  "mode": "function",
+  "testInput": "[[5, 1, 1, 2, 0, 0]]",
+  "stdin": "",
+  "expectedStdout": "[0,0,1,1,2,5]",
+  "expectedDS": [
+    "array"
+  ]
+}

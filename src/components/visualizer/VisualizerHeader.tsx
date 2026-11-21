@@ -38,6 +38,7 @@ export const VisualizerHeader: React.FC = () => {
     setLanguage,
     code,
     input,
+    stdin,
     setCode,
     setInput,
     modeOverride,
@@ -108,6 +109,7 @@ export const VisualizerHeader: React.FC = () => {
       const result = await adapter.trace({
         code,
         input,
+        stdin,
         mode: modeOverride,
         maxSteps: 5000,
         timeoutMs: 10000,
@@ -125,7 +127,7 @@ export const VisualizerHeader: React.FC = () => {
       setRunning(false);
       setPyodideLoading(false);
     }
-  }, [language, code, input, modeOverride, isRunning, setResult, setStatus, setRunning, setError, setPyodideLoading, setLanguage]);
+  }, [language, code, input, stdin, modeOverride, isRunning, setResult, setStatus, setRunning, setError, setPyodideLoading, setLanguage]);
 
   // Load a preset algorithm and auto-run
   const handleSelectPreset = useCallback(

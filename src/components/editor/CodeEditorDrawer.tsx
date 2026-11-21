@@ -16,6 +16,7 @@ export const CodeEditorDrawer: React.FC = () => {
     setLanguage,
     code,
     input,
+    stdin,
     setInput,
     modeOverride,
     setModeOverride,
@@ -83,6 +84,7 @@ export const CodeEditorDrawer: React.FC = () => {
       const result = await adapter.trace({
         code,
         input: effectiveInput,
+        stdin,
         mode: effectiveMode,
         maxSteps: 5000,
         timeoutMs: 10000,

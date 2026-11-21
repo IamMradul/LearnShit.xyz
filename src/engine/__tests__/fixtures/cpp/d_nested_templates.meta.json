@@ -1,0 +1,9 @@
+{
+  "mode": "function",
+  "testInput": "[3]",
+  "stdin": "",
+  "expectedStdout": "4",
+  "expectedDS": [
+    "grid"
+  ]
+}

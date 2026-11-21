@@ -1,0 +1,1 @@
+impl Solution {\r\n    pub fn add_one(x: i32) -> i32 {\r\n        x + 1\r\n    }\r\n}\r\n// EOF comment without trailing newline

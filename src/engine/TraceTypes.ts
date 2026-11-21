@@ -79,6 +79,8 @@ export interface TraceResult {
   language: string;
   mode: 'function' | 'full-program';
   truncated: boolean;
+  truncatedReason?: 'max-steps' | 'timeout';
+  timedOut?: boolean;
   totalSteps: number;
   sampleRate?: number;
   stdout: string;
@@ -96,6 +98,8 @@ export interface ValidationResult {
 export interface TraceRequest {
   code: string;
   input: string;
+  /** Custom stdin for full programs. Falls back to `input` in full-program mode. */
+  stdin?: string;
   mode: 'function' | 'full-program' | 'auto';
   maxSteps: number;
   timeoutMs: number;

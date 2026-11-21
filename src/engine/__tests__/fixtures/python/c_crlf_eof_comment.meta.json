@@ -1,0 +1,7 @@
+{
+  "mode": "function",
+  "testInput": "[41]",
+  "stdin": "",
+  "expectedStdout": "42",
+  "expectedDS": []
+}

@@ -1,0 +1,7 @@
+{
+  "mode": "full-program",
+  "testInput": "",
+  "stdin": "helloworld",
+  "expectedStdout": "dlrowolleh",
+  "expectedDS": []
+}
