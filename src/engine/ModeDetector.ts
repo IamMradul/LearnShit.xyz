@@ -269,6 +269,23 @@ export function parseDriverArgs(input: string, paramCount: number = 0): unknown[
     // Continue to advanced parsing
   }
 
+  // Handle relaxed JS object / array expressions like [{ a: 1 }]
+  if (!trimmed.includes('=')) {
+    try {
+      const fn = new Function('return (' + trimmed + ');');
+      const parsed = fn();
+      if (parsed !== undefined) {
+        if (paramCount === 1) {
+          if (Array.isArray(parsed) && parsed.length === 1) return parsed;
+          return [parsed];
+        }
+        return Array.isArray(parsed) ? parsed : [parsed];
+      }
+    } catch {
+      // Continue
+    }
+  }
+
   // Handle LeetCode format: "nums = [2,7,11,15], target = 9" or "head = [3,2,0,-4], pos = 1"
   try {
     const cleaned = trimmed
@@ -737,38 +754,99 @@ function isTopLevelMatch(code: string, matchIndex: number): boolean {
   return depth === 0;
 }
 
+function extractClassBody(source: string, openBraceIndex: number): string {
+  let depth = 1;
+  for (let i = openBraceIndex + 1; i < source.length; i++) {
+    const ch = source[i];
+    if (ch === '{') depth++;
+    else if (ch === '}') {
+      depth--;
+      if (depth === 0) {
+        return source.slice(openBraceIndex + 1, i);
+      }
+    }
+  }
+  return source.slice(openBraceIndex + 1);
+}
+
 // ─── JavaScript driver ────────────────────────────────────────────────────────
 
 function buildJSDriver(code: string, input: string): string {
-  // Check if user code has class Solution (LeetCode JavaScript style)
-  const classMatch = code.match(/class\s+(\w+)\s*\{([\s\S]*?)\}/);
+  const cleanCode = stripCommentsPreservingLines(code);
+
   let isSolutionClass = false;
   let className = '';
   let methodName = '';
   let fnName = '';
   let paramNames: string[] = [];
 
-  if (classMatch) {
-    className = classMatch[1];
-    const classBody = classMatch[2];
-    const methodRegex = /(?:async\s+)?([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\(([^)]*)\)\s*\{/g;
-    const methods: Array<{ name: string; rawParams: string }> = [];
-    let mm: RegExpExecArray | null;
-    while ((mm = methodRegex.exec(classBody)) !== null) {
-      if (mm[1] !== 'constructor') {
-        methods.push({ name: mm[1], rawParams: mm[2] || '' });
+  // Top-level function / runner detection first
+  const candidates: Array<{ name: string; rawParams: string }> = [];
+  const fnRegex =
+    /(?:(?:export\s+)?(?:async\s+)?function\s+([A-Za-z_$]\w*)\s*\(([^)]*)\)|(?:export\s+)?(?:const|let|var)\s+([A-Za-z_$]\w*)\s*=\s*(?:async\s+)?(?:function(?:\s+[A-Za-z_$]\w*)?\s*\(([^)]*)\)|(?:\(([^)]*)\)|([A-Za-z_$]\w*))\s*=>))/g;
+  let m: RegExpExecArray | null;
+  while ((m = fnRegex.exec(cleanCode)) !== null) {
+    const name = m[1] || m[3] || '';
+    const rawParams = m[2] || m[4] || m[5] || m[6] || '';
+    if (
+      name &&
+      name !== 'main' &&
+      name !== 'ListNode' &&
+      name !== 'TreeNode' &&
+      name !== 'Node' &&
+      isTopLevelMatch(cleanCode, m.index)
+    ) {
+      candidates.push({ name, rawParams });
+    }
+  }
+
+  const runner = candidates.find((c) => /^(?:test|run)[A-Z_]/i.test(c.name));
+  if (runner) {
+    fnName = runner.name;
+    paramNames = splitTopLevelParams(runner.rawParams);
+  }
+
+  // Check if user code has class Solution or a problem class (if no runner found)
+  if (!fnName) {
+    const classRegex = /class\s+([A-Za-z_$]\w*)\s*\{/g;
+    let cm: RegExpExecArray | null;
+    const foundClasses: Array<{ name: string; body: string; methods: Array<{ name: string; rawParams: string }>; ctorParams: string }> = [];
+    while ((cm = classRegex.exec(cleanCode)) !== null) {
+      const cName = cm[1];
+      if (cName === 'ListNode' || cName === 'TreeNode' || cName === 'Node') continue;
+      const openBrace = cm.index + cm[0].length - 1;
+      const classBody = extractClassBody(cleanCode, openBrace);
+      const methodRegex = /(?:async\s+)?([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\(([^)]*)\)\s*\{/g;
+      const methods: Array<{ name: string; rawParams: string }> = [];
+      let ctorParams = '';
+      let mm: RegExpExecArray | null;
+      while ((mm = methodRegex.exec(classBody)) !== null) {
+        if (mm[1] !== 'constructor') {
+          methods.push({ name: mm[1], rawParams: mm[2] || '' });
+        } else {
+          ctorParams = mm[2] || '';
+        }
+      }
+      if (methods.length > 0) {
+        foundClasses.push({ name: cName, body: classBody, methods, ctorParams });
       }
     }
-    if (methods.length > 0) {
+
+    const solutionClass =
+      foundClasses.find((c) => /^Solution/i.test(c.name)) ||
+      foundClasses.find((c) => !c.ctorParams.trim());
+
+    if (solutionClass) {
       isSolutionClass = true;
-      let chosen = methods[0];
-      const knownProblem = methods.find((m) =>
+      className = solutionClass.name;
+      let chosen = solutionClass.methods[0];
+      const knownProblem = solutionClass.methods.find((m) =>
         /^(?:twoSum|reverseList|isValid|inorderTraversal|preorderTraversal|postorderTraversal|numIslands|maxSubArray|climbStairs|mergeTwoLists|lengthOfLongestSubstring|isPalindrome|coinChange|invertTree|hasCycle|search|binarySearch)$/i.test(m.name),
       );
       if (knownProblem) {
         chosen = knownProblem;
-      } else if (methods.length > 1) {
-        const nonHelper = methods.find(
+      } else if (solutionClass.methods.length > 1) {
+        const nonHelper = solutionClass.methods.find(
           (m) => !/^(?:_|helper|dfs|bfs|solve|inorder$|preorder$|postorder$)/i.test(m.name),
         );
         if (nonHelper) chosen = nonHelper;
@@ -778,26 +856,9 @@ function buildJSDriver(code: string, input: string): string {
     }
   }
 
-  // Top-level function or function expression
-  if (!isSolutionClass) {
-    const candidates: Array<{ name: string; rawParams: string }> = [];
-    const fnRegex =
-      /(?:(?:export\s+)?(?:async\s+)?function\s+([A-Za-z_$]\w*)\s*\(([^)]*)\)|(?:export\s+)?(?:const|let|var)\s+([A-Za-z_$]\w*)\s*=\s*(?:async\s+)?(?:function(?:\s+[A-Za-z_$]\w*)?\s*\(([^)]*)\)|(?:\(([^)]*)\)|([A-Za-z_$]\w*))\s*=>))/g;
-    let m: RegExpExecArray | null;
-    while ((m = fnRegex.exec(code)) !== null) {
-      const name = m[1] || m[3] || '';
-      const rawParams = m[2] || m[4] || m[5] || m[6] || '';
-      if (
-        name &&
-        name !== 'main' &&
-        name !== 'ListNode' &&
-        name !== 'TreeNode' &&
-        name !== 'Node' &&
-        isTopLevelMatch(code, m.index)
-      ) {
-        candidates.push({ name, rawParams });
-      }
-    }
+  // Top-level function, prototype-style class, or function expression
+  let isProtoClass = false;
+  if (!isSolutionClass && !fnName) {
     if (candidates.length === 0) return code;
 
     let chosen = candidates[candidates.length - 1];
@@ -814,6 +875,7 @@ function buildJSDriver(code: string, input: string): string {
     }
     fnName = chosen.name;
     paramNames = splitTopLevelParams(chosen.rawParams);
+    isProtoClass = new RegExp(`\\b${fnName}\\.prototype\\.`).test(cleanCode);
   }
 
   const effectiveInput = input && input.trim() ? input : (inferDefaultInput(code) ?? '');
@@ -825,27 +887,64 @@ function buildJSDriver(code: string, input: string): string {
     return hint.includes('head') || hint.includes('root') || hint.includes('tree') || hint.includes('listnode') || hint.includes('treenode') || hint.includes('l1') || hint.includes('l2');
   });
 
+  const serializeFn = `function _serialize(obj) {
+  if (obj === null || obj === undefined) return obj;
+  if (typeof obj === 'object' && ('val' in obj || 'value' in obj) && 'next' in obj) {
+    const res = [];
+    let curr = obj;
+    let count = 0;
+    while (curr && count < 1000) {
+      res.push(curr.val !== undefined ? curr.val : curr.value);
+      curr = curr.next;
+      count++;
+    }
+    return res;
+  }
+  if (typeof obj === 'object' && ('val' in obj || 'value' in obj) && ('left' in obj || 'right' in obj)) {
+    const res = [];
+    const q = [obj];
+    while (q.length > 0) {
+      const n = q.shift();
+      if (n) {
+        res.push(n.val !== undefined ? n.val : n.value);
+        q.push(n.left || null);
+        q.push(n.right || null);
+      } else {
+        res.push(null);
+      }
+    }
+    while (res.length > 0 && res[res.length - 1] === null) {
+      res.pop();
+    }
+    return res;
+  }
+  return obj;
+};`;
+
   if (!needsConversion) {
     const directCall = isSolutionClass
       ? `new ${className}().${methodName}(${argsRepr})`
-      : `${fnName}(${argsRepr})`;
+      : (isProtoClass ? `new ${fnName}(${argsRepr})` : `${fnName}(${argsRepr})`);
     return `${code}
 
 // ── AlgoLens generated driver ──────────────────────────
+${serializeFn}
 (function() {
   const _result = ${directCall};
-  if (_result !== undefined) console.log(JSON.stringify(_result));
+  if (_result !== undefined) console.log(JSON.stringify(_serialize(_result)));
 })();
 `;
   }
 
   const caller = isSolutionClass
     ? `const _sol = new ${className}();\n    const _result = _sol.${methodName}(..._converted_args);`
-    : `const _result = ${fnName}(..._converted_args);`;
+    : (isProtoClass ? `const _result = new ${fnName}(..._converted_args);` : `const _result = ${fnName}(..._converted_args);`);
 
   return `${code}
 
 // ── AlgoLens generated driver ──────────────────────────
+${serializeFn}
+
 const _ListNodeClass = typeof ListNode !== 'undefined' ? ListNode : class ListNode {
   constructor(val = 0, next = null) {
     this.val = val;
@@ -931,7 +1030,7 @@ function _to_tree_node(vals) {
 
   try {
     ${caller}
-    if (_result !== undefined) console.log(JSON.stringify(_result));
+    if (_result !== undefined) console.log(JSON.stringify(_serialize(_result)));
   } catch (err) {
     console.error(err);
     throw err;

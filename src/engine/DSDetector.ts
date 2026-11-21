@@ -183,8 +183,8 @@ function heuristicDetect(
     }
 
     if (sample.length === 0) {
-      if (/stack|stk/.test(lname)) return 'stack';
-      if (/queue|que/.test(lname)) return 'queue';
+      if (/(?:^|_)(?:st|stack|stk)(?:$|_)/i.test(lname) || /stack|stk/i.test(lname)) return 'stack';
+      if (/(?:^|_)(?:q|queue|que|dq|deque)(?:$|_)/i.test(lname) || /queue|que|deque|dq/i.test(lname)) return 'queue';
       if (/heap|pq/.test(lname)) return 'heap';
       return 'array';
     }
@@ -279,8 +279,8 @@ function heuristicDetect(
     }
 
     // Default: array
-    if (/stack|stk/.test(lname)) return 'stack';
-    if (/queue|que/.test(lname)) return 'queue';
+    if (/(?:^|_)(?:st|stack|stk)(?:$|_)/i.test(lname) || /stack|stk/i.test(lname)) return 'stack';
+    if (/(?:^|_)(?:q|queue|que|dq|deque)(?:$|_)/i.test(lname) || /queue|que|deque|dq/i.test(lname)) return 'queue';
     return 'array';
   }
 
@@ -309,8 +309,8 @@ function heuristicDetect(
   }
 
   // Name-based hints
-  if (/stack|stk/.test(lname)) return 'stack';
-  if (/queue|que/.test(lname)) return 'queue';
+  if (/(?:^|_)(?:st|stack|stk)(?:$|_)/i.test(lname) || /stack|stk/i.test(lname)) return 'stack';
+  if (/(?:^|_)(?:q|queue|que|dq|deque)(?:$|_)/i.test(lname) || /queue|que|deque|dq/i.test(lname)) return 'queue';
   if (/heap|pq/.test(lname)) return 'heap';
   if (/graph|adj/.test(lname)) return 'graph';
   if (/tree|root|node/.test(lname)) return 'binaryTree';

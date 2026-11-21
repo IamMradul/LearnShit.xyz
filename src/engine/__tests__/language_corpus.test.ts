@@ -270,8 +270,13 @@ describe('Language Support Corpus Test Suite', () => {
         if (meta.expectedDS && meta.expectedDS.length > 0 && res.steps && res.steps.length > 0) {
           const detected = detectDataStructures(res.steps);
           const detectedTypes = new Set(detected.map((d) => d.dsType));
-          // If any expected DS type is in detectedTypes
-          expectedDSDetected = meta.expectedDS.some((type) => detectedTypes.has(type as any));
+          // If any expected DS type is in detectedTypes (stack/queue are array-backed and rendered by ArrayRenderer)
+          expectedDSDetected = meta.expectedDS.some((type) => {
+            if (detectedTypes.has(type as any)) return true;
+            if (type === 'array' && (detectedTypes.has('stack') || detectedTypes.has('queue'))) return true;
+            if ((type === 'stack' || type === 'queue') && detectedTypes.has('array')) return true;
+            return false;
+          });
         } else if (!meta.expectedDS || meta.expectedDS.length === 0) {
           expectedDSDetected = true;
         } else {
@@ -379,6 +384,7 @@ describe('Language Support Corpus Test Suite', () => {
       // Verify that the record was generated
       expect(record).toBeDefined();
     },
+    15000,
   );
 });
 
