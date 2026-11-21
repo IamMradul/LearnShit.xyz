@@ -1,15 +1,17 @@
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { Navbar } from './components/layout/Navbar';
 import { MainLayout } from './components/layout/MainLayout';
 import { GallerySection } from './components/gallery/GallerySection';
-import { ResourcesSection } from './components/resources/ResourcesSection';
+import { ResourcesSection, type ResourceTab } from './components/resources/ResourcesSection';
 import { HeroSection } from './components/landing/HeroSection';
 import { Footer } from './components/layout/Footer';
 import { useUIStore } from './store/uiStore';
-import { Analytics } from "@vercel/analytics/react";
+import { Analytics } from '@vercel/analytics/react';
 
 export default function App() {
   const { theme } = useUIStore();
+  const [showResources, setShowResources] = useState(false);
+  const [resourceTab, setResourceTab] = useState<ResourceTab>('sheets');
   const ideRef = useRef<HTMLDivElement>(null);
 
   // Apply theme class to <html> on mount and whenever it changes
@@ -18,7 +20,36 @@ export default function App() {
   }, [theme]);
 
   const handleEnterApp = useCallback(() => {
-    ideRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (showResources) {
+      setShowResources(false);
+      setTimeout(() => {
+        ideRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 60);
+    } else {
+      ideRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [showResources]);
+
+  const handleOpenPlaygrounds = useCallback(() => {
+    if (showResources) {
+      setShowResources(false);
+      setTimeout(() => {
+        document.getElementById('gallery-anchor')?.scrollIntoView({ behavior: 'smooth' });
+      }, 60);
+    } else {
+      document.getElementById('gallery-anchor')?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [showResources]);
+
+  const handleGoHome = useCallback(() => {
+    setShowResources(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  const handleOpenResources = useCallback((tab: ResourceTab = 'sheets') => {
+    setResourceTab(tab);
+    setShowResources(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
   return (
@@ -31,37 +62,56 @@ export default function App() {
       }}
     >
       {/* ── Global Persistent Navigation Bar ── */}
-      <Navbar onOpenVisualizer={handleEnterApp} />
+      <Navbar
+        onOpenVisualizer={handleEnterApp}
+        onOpenPlaygrounds={handleOpenPlaygrounds}
+        onOpenResources={handleOpenResources}
+        onGoHome={handleGoHome}
+        isResourcesView={showResources}
+        currentResourceTab={resourceTab}
+      />
 
-      {/* ── Hero landing (100vh) ── */}
-      <HeroSection onEnterApp={handleEnterApp} />
+      {showResources ? (
+        <div style={{ paddingTop: 62, minHeight: 'calc(100vh - 62px)', display: 'flex', flexDirection: 'column' }}>
+          <ResourcesSection
+            initialTab={resourceTab}
+            onTabChange={setResourceTab}
+            onBack={handleGoHome}
+          />
+          <Footer onOpenResources={handleOpenResources} />
+        </div>
+      ) : (
+        <>
+          {/* ── Hero landing (100vh) ── */}
+          <HeroSection
+            onEnterApp={handleEnterApp}
+            onOpenResources={handleOpenResources}
+          />
 
-      {/* ── IDE workspace (100vh) ── */}
-      <div
-        ref={ideRef}
-        id="ide-anchor"
-        style={{
-          height: '100vh',
-          flexShrink: 0,
-          background: 'var(--bg-primary)',
-        }}
-      >
-        <MainLayout />
-      </div>
+          {/* ── IDE workspace (100vh) ── */}
+          <div
+            ref={ideRef}
+            id="ide-anchor"
+            style={{
+              height: '100vh',
+              flexShrink: 0,
+              background: 'var(--bg-primary)',
+            }}
+          >
+            <MainLayout />
+          </div>
 
-      {/* ── Algorithm gallery below ── */}
-      <div id="gallery-anchor">
-        <GallerySection />
-      </div>
+          {/* ── Algorithm gallery below ── */}
+          <div id="gallery-anchor">
+            <GallerySection />
+          </div>
 
-      {/* ── Developer Resources & Cheatsheet ── */}
-      <div id="resources-anchor">
-        <ResourcesSection onOpenVisualizer={handleEnterApp} />
-      </div>
+          {/* ── Platform Footer & Contact ── */}
+          <Footer onOpenResources={handleOpenResources} />
+        </>
+      )}
 
-      {/* ── Platform Footer & Contact ── */}
-      <Footer />
-
+      {/* ── Vercel Web Analytics ── */}
       <Analytics />
     </div>
   );

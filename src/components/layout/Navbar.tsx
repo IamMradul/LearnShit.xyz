@@ -8,8 +8,9 @@ import {
   X,
   ExternalLink,
   ChevronRight,
-  Sparkles,
+  FileText,
 } from 'lucide-react';
+import type { ResourceTab } from '../resources/ResourcesSection';
 
 /* ─── Crisp Inline GitHub SVG ────────────────────────────────────────────────── */
 function GithubIcon({ size = 16, color = 'currentColor' }: { size?: number; color?: string }) {
@@ -30,57 +31,40 @@ function GithubIcon({ size = 16, color = 'currentColor' }: { size?: number; colo
   );
 }
 
-/* ─── Accent Mark Gyroscope SVG ─────────────────────────────────────────────── */
-function AccentMark() {
-  return (
-    <svg
-      viewBox="0 0 52 52"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-      style={{ width: 17, height: 17, overflow: 'visible' }}
-    >
-      <circle
-        cx="26"
-        cy="26"
-        r="23"
-        stroke="#D6523A"
-        strokeWidth="2.2"
-        strokeDasharray="98.3 46.3"
-        transform="rotate(2.5 26 26)"
-      />
-      <g stroke="#D6523A" strokeWidth="2.2" strokeLinecap="round">
-        <circle cx="26.5" cy="26.1" r="2.3" />
-        <path d="M28.9 27.6C31.6 29 32.9 31.2 31.8 33.3 30.7 35.4 27.2 36.1 24.2 35.1" />
-      </g>
-    </svg>
-  );
-}
-
-interface NavbarProps {
+export interface NavbarProps {
   onOpenVisualizer?: () => void;
+  onOpenPlaygrounds?: () => void;
+  onOpenResources?: (tab?: ResourceTab) => void;
+  onGoHome?: () => void;
+  isResourcesView?: boolean;
+  currentResourceTab?: ResourceTab;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onOpenVisualizer }) => {
+export const Navbar: React.FC<NavbarProps> = ({
+  onOpenVisualizer,
+  onOpenPlaygrounds,
+  onOpenResources,
+  onGoHome,
+  isResourcesView = false,
+  currentResourceTab = 'sheets',
+}) => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState<'home' | 'ide' | 'gallery' | 'resources'>('home');
+  const [activeSection, setActiveSection] = useState<'home' | 'ide' | 'gallery'>('home');
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+      setScrolled(window.scrollY > 15);
 
-      // Simple active section detection
+      if (isResourcesView) return;
+
       const scrollY = window.scrollY;
       const ideEl = document.getElementById('ide-anchor');
       const galleryEl = document.getElementById('gallery-anchor');
-      const resourcesEl = document.getElementById('resources-anchor');
 
-      if (resourcesEl && scrollY >= resourcesEl.offsetTop - 150) {
-        setActiveSection('resources');
-      } else if (galleryEl && scrollY >= galleryEl.offsetTop - 150) {
+      if (galleryEl && scrollY >= galleryEl.offsetTop - 180) {
         setActiveSection('gallery');
-      } else if (ideEl && scrollY >= ideEl.offsetTop - 150) {
+      } else if (ideEl && scrollY >= ideEl.offsetTop - 180) {
         setActiveSection('ide');
       } else {
         setActiveSection('home');
@@ -89,28 +73,51 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenVisualizer }) => {
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isResourcesView]);
 
-  const scrollToAnchor = (id: string) => {
+  const handleBrandClick = () => {
     setMobileMenuOpen(false);
-    if (id === 'top') {
+    if (onGoHome) {
+      onGoHome();
+    } else {
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      return;
-    }
-    const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
-  const handleLaunchVisualizer = () => {
+  const handleVisualizerClick = () => {
     setMobileMenuOpen(false);
     if (onOpenVisualizer) {
       onOpenVisualizer();
     } else {
-      scrollToAnchor('ide-anchor');
+      const el = document.getElementById('ide-anchor');
+      el?.scrollIntoView({ behavior: 'smooth' });
     }
   };
+
+  const handlePlaygroundsClick = () => {
+    setMobileMenuOpen(false);
+    if (onOpenPlaygrounds) {
+      onOpenPlaygrounds();
+    } else {
+      const el = document.getElementById('gallery-anchor');
+      el?.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleResourcesClick = (tab: ResourceTab = 'sheets') => {
+    setMobileMenuOpen(false);
+    if (onOpenResources) {
+      onOpenResources(tab);
+    } else {
+      const el = document.getElementById('resources-anchor');
+      el?.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const isSheetsActive = isResourcesView && (currentResourceTab === 'sheets' || currentResourceTab === 'learnshit-sheet');
+  const isBooksActive = isResourcesView && currentResourceTab === 'books';
+  const isIdeActive = !isResourcesView && activeSection === 'ide';
+  const isGalleryActive = !isResourcesView && activeSection === 'gallery';
 
   return (
     <>
@@ -122,23 +129,24 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenVisualizer }) => {
           right: 0,
           height: 62,
           zIndex: 100,
-          background: scrolled ? 'rgba(8, 10, 13, 0.88)' : 'rgba(10, 11, 14, 0.72)',
+          background: scrolled ? 'rgba(8, 10, 13, 0.92)' : 'rgba(10, 11, 14, 0.78)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
-          borderBottom: `1px solid ${scrolled ? 'rgba(247, 245, 239, 0.1)' : 'rgba(247, 245, 239, 0.06)'}`,
-          transition: 'all 0.25s ease',
+          borderBottom: `1px solid ${scrolled ? 'rgba(247, 245, 239, 0.12)' : 'rgba(247, 245, 239, 0.07)'}`,
+          transition: 'background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease',
+          boxShadow: scrolled ? '0 4px 20px rgba(0, 0, 0, 0.45)' : 'none',
         }}
       >
-        {/* Subtle accent glow line at top */}
+        {/* Subtle accent highlight line */}
         <div
           style={{
             position: 'absolute',
             top: 0,
             left: '50%',
             transform: 'translateX(-50%)',
-            width: '60%',
+            width: '65%',
             height: '1px',
-            background: 'linear-gradient(90deg, transparent 0%, rgba(214, 82, 58, 0.45) 50%, transparent 100%)',
+            background: 'linear-gradient(90deg, transparent 0%, rgba(214, 82, 58, 0.5) 50%, transparent 100%)',
             pointerEvents: 'none',
           }}
         />
@@ -157,7 +165,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenVisualizer }) => {
         >
           {/* ── Brand Logo & Title (Left) ── */}
           <div
-            onClick={() => scrollToAnchor('top')}
+            onClick={handleBrandClick}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -165,6 +173,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenVisualizer }) => {
               cursor: 'pointer',
               userSelect: 'none',
             }}
+            title="Go to LearnShit Home"
           >
             <div
               style={{
@@ -177,6 +186,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenVisualizer }) => {
                 alignItems: 'center',
                 justifyContent: 'center',
                 boxShadow: '0 2px 10px rgba(214, 82, 58, 0.25)',
+                overflow: 'hidden',
                 transition: 'transform 0.2s ease, border-color 0.2s ease',
               }}
               onMouseEnter={(e) => {
@@ -188,7 +198,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenVisualizer }) => {
                 e.currentTarget.style.borderColor = 'rgba(247, 245, 239, 0.16)';
               }}
             >
-              <AccentMark />
+              <img
+                src="/learnshit.svg"
+                alt="LearnShit Logo"
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
             </div>
 
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
@@ -227,22 +241,23 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenVisualizer }) => {
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: 8,
+              gap: 6,
             }}
             className="navbar-desktop-nav"
+            aria-label="Main Navigation"
           >
             {/* Visualizer / IDE */}
             <button
-              onClick={() => scrollToAnchor('ide-anchor')}
+              onClick={handleVisualizerClick}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 7,
-                padding: '6px 14px',
+                padding: '6px 13px',
                 borderRadius: 8,
-                background: activeSection === 'ide' ? 'rgba(214, 82, 58, 0.14)' : 'transparent',
-                border: activeSection === 'ide' ? '1px solid rgba(214, 82, 58, 0.35)' : '1px solid transparent',
-                color: activeSection === 'ide' ? '#F7F5EF' : 'rgba(247, 245, 239, 0.75)',
+                background: isIdeActive ? 'rgba(214, 82, 58, 0.14)' : 'transparent',
+                border: isIdeActive ? '1px solid rgba(214, 82, 58, 0.35)' : '1px solid transparent',
+                color: isIdeActive ? '#F7F5EF' : 'rgba(247, 245, 239, 0.75)',
                 fontFamily: "'Inter', sans-serif",
                 fontSize: 13,
                 fontWeight: 600,
@@ -250,34 +265,34 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenVisualizer }) => {
                 transition: 'all 0.18s ease',
               }}
               onMouseEnter={(e) => {
-                if (activeSection !== 'ide') {
+                if (!isIdeActive) {
                   e.currentTarget.style.color = '#F7F5EF';
                   e.currentTarget.style.background = 'rgba(247, 245, 239, 0.05)';
                 }
               }}
               onMouseLeave={(e) => {
-                if (activeSection !== 'ide') {
+                if (!isIdeActive) {
                   e.currentTarget.style.color = 'rgba(247, 245, 239, 0.75)';
                   e.currentTarget.style.background = 'transparent';
                 }
               }}
             >
-              <Code2 size={15} style={{ color: activeSection === 'ide' ? 'var(--accent, #D6523A)' : 'inherit' }} />
+              <Code2 size={15} style={{ color: isIdeActive ? 'var(--accent, #D6523A)' : 'inherit' }} />
               <span>Visualizer</span>
             </button>
 
             {/* Algorithm Playgrounds / Catalog */}
             <button
-              onClick={() => scrollToAnchor('gallery-anchor')}
+              onClick={handlePlaygroundsClick}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 7,
-                padding: '6px 14px',
+                padding: '6px 13px',
                 borderRadius: 8,
-                background: activeSection === 'gallery' ? 'rgba(214, 82, 58, 0.14)' : 'transparent',
-                border: activeSection === 'gallery' ? '1px solid rgba(214, 82, 58, 0.35)' : '1px solid transparent',
-                color: activeSection === 'gallery' ? '#F7F5EF' : 'rgba(247, 245, 239, 0.75)',
+                background: isGalleryActive ? 'rgba(214, 82, 58, 0.14)' : 'transparent',
+                border: isGalleryActive ? '1px solid rgba(214, 82, 58, 0.35)' : '1px solid transparent',
+                color: isGalleryActive ? '#F7F5EF' : 'rgba(247, 245, 239, 0.75)',
                 fontFamily: "'Inter', sans-serif",
                 fontSize: 13,
                 fontWeight: 600,
@@ -285,26 +300,26 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenVisualizer }) => {
                 transition: 'all 0.18s ease',
               }}
               onMouseEnter={(e) => {
-                if (activeSection !== 'gallery') {
+                if (!isGalleryActive) {
                   e.currentTarget.style.color = '#F7F5EF';
                   e.currentTarget.style.background = 'rgba(247, 245, 239, 0.05)';
                 }
               }}
               onMouseLeave={(e) => {
-                if (activeSection !== 'gallery') {
+                if (!isGalleryActive) {
                   e.currentTarget.style.color = 'rgba(247, 245, 239, 0.75)';
                   e.currentTarget.style.background = 'transparent';
                 }
               }}
             >
-              <Layers size={15} style={{ color: activeSection === 'gallery' ? 'var(--accent, #D6523A)' : 'inherit' }} />
+              <Layers size={15} style={{ color: isGalleryActive ? 'var(--accent, #D6523A)' : 'inherit' }} />
               <span>Playgrounds</span>
               <span
                 style={{
                   fontFamily: "'JetBrains Mono', monospace",
                   fontSize: 10,
-                  color: 'rgba(247, 245, 239, 0.45)',
-                  background: 'rgba(247, 245, 239, 0.08)',
+                  color: isGalleryActive ? '#F7F5EF' : 'rgba(247, 245, 239, 0.45)',
+                  background: isGalleryActive ? 'rgba(214, 82, 58, 0.25)' : 'rgba(247, 245, 239, 0.08)',
                   padding: '1px 5px',
                   borderRadius: 4,
                 }}
@@ -313,19 +328,19 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenVisualizer }) => {
               </span>
             </button>
 
-            {/* Resources Section Link */}
+            {/* Resources (Problem Sheets) */}
             <button
-              onClick={() => scrollToAnchor('resources-anchor')}
+              onClick={() => handleResourcesClick('sheets')}
               id="navbar-resources-btn"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 7,
-                padding: '6px 14px',
+                padding: '6px 13px',
                 borderRadius: 8,
-                background: activeSection === 'resources' ? 'rgba(214, 82, 58, 0.14)' : 'transparent',
-                border: activeSection === 'resources' ? '1px solid rgba(214, 82, 58, 0.35)' : '1px solid transparent',
-                color: activeSection === 'resources' ? '#F7F5EF' : 'rgba(247, 245, 239, 0.75)',
+                background: isSheetsActive ? 'rgba(214, 82, 58, 0.14)' : 'transparent',
+                border: isSheetsActive ? '1px solid rgba(214, 82, 58, 0.35)' : '1px solid transparent',
+                color: isSheetsActive ? '#F7F5EF' : 'rgba(247, 245, 239, 0.75)',
                 fontFamily: "'Inter', sans-serif",
                 fontSize: 13,
                 fontWeight: 600,
@@ -333,34 +348,85 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenVisualizer }) => {
                 transition: 'all 0.18s ease',
               }}
               onMouseEnter={(e) => {
-                if (activeSection !== 'resources') {
+                if (!isSheetsActive) {
                   e.currentTarget.style.color = '#F7F5EF';
                   e.currentTarget.style.background = 'rgba(247, 245, 239, 0.05)';
                 }
               }}
               onMouseLeave={(e) => {
-                if (activeSection !== 'resources') {
+                if (!isSheetsActive) {
                   e.currentTarget.style.color = 'rgba(247, 245, 239, 0.75)';
                   e.currentTarget.style.background = 'transparent';
                 }
               }}
             >
-              <BookOpen size={15} style={{ color: activeSection === 'resources' ? 'var(--accent, #D6523A)' : 'inherit' }} />
+              <FileText size={15} style={{ color: isSheetsActive ? 'var(--accent, #D6523A)' : 'inherit' }} />
               <span>Resources</span>
               <span
                 style={{
                   fontFamily: "'JetBrains Mono', monospace",
                   fontSize: 9.5,
-                  color: 'var(--accent, #D6523A)',
-                  background: 'rgba(214, 82, 58, 0.15)',
-                  border: '1px solid rgba(214, 82, 58, 0.3)',
+                  color: isSheetsActive ? '#FFFFFF' : 'rgba(247, 245, 239, 0.55)',
+                  background: isSheetsActive ? 'rgba(214, 82, 58, 0.35)' : 'rgba(247, 245, 239, 0.08)',
+                  border: isSheetsActive ? '1px solid rgba(214, 82, 58, 0.5)' : '1px solid rgba(247, 245, 239, 0.12)',
                   padding: '1px 5px',
                   borderRadius: 4,
-                  fontWeight: 700,
+                  fontWeight: 600,
                   textTransform: 'uppercase',
                 }}
               >
-                Toolkit
+                Sheets
+              </span>
+            </button>
+
+            {/* Books (CP Reference Books) */}
+            <button
+              onClick={() => handleResourcesClick('books')}
+              id="navbar-books-btn"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 7,
+                padding: '6px 13px',
+                borderRadius: 8,
+                background: isBooksActive ? 'rgba(214, 82, 58, 0.14)' : 'transparent',
+                border: isBooksActive ? '1px solid rgba(214, 82, 58, 0.35)' : '1px solid transparent',
+                color: isBooksActive ? '#F7F5EF' : 'rgba(247, 245, 239, 0.75)',
+                fontFamily: "'Inter', sans-serif",
+                fontSize: 13,
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.18s ease',
+              }}
+              onMouseEnter={(e) => {
+                if (!isBooksActive) {
+                  e.currentTarget.style.color = '#F7F5EF';
+                  e.currentTarget.style.background = 'rgba(247, 245, 239, 0.05)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isBooksActive) {
+                  e.currentTarget.style.color = 'rgba(247, 245, 239, 0.75)';
+                  e.currentTarget.style.background = 'transparent';
+                }
+              }}
+            >
+              <BookOpen size={15} style={{ color: isBooksActive ? 'var(--accent, #D6523A)' : 'inherit' }} />
+              <span>Books</span>
+              <span
+                style={{
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: 9.5,
+                  color: '#FFFFFF',
+                  background: 'linear-gradient(135deg, #D6523A 0%, #E2583E 100%)',
+                  padding: '1px 6px',
+                  borderRadius: 10,
+                  fontWeight: 700,
+                  letterSpacing: '0.04em',
+                  boxShadow: '0 1px 6px rgba(214, 82, 58, 0.35)',
+                }}
+              >
+                NEW
               </span>
             </button>
           </nav>
@@ -411,7 +477,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenVisualizer }) => {
 
             {/* Launch Visualizer Primary CTA */}
             <button
-              onClick={handleLaunchVisualizer}
+              onClick={handleVisualizerClick}
               id="navbar-launch-btn"
               style={{
                 display: 'inline-flex',
@@ -488,7 +554,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenVisualizer }) => {
           }}
         >
           <button
-            onClick={() => scrollToAnchor('ide-anchor')}
+            onClick={handleVisualizerClick}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -513,7 +579,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenVisualizer }) => {
           </button>
 
           <button
-            onClick={() => scrollToAnchor('gallery-anchor')}
+            onClick={handlePlaygroundsClick}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -538,15 +604,40 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenVisualizer }) => {
           </button>
 
           <button
-            onClick={() => scrollToAnchor('resources-anchor')}
+            onClick={() => handleResourcesClick('sheets')}
             style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               padding: '12px 16px',
               borderRadius: 8,
-              background: 'rgba(214, 82, 58, 0.1)',
-              border: '1px solid rgba(214, 82, 58, 0.3)',
+              background: isSheetsActive ? 'rgba(214, 82, 58, 0.15)' : '#12141a',
+              border: isSheetsActive ? '1px solid rgba(214, 82, 58, 0.4)' : '1px solid rgba(247, 245, 239, 0.08)',
+              color: '#F7F5EF',
+              fontFamily: "'Inter', sans-serif",
+              fontSize: 14,
+              fontWeight: 600,
+              cursor: 'pointer',
+              textAlign: 'left',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <FileText size={16} color="var(--accent, #D6523A)" />
+              <span>Resources &amp; Problem Sheets</span>
+            </div>
+            <ChevronRight size={14} style={{ opacity: 0.5 }} />
+          </button>
+
+          <button
+            onClick={() => handleResourcesClick('books')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '12px 16px',
+              borderRadius: 8,
+              background: isBooksActive ? 'rgba(214, 82, 58, 0.2)' : 'rgba(214, 82, 58, 0.1)',
+              border: '1px solid rgba(214, 82, 58, 0.35)',
               color: '#F7F5EF',
               fontFamily: "'Inter', sans-serif",
               fontSize: 14,
@@ -557,13 +648,16 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenVisualizer }) => {
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <BookOpen size={16} color="var(--accent, #D6523A)" />
-              <span>Resources &amp; Toolkit</span>
+              <span>Reference Books</span>
             </div>
             <span
               style={{
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: 10,
-                color: 'var(--accent, #D6523A)',
+                color: '#FFFFFF',
+                background: 'var(--accent, #D6523A)',
+                padding: '1px 6px',
+                borderRadius: 8,
                 fontWeight: 700,
               }}
             >
@@ -598,7 +692,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenVisualizer }) => {
           </a>
 
           <button
-            onClick={handleLaunchVisualizer}
+            onClick={handleVisualizerClick}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -626,7 +720,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenVisualizer }) => {
 
       {/* Responsive styles */}
       <style>{`
-        @media (max-width: 860px) {
+        @media (max-width: 960px) {
           .navbar-desktop-nav {
             display: none !important;
           }

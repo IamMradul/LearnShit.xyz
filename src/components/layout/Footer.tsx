@@ -83,7 +83,11 @@ const CREATORS: Creator[] = [
   },
 ];
 
-export const Footer: React.FC = () => {
+interface FooterProps {
+  onOpenResources?: (tab?: 'sheets' | 'books') => void;
+}
+
+export const Footer: React.FC<FooterProps> = ({ onOpenResources }) => {
   const [avatarSources, setAvatarSources] = useState<Record<string, string>>({
     IamMradul: '/avatars/mradul.jpg',
     Imdilshan: '/avatars/dilshan.jpg',
@@ -238,7 +242,7 @@ export const Footer: React.FC = () => {
                 Gallery
               </button>
               <button
-                onClick={() => scrollToAnchor('resources-anchor')}
+                onClick={() => (onOpenResources ? onOpenResources('sheets') : scrollToAnchor('resources-anchor'))}
                 style={{
                   background: 'none',
                   border: 'none',
@@ -253,6 +257,23 @@ export const Footer: React.FC = () => {
                 onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(247, 245, 239, 0.65)')}
               >
                 Resources
+              </button>
+              <button
+                onClick={() => (onOpenResources ? onOpenResources('books') : scrollToAnchor('resources-anchor'))}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  padding: 0,
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: 12,
+                  color: 'rgba(247, 245, 239, 0.65)',
+                  cursor: 'pointer',
+                  transition: 'color 0.15s ease',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--accent, #D6523A)')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(247, 245, 239, 0.65)')}
+              >
+                Books
               </button>
             </div>
           </div>

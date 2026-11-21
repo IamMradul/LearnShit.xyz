@@ -46,7 +46,13 @@ function AccentMark() {
 }
 
 /* ─── HeroSection ────────────────────────────────────────────────── */
-export function HeroSection({ onEnterApp }: { onEnterApp: () => void }) {
+export function HeroSection({
+  onEnterApp,
+  onOpenResources,
+}: {
+  onEnterApp: () => void;
+  onOpenResources?: (tab?: 'sheets' | 'books') => void;
+}) {
   const { setCode, setInput, setLanguage, language } = useEditorStore();
   const { setResult, setRunning, setError } = useTraceStore();
 
@@ -115,8 +121,8 @@ export function HeroSection({ onEnterApp }: { onEnterApp: () => void }) {
           background: #0a0b0d;
           display: flex;
           flex-direction: column;
-          justifyContent: space-between;
-          padding: 84px 32px 28px;
+          justifyContent: center;
+          padding: 80px 32px 32px;
           box-sizing: border-box;
         }
 
