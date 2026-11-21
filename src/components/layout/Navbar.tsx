@@ -218,21 +218,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               >
                 LEARNSHIT<span style={{ color: 'var(--accent, #D6523A)' }}>.XYZ</span>
               </span>
-              <span
-                style={{
-                  fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: 10,
-                  color: 'var(--accent, #D6523A)',
-                  background: 'rgba(214, 82, 58, 0.12)',
-                  border: '1px solid rgba(214, 82, 58, 0.3)',
-                  padding: '1px 6px',
-                  borderRadius: 10,
-                  fontWeight: 700,
-                  letterSpacing: '0.04em',
-                }}
-              >
-                v2.4
-              </span>
             </div>
           </div>
 
@@ -411,9 +396,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                 }
               }}
             >
-              <BookOpen size={15} style={{ color: isBooksActive ? 'var(--accent, #D6523A)' : 'inherit' }} />
-              <span>Books</span>
-              <span
+              {/* <BookOpen size={15} style={{ color: isBooksActive ? 'var(--accent, #D6523A)' : 'inherit' }} />
+              <span>Books</span> */}
+              {/* <span
                 style={{
                   fontFamily: "'JetBrains Mono', monospace",
                   fontSize: 9.5,
@@ -427,7 +412,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 }}
               >
                 NEW
-              </span>
+              </span> */}
             </button>
           </nav>
 
@@ -441,7 +426,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             className="navbar-desktop-actions"
           >
             {/* GitHub Repo Pill Button */}
-            <a
+            {/* <a
               href="https://github.com/IamMradul/LearnShit.xyz"
               target="_blank"
               rel="noopener noreferrer"
@@ -473,7 +458,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <GithubIcon size={15} />
               <span>GitHub</span>
               <ExternalLink size={11} style={{ opacity: 0.55 }} />
-            </a>
+            </a> */}
 
             {/* Launch Visualizer Primary CTA */}
             <button
@@ -650,19 +635,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               <BookOpen size={16} color="var(--accent, #D6523A)" />
               <span>Reference Books</span>
             </div>
-            <span
-              style={{
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: 10,
-                color: '#FFFFFF',
-                background: 'var(--accent, #D6523A)',
-                padding: '1px 6px',
-                borderRadius: 8,
-                fontWeight: 700,
-              }}
-            >
-              NEW
-            </span>
           </button>
 
 
