@@ -411,6 +411,24 @@ export function instrumentCode(code: string, maxUserLine: number): string {
         return;
       }
 
+      if (t.isThrowStatement(node)) {
+        const stepCall = t.expressionStatement(
+          t.callExpression(t.identifier('__step__'), [
+            t.numericLiteral(line),
+            t.stringLiteral('line'),
+            varSnapshot,
+          ]),
+        );
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (stepCall as any)._stepInstrumented = true;
+        if (!path.parentPath?.isBlockStatement() && !path.parentPath?.isProgram()) {
+          path.replaceWith(t.blockStatement([stepCall, path.node]));
+        } else {
+          path.insertBefore(stepCall);
+        }
+        return;
+      }
+
       if (
         t.isForStatement(node) ||
         t.isWhileStatement(node) ||

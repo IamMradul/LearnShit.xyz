@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useState, useRef } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { useTraceStore } from '../../store/traceStore';
 import { useUIStore } from '../../store/uiStore';
 import { useEditorStore } from '../../store/editorStore';
@@ -24,13 +24,9 @@ import {
   Info,
   AlertTriangle,
   Code2,
-  Terminal,
-  ChevronDown,
-  ChevronUp,
   Activity,
   Layers,
   Sparkles,
-  ArrowLeft,
   Loader2,
   Layout,
 } from 'lucide-react';
@@ -133,7 +129,6 @@ export const VisualizerPane: React.FC = () => {
     steps,
     currentIndex,
     setCurrentIndex,
-    status,
     result,
     setResult,
     setRunning,
