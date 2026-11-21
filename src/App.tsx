@@ -43,13 +43,15 @@ export default function App() {
 
   const handleGoHome = useCallback(() => {
     setShowResources(false);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    requestAnimationFrame(() => window.scrollTo(0, 0));
   }, []);
 
   const handleOpenResources = useCallback((tab: ResourceTab = 'sheets') => {
     setResourceTab(tab);
     setShowResources(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    requestAnimationFrame(() => window.scrollTo(0, 0));
   }, []);
 
   return (

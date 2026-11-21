@@ -33,6 +33,7 @@ export function ResourcesSection({
     if (initialTab) {
       setTab(initialTab);
     }
+    window.scrollTo({ top: 0, behavior: 'instant' });
   }, [initialTab]);
 
   const handleTabSelect = (nextTab: ResourceTab) => {

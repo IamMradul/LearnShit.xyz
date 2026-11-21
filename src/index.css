@@ -414,11 +414,29 @@ body {
 }
 .resources-topbar {
   position: sticky;
-  top: 0;
+  top: 62px;
   z-index: 20;
   background: rgba(10, 11, 13, 0.94);
   border-bottom: 1px solid var(--border);
   backdrop-filter: blur(14px);
+}
+.hero-brand-logo {
+  width: 28px !important;
+  height: 28px !important;
+  max-width: 28px !important;
+  max-height: 28px !important;
+  border-radius: 7px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.hero-brand-logo img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+  display: block;
 }
 .resources-topbar-inner {
   max-width: 1600px;

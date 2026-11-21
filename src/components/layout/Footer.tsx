@@ -177,8 +177,26 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources }) => {
               >
                 
               </div> */}
-              <div className="hero-brand-logo" style={{ overflow: 'hidden' }}>
-                <img src="/learnshit.svg" alt="LearnShit Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <div
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: 7,
+                  background: '#14161c',
+                  border: '1px solid rgba(247, 245, 239, 0.16)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 2px 8px rgba(214, 82, 58, 0.2)',
+                  overflow: 'hidden',
+                  flexShrink: 0,
+                }}
+              >
+                <img
+                  src="/learnshit.svg"
+                  alt="LearnShit Logo"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                />
               </div>
               <span
                 style={{
