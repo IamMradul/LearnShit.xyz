@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Mail, ExternalLink, ArrowUp, Heart } from 'lucide-react';
 
 /* ─── GitHub Icon (Crisp inline SVG) ────────────────────────────────────────── */
@@ -53,9 +53,6 @@ interface Creator {
   role: string;
   github: string;
   email?: string;
-  avatarUrl: string;
-  initials: string;
-  fallbackBg: string;
 }
 
 const CREATORS: Creator[] = [
@@ -65,23 +62,16 @@ const CREATORS: Creator[] = [
     role: 'Lead Architect',
     github: 'https://github.com/IamMradul',
     email: 'mradulg306@gmail.com',
-    avatarUrl: 'https://github.com/IamMradul.png?size=80',
-    initials: 'M',
-    fallbackBg: 'linear-gradient(135deg, #D6523A 0%, #FF7854 100%)',
   },
   {
     name: 'Md Dilshan',
     handle: 'Imdilshan',
     role: 'Core Contributor',
     github: 'https://github.com/Imdilshan',
-    avatarUrl: 'https://github.com/Imdilshan.png?size=80',
-    initials: 'MD',
-    fallbackBg: 'linear-gradient(135deg, #2563EB 0%, #60A5FA 100%)',
   },
 ];
 
 export const Footer: React.FC = () => {
-  const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
