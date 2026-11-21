@@ -38,10 +38,20 @@ export interface TraceValue {
   dsHint?: DSType;
 }
 
+export interface LoopContext {
+  type: 'for' | 'while' | 'do-while';
+  headerLine: number;
+  iteration: number;
+  isHeader?: boolean;
+}
+
 export interface StackFrame {
   name: string;
   line: number;
   locals: Record<string, TraceValue>;
+  args?: Record<string, TraceValue>;
+  depth?: number;
+  returnValue?: TraceValue;
 }
 
 export interface DSMutation {
@@ -72,6 +82,11 @@ export interface TraceStep {
   stdout?: string;
   stderr?: string;
   exception?: { type: string; message: string };
+
+  lineExecutionCounts?: Record<number, number>;
+  loop?: LoopContext;
+  stdoutSoFar?: string;
+  returnFrom?: string;
 }
 
 export interface TraceResult {

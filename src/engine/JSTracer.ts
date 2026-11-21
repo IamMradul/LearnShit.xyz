@@ -11,7 +11,7 @@ import * as parser from '@babel/parser';
 import _traverse from '@babel/traverse';
 import _generate from '@babel/generator';
 import * as t from '@babel/types';
-import type { TraceRequest, TraceResult, TraceStep, DSMutation, StackFrame } from './TraceTypes';
+import type { TraceRequest, TraceResult, TraceStep, DSMutation, StackFrame, LoopContext, TraceValue } from './TraceTypes';
 import { createIoShims } from './ioShims';
 import { normalizeTraceResult } from './normalizeTrace';
 
@@ -219,6 +219,33 @@ function buildVarSnapshot(path: import('@babel/traverse').NodePath): t.ObjectExp
   return t.objectExpression(properties);
 }
 
+function buildArgsSnapshot(params: t.Function['params']): t.ObjectExpression {
+  const properties: t.ObjectProperty[] = [];
+  for (const param of params) {
+    let name: string | null = null;
+    if (t.isIdentifier(param)) {
+      name = param.name;
+    } else if (t.isAssignmentPattern(param) && t.isIdentifier(param.left)) {
+      name = param.left.name;
+    } else if (t.isRestElement(param) && t.isIdentifier(param.argument)) {
+      name = param.argument.name;
+    }
+    if (name) {
+      try {
+        properties.push(
+          t.objectProperty(
+            t.stringLiteral(name),
+            t.arrowFunctionExpression([], t.identifier(name)),
+          ),
+        );
+      } catch {
+        // ignore
+      }
+    }
+  }
+  return t.objectExpression(properties);
+}
+
 export function instrumentCode(code: string, maxUserLine: number): string {
   let ast: ReturnType<typeof parser.parse>;
   try {
@@ -230,6 +257,8 @@ export function instrumentCode(code: string, maxUserLine: number): string {
   } catch (err) {
     throw new Error(`Syntax error: ${err}`);
   }
+
+  let loopIdCounter = 0;
 
   // 0. Strip TypeScript type annotations, interfaces, and type assertions
   traverse(ast, {
@@ -300,6 +329,7 @@ export function instrumentCode(code: string, maxUserLine: number): string {
         t.callExpression(t.identifier('__enterFunc__'), [
           t.stringLiteral(fnName),
           t.numericLiteral(startLine),
+          buildArgsSnapshot(node.params),
         ]),
       );
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -381,32 +411,90 @@ export function instrumentCode(code: string, maxUserLine: number): string {
         return;
       }
 
-      if (t.isWhileStatement(node) || t.isDoWhileStatement(node)) {
+      if (
+        t.isForStatement(node) ||
+        t.isWhileStatement(node) ||
+        t.isDoWhileStatement(node) ||
+        t.isForOfStatement(node) ||
+        t.isForInStatement(node)
+      ) {
+        const loopId = ++loopIdCounter;
+        const loopType = t.isWhileStatement(node)
+          ? 'while'
+          : t.isDoWhileStatement(node)
+            ? 'do-while'
+            : 'for';
+
         if (!t.isBlockStatement(node.body)) {
           node.body = t.blockStatement([node.body]);
         }
-        if (node.test) {
+
+        const loopIterCall = t.expressionStatement(
+          t.callExpression(t.identifier('__loopIter__'), [
+            t.numericLiteral(loopId),
+            t.numericLiteral(line),
+          ]),
+        );
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (loopIterCall as any)._stepInstrumented = true;
+
+        if (t.isForOfStatement(node) || t.isForInStatement(node)) {
+          const ofHeaderStep = t.expressionStatement(
+            t.callExpression(t.identifier('__step__'), [
+              t.numericLiteral(line),
+              t.stringLiteral('line'),
+              varSnapshot,
+            ]),
+          );
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (ofHeaderStep as any)._stepInstrumented = true;
+          node.body.body.unshift(loopIterCall, ofHeaderStep);
+        } else {
+          node.body.body.unshift(loopIterCall);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const testExpr = (node as any).test || t.booleanLiteral(true);
+          const headerCall = t.callExpression(t.identifier('__loopHeader__'), [
+            t.numericLiteral(loopId),
+            t.numericLiteral(line),
+          ]);
           const stepCall = t.callExpression(t.identifier('__step__'), [
             t.numericLiteral(line),
             t.stringLiteral('line'),
             varSnapshot,
           ]);
-          node.test = t.sequenceExpression([stepCall, node.test]);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (node as any).test = t.sequenceExpression([headerCall, stepCall, testExpr]);
         }
-        return;
-      }
 
-      if (t.isForStatement(node)) {
-        if (!t.isBlockStatement(node.body)) {
-          node.body = t.blockStatement([node.body]);
-        }
-        const testExpr = node.test || t.booleanLiteral(true);
-        const stepCall = t.callExpression(t.identifier('__step__'), [
-          t.numericLiteral(line),
-          t.stringLiteral('line'),
-          varSnapshot,
-        ]);
-        node.test = t.sequenceExpression([stepCall, testExpr]);
+        const enterLoopCall = t.expressionStatement(
+          t.callExpression(t.identifier('__enterLoop__'), [
+            t.numericLiteral(loopId),
+            t.stringLiteral(loopType),
+            t.numericLiteral(line),
+          ]),
+        );
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (enterLoopCall as any)._stepInstrumented = true;
+
+        const exitLoopCall = t.expressionStatement(
+          t.callExpression(t.identifier('__exitLoop__'), [
+            t.numericLiteral(loopId),
+          ]),
+        );
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (exitLoopCall as any)._stepInstrumented = true;
+
+        const tryFinally = t.tryStatement(
+          t.blockStatement([node]),
+          null,
+          t.blockStatement([exitLoopCall]),
+        );
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (tryFinally as any)._stepInstrumented = true;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (node as any)._stepInstrumented = true;
+
+        path.replaceWith(t.blockStatement([enterLoopCall, tryFinally]));
         return;
       }
 
@@ -513,7 +601,24 @@ export async function runTrace(
   }
 
   const registry = new ObjectRegistry();
-  const callStack: Array<{ name: string; line: number; locals: StackFrame['locals'] }> = [];
+  const callStack: Array<{
+    name: string;
+    line: number;
+    locals: StackFrame['locals'];
+    args?: Record<string, TraceValue>;
+    depth: number;
+    returnValue?: TraceValue;
+  }> = [];
+  const lineExecCounts: Record<number, number> = {};
+  interface ActiveLoop {
+    id: number;
+    type: 'for' | 'while' | 'do-while';
+    headerLine: number;
+    iteration: number;
+    isHeader?: boolean;
+    frameDepth: number;
+  }
+  const activeLoops: ActiveLoop[] = [];
   let stepCount = 0;
   let lastVarsSnapshot: Record<string, unknown> = {};
   let timedOut = false;
@@ -714,6 +819,33 @@ export async function runTrace(
       }
     }
 
+    lineExecCounts[line] = (lineExecCounts[line] || 0) + 1;
+
+    if (event === 'return' && callStack.length > 0) {
+      const top = callStack[callStack.length - 1];
+      if (retVal !== undefined) {
+        top.returnValue = {
+          type: getType(retVal),
+          repr: safeRepr(retVal),
+          value: serializeValue(retVal, registry),
+        };
+      }
+    }
+
+    const matchingLoop = activeLoops
+      .slice()
+      .reverse()
+      .find((l) => l.frameDepth === callStack.length);
+
+    const loopContext: LoopContext | undefined = matchingLoop
+      ? {
+          type: matchingLoop.type,
+          headerLine: matchingLoop.headerLine,
+          iteration: Math.max(1, matchingLoop.iteration),
+          isHeader: matchingLoop.isHeader || matchingLoop.headerLine === line,
+        }
+      : undefined;
+
     steps.push({
       index: stepCount++,
       line,
@@ -723,9 +855,16 @@ export async function runTrace(
         name: f.name,
         line: f.line,
         locals: f.locals ?? {},
+        args: f.args ? { ...f.args } : undefined,
+        depth: f.depth,
+        returnValue: f.returnValue,
       })),
       mutations,
       returnValue: retVal !== undefined ? serializeValue(retVal, registry) : undefined,
+      returnFrom: event === 'return' && callStack.length > 0 ? callStack[callStack.length - 1].name : undefined,
+      lineExecutionCounts: { ...lineExecCounts },
+      loop: loopContext,
+      stdoutSoFar: stdout,
       stdout: stdout || undefined,
     });
   }
@@ -844,8 +983,62 @@ export async function runTrace(
     __cin_next: () => {
       return cinStream.length > 0 ? cinStream.shift() : 0;
     },
-    __enterFunc__: (name: string, line: number) => {
-      callStack.push({ name, line, locals: {} });
+    __enterLoop__: (loopId: number, type: 'for' | 'while' | 'do-while', headerLine: number) => {
+      activeLoops.push({
+        id: loopId,
+        type,
+        headerLine,
+        iteration: 0,
+        isHeader: true,
+        frameDepth: callStack.length,
+      });
+    },
+    __loopHeader__: (loopId: number, _headerLine: number) => {
+      const loop = activeLoops.find((l) => l.id === loopId);
+      if (loop) {
+        loop.isHeader = true;
+      }
+    },
+    __loopIter__: (loopId: number, _headerLine: number) => {
+      const loop = activeLoops.find((l) => l.id === loopId);
+      if (loop) {
+        loop.iteration++;
+        loop.isHeader = false;
+      }
+    },
+    __exitLoop__: (loopId: number) => {
+      const idx = activeLoops.findIndex((l) => l.id === loopId);
+      if (idx !== -1) {
+        activeLoops.splice(idx, 1);
+      }
+    },
+    __enterFunc__: (
+      name: string,
+      line: number,
+      argsCollector?: Record<string, () => unknown>,
+    ) => {
+      const args: Record<string, TraceValue> = {};
+      if (argsCollector && typeof argsCollector === 'object') {
+        for (const [k, getter] of Object.entries(argsCollector)) {
+          try {
+            const v = typeof getter === 'function' ? getter() : getter;
+            args[k] = {
+              type: getType(v),
+              repr: safeRepr(v),
+              value: serializeValue(v, registry),
+            };
+          } catch {
+            // ignore
+          }
+        }
+      }
+      callStack.push({
+        name,
+        line,
+        locals: {},
+        args,
+        depth: callStack.length + 1,
+      });
     },
     __exitFunc__: () => {
       callStack.pop();

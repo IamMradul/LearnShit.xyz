@@ -122,6 +122,10 @@ _TRUNCATED = False
 _TOTAL = 0
 _last_vars_snapshot = {}
 _MAX_USER_LINE = 999999
+_line_exec_counts = {}
+_loop_meta = {}
+_loop_iters = {}
+_source_lines = []
 
 def _is_list_node(obj):
     return obj is not None and (type(obj).__name__ == 'ListNode' or (hasattr(obj, 'val') and hasattr(obj, 'next')))
@@ -298,7 +302,7 @@ def _is_unwanted_var(k, v):
     return False
 
 def _tracer_fn(frame, event, arg):
-    global _TRUNCATED, _TOTAL, _last_vars_snapshot, _MAX_USER_LINE
+    global _TRUNCATED, _TOTAL, _last_vars_snapshot, _MAX_USER_LINE, _line_exec_counts, _loop_meta, _loop_iters, _source_lines
     if _TRUNCATED:
         return None
 
@@ -318,6 +322,37 @@ def _tracer_fn(frame, event, arg):
     if len(_steps) >= _MAX_STEPS:
         _TRUNCATED = True
         raise _StepLimitExceeded("Execution step limit reached")
+
+    lineno = max(1, frame.f_lineno)
+    _line_exec_counts[lineno] = _line_exec_counts.get(lineno, 0) + 1
+
+    # Loop detection
+    loop_context = None
+    if lineno in _loop_meta:
+        _loop_iters[lineno] = _loop_iters.get(lineno, 0) + 1
+        loop_context = {
+            "type": _loop_meta[lineno]["type"],
+            "headerLine": lineno,
+            "iteration": _loop_iters[lineno],
+            "isHeader": True
+        }
+    elif _loop_meta:
+        curr_indent = 0
+        if 1 <= lineno <= len(_source_lines):
+            raw_l = _source_lines[lineno - 1]
+            curr_indent = len(raw_l) - len(raw_l.lstrip()) if raw_l.strip() else 999
+        best_hdr = None
+        for hdr, meta in sorted(_loop_meta.items(), key=lambda x: x[0], reverse=True):
+            if hdr < lineno and curr_indent > meta["indent"]:
+                best_hdr = hdr
+                break
+        if best_hdr is not None:
+            loop_context = {
+                "type": _loop_meta[best_hdr]["type"],
+                "headerLine": best_hdr,
+                "iteration": max(1, _loop_iters.get(best_hdr, 1)),
+                "isHeader": False
+            }
 
     # Build variables snapshot
     local_vars = {k: v for k, v in frame.f_locals.items() if not _is_unwanted_var(k, v)}
@@ -406,29 +441,56 @@ def _tracer_fn(frame, event, arg):
         if isinstance(v, list):
             _last_vars_snapshot[k] = list(v)
 
-    # Build call stack (capped at 50 to prevent quadratic slowdown on deep recursion)
+    # Build call stack (with args and depth)
     call_stack = []
     f = frame
-    cs_depth = 0
-    while f is not None and cs_depth < 50:
+    raw_depth = 0
+    while f is not None:
         if f.f_code.co_filename in ('<algolens>', '<string>'):
-            cs_depth += 1
+            raw_depth += 1
+        f = f.f_back
+
+    f = frame
+    cs_depth = raw_depth
+    while f is not None and len(call_stack) < 50:
+        if f.f_code.co_filename in ('<algolens>', '<string>'):
             frame_locals = {}
+            frame_args = {}
             arg_count = f.f_code.co_argcount
             arg_names = f.f_code.co_varnames[:arg_count]
             for arg_name in arg_names:
                 if arg_name in f.f_locals and not arg_name.startswith('_'):
                     val = f.f_locals[arg_name]
                     if not _is_unwanted_var(arg_name, val):
-                        frame_locals[arg_name] = {
+                        arg_entry = {
+                            "type": _get_type(val),
                             "repr": _safe_repr(val),
                             "value": _safe_clone(val),
                         }
-            call_stack.append({
+                        frame_args[arg_name] = arg_entry
+                        frame_locals[arg_name] = arg_entry
+            for k, val in f.f_locals.items():
+                if not _is_unwanted_var(k, val) and k not in frame_locals:
+                    frame_locals[k] = {
+                        "type": _get_type(val),
+                        "repr": _safe_repr(val),
+                        "value": _safe_clone(val),
+                    }
+            frame_entry = {
                 "name": f.f_code.co_name,
                 "line": f.f_lineno,
                 "locals": frame_locals,
-            })
+                "args": frame_args,
+                "depth": cs_depth,
+            }
+            if event == 'return' and f == frame and arg is not None:
+                frame_entry["returnValue"] = {
+                    "type": _get_type(arg),
+                    "repr": _safe_repr(arg),
+                    "value": _safe_clone(arg),
+                }
+            call_stack.append(frame_entry)
+            cs_depth -= 1
         f = f.f_back
 
     ev = event
@@ -443,13 +505,24 @@ def _tracer_fn(frame, event, arg):
 
     step = {
         "index": len(_steps),
-        "line": max(1, frame.f_lineno),
+        "line": lineno,
         "event": ev,
         "variables": variables,
         "callStack": list(reversed(call_stack)),
         "mutations": mutations,
+        "lineExecutionCounts": dict(_line_exec_counts),
+        "loop": loop_context,
+        "stdoutSoFar": _stdout_capture.getvalue(),
         "stdout": _stdout_capture.getvalue() or None,
     }
+
+    if event == 'return' and arg is not None:
+        step["returnValue"] = {
+            "type": _get_type(arg),
+            "repr": _safe_repr(arg),
+            "value": _safe_clone(arg),
+        }
+        step["returnFrom"] = frame.f_code.co_name
 
     if event == 'exception' and arg is not None:
         exc_type, exc_val, _ = arg
@@ -463,13 +536,16 @@ def _tracer_fn(frame, event, arg):
 
 
 def run_with_trace(user_code, max_steps=5000, user_input="", user_line_count=0):
-    global _steps, _stdout_capture, _TRUNCATED, _TOTAL, _MAX_STEPS, _last_vars_snapshot, _MAX_USER_LINE
+    global _steps, _stdout_capture, _TRUNCATED, _TOTAL, _MAX_STEPS, _last_vars_snapshot, _MAX_USER_LINE, _line_exec_counts, _loop_meta, _loop_iters, _source_lines
     _steps = []
     _stdout_capture = io.StringIO()
     _TRUNCATED = False
     _TOTAL = 0
     _MAX_STEPS = max_steps
     _last_vars_snapshot = {}
+    _line_exec_counts = {}
+    _loop_meta = {}
+    _loop_iters = {}
 
     driver_marker = '# ── AlgoLens generated driver'
     if user_line_count and user_line_count > 0:
@@ -478,6 +554,16 @@ def run_with_trace(user_code, max_steps=5000, user_input="", user_line_count=0):
         _MAX_USER_LINE = len(user_code.split(driver_marker)[0].splitlines())
     else:
         _MAX_USER_LINE = len(user_code.splitlines())
+
+    _source_lines = user_code.splitlines()[:_MAX_USER_LINE]
+    for idx, l in enumerate(_source_lines, 1):
+        stripped = l.lstrip()
+        if stripped.startswith('for ') or stripped.startswith('while '):
+            indent = len(l) - len(stripped)
+            _loop_meta[idx] = {
+                'type': 'for' if stripped.startswith('for ') else 'while',
+                'indent': indent
+            }
 
     # Redirect stdout
     old_stdout = sys.stdout
