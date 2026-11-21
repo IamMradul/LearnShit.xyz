@@ -665,31 +665,6 @@ export const Navbar: React.FC<NavbarProps> = ({
             </span>
           </button>
 
-          <a
-            href="https://github.com/IamMradul/LearnShit.xyz"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 8,
-              padding: '12px 16px',
-              borderRadius: 8,
-              background: '#14161f',
-              border: '1px solid rgba(247, 245, 239, 0.12)',
-              color: '#F7F5EF',
-              fontFamily: "'Inter', sans-serif",
-              fontSize: 14,
-              fontWeight: 600,
-              textDecoration: 'none',
-              marginTop: 4,
-            }}
-          >
-            <GithubIcon size={16} />
-            <span>GitHub Repository</span>
-            <ExternalLink size={13} style={{ opacity: 0.5 }} />
-          </a>
 
           <button
             onClick={handleVisualizerClick}
