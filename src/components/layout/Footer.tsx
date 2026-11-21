@@ -237,6 +237,23 @@ export const Footer: React.FC = () => {
               >
                 Gallery
               </button>
+              <button
+                onClick={() => scrollToAnchor('resources-anchor')}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  padding: 0,
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: 12,
+                  color: 'rgba(247, 245, 239, 0.65)',
+                  cursor: 'pointer',
+                  transition: 'color 0.15s ease',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = '#F7F5EF')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(247, 245, 239, 0.65)')}
+              >
+                Resources
+              </button>
             </div>
           </div>
 

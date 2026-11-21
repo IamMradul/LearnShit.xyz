@@ -219,7 +219,11 @@ export const VisualizerHeader: React.FC = () => {
       {/* ── Left Controls: Branding & Language & Preset Picker ─────────────── */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         {/* Logo / Brand badge */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginRight: 8 }}>
+        <div
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          title="Return to Home"
+          style={{ display: 'flex', alignItems: 'center', gap: 8, marginRight: 8, cursor: 'pointer' }}
+        >
           <div
             style={{
               width: 28,

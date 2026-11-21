@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useCallback } from 'react';
+import { Navbar } from './components/layout/Navbar';
 import { MainLayout } from './components/layout/MainLayout';
 import { GallerySection } from './components/gallery/GallerySection';
+import { ResourcesSection } from './components/resources/ResourcesSection';
 import { HeroSection } from './components/landing/HeroSection';
 import { Footer } from './components/layout/Footer';
 import { useUIStore } from './store/uiStore';
@@ -28,6 +30,9 @@ export default function App() {
         background: '#0a0b0c',
       }}
     >
+      {/* ── Global Persistent Navigation Bar ── */}
+      <Navbar onOpenVisualizer={handleEnterApp} />
+
       {/* ── Hero landing (100vh) ── */}
       <HeroSection onEnterApp={handleEnterApp} />
 
@@ -47,6 +52,11 @@ export default function App() {
       {/* ── Algorithm gallery below ── */}
       <div id="gallery-anchor">
         <GallerySection />
+      </div>
+
+      {/* ── Developer Resources & Cheatsheet ── */}
+      <div id="resources-anchor">
+        <ResourcesSection onOpenVisualizer={handleEnterApp} />
       </div>
 
       {/* ── Platform Footer & Contact ── */}

@@ -116,7 +116,7 @@ export function HeroSection({ onEnterApp }: { onEnterApp: () => void }) {
           display: flex;
           flex-direction: column;
           justifyContent: space-between;
-          padding: 24px 32px 32px;
+          padding: 84px 32px 28px;
           box-sizing: border-box;
         }
 
@@ -511,39 +511,6 @@ export function HeroSection({ onEnterApp }: { onEnterApp: () => void }) {
         {/* Ambient Dark Gradient Layer */}
         <div className="hero-bg-overlay" />
 
-        {/* ── Top Bar / Navigation ── */}
-        <header className="hero-top-nav">
-          <div className="hero-brand">
-            <div className="hero-brand-logo" style={{ overflow: 'hidden' }}>
-              <img src="/learnshit.svg" alt="LearnShit Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span className="hero-brand-name">LearnShit</span>
-              <span className="hero-brand-badge">ENGINE v2.4</span>
-            </div>
-          </div>
-
-          <div className="hero-nav-ticker">
-            <span className="pulse" />
-            <span>AST PARSER · D3 VECTOR CANVAS · CLIENT-SIDE WORKER</span>
-          </div>
-
-          <div className="hero-nav-actions">
-            <button
-              className="hero-nav-btn"
-              onClick={() => {
-                const el = document.getElementById('gallery-anchor');
-                el?.scrollIntoView({ behavior: 'smooth' });
-              }}
-            >
-              Algorithm Catalog
-            </button>
-            <button className="hero-nav-btn hero-nav-btn-primary" onClick={onEnterApp}>
-              Open Visualizer
-            </button>
-          </div>
-        </header>
-
         {/* ── 3-Column Full-Widescreen Stage ── */}
         <main className="hero-widescreen-grid">
           {/* LEFT FLANK: Live Interactive Code Terminal */}
@@ -628,6 +595,10 @@ export function HeroSection({ onEnterApp }: { onEnterApp: () => void }) {
 
           {/* CENTER FLANK: Headline, Accent Mark, and Core CTA */}
           <section className="hero-center-column">
+            <div className="hero-nav-ticker" style={{ margin: '0 auto 12px' }}>
+              <span className="pulse" />
+              <span>AST PARSER · D3 VECTOR CANVAS · CLIENT-SIDE WORKER</span>
+            </div>
             <div className="hero-eyebrow">Algorithm Execution Engine</div>
 
             <h1 className="hero-headline-title">
