@@ -298,6 +298,7 @@ export const AnimatedCodeVisualizer: React.FC<AnimatedCodeVisualizerProps> = ({
         });
 
         setResult(res);
+        useTraceStore.getState().setTraceSource('user');
         if (res.steps.length > 0) {
           setStatus('playing');
         }

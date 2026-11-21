@@ -890,6 +890,8 @@ export const VisualizerPane: React.FC = () => {
                     if (langData) {
                       setCode(langData.code);
                       setInput(langData.input);
+                      useTraceStore.getState().setTraceSource('gallery');
+                      useUIStore.getState().setCenterViewMode('ds');
                     }
                   }}
                   style={{
@@ -928,14 +930,23 @@ export const VisualizerPane: React.FC = () => {
               <div
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: '1fr 1fr',
+                  gridTemplateColumns: '1.2fr 1fr',
                   gap: 16,
                   width: '100%',
                   height: '100%',
                   alignItems: 'stretch',
                 }}
               >
-                <AnimatedCodeVisualizer layoutMode="split" />
+                <FallbackStateRenderer
+                  step={currentStep}
+                  currentIndex={currentIndex}
+                  totalSteps={steps.length}
+                  steps={steps}
+                  code={code}
+                  language={language}
+                  result={result}
+                  onSelectStep={setCurrentIndex}
+                />
                 <div
                   style={{
                     display: 'flex',

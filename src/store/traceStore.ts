@@ -15,6 +15,7 @@ interface TraceStore {
   isRunning: boolean;
   error: string | null;
   pyodideLoading: boolean;
+  traceSource: 'user' | 'gallery';
 
   // Actions
   setResult: (result: TraceResult) => void;
@@ -24,6 +25,7 @@ interface TraceStore {
   setRunning: (b: boolean) => void;
   setError: (e: string | null) => void;
   setPyodideLoading: (b: boolean) => void;
+  setTraceSource: (source: 'user' | 'gallery') => void;
   reset: () => void;
 
   // Derived helpers
@@ -40,6 +42,7 @@ export const useTraceStore = create<TraceStore>((set, get) => ({
   isRunning: false,
   error: null,
   pyodideLoading: false,
+  traceSource: 'gallery',
 
   setResult: (result) =>
     set({
@@ -56,6 +59,7 @@ export const useTraceStore = create<TraceStore>((set, get) => ({
   setRunning: (isRunning) => set({ isRunning }),
   setError: (error) => set({ error }),
   setPyodideLoading: (pyodideLoading) => set({ pyodideLoading }),
+  setTraceSource: (traceSource) => set({ traceSource }),
 
   reset: () =>
     set({

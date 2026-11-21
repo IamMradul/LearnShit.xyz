@@ -7,6 +7,7 @@ import { useEditorStore } from '../../store/editorStore';
 import { useUIStore } from '../../store/uiStore';
 import { useTraceStore } from '../../store/traceStore';
 import { getAdapter } from '../../engine/adapters/AdapterRegistry';
+import { detectDataStructures } from '../../engine/DSDetector';
 import type { SupportedLanguage } from '../../engine/TraceTypes';
 import { createShareUrl } from '../../utils/shareLink';
 
@@ -58,8 +59,15 @@ export const EditorToolbar: React.FC = () => {
       });
 
       setResult(result);
+      useTraceStore.getState().setTraceSource('user');
       if (result.steps.length > 0) {
         setStatus('playing');
+        const detected = detectDataStructures(result.steps);
+        if (detected.length > 0) {
+          useUIStore.getState().setCenterViewMode('split');
+        } else {
+          useUIStore.getState().setCenterViewMode('trace');
+        }
       }
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);

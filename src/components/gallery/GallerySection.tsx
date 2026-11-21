@@ -859,6 +859,7 @@ export const GallerySection: React.FC = () => {
     setCode(code);
     setInput(input);
     setLanguage(lang);
+    useTraceStore.getState().setTraceSource('gallery');
     useUIStore.getState().setCenterViewMode('ds');
 
     const visualizerEl =
