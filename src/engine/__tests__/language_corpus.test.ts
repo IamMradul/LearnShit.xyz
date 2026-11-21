@@ -1,15 +1,23 @@
 import { describe, test, expect, afterAll } from 'vitest';
-import * as fs from 'fs';
-import * as path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { getAdapter } from '../adapters/AdapterRegistry';
 import { runTrace } from '../JSTracer';
 import { detectDataStructures } from '../DSDetector';
 import type { SupportedLanguage, TraceResult } from '../TraceTypes';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // Web Worker shim for Node.js / Vitest environment to run the exact adapter pipeline
 class MockWorker extends EventTarget {
-  constructor(public url: URL | string, public options?: any) {
+  url: URL | string;
+  options?: any;
+  constructor(url: URL | string, options?: any) {
     super();
+    this.url = url;
+    this.options = options;
   }
   postMessage(data: any) {
     setTimeout(async () => {
@@ -215,8 +223,8 @@ describe('Language Support Corpus Test Suite', () => {
             truncated: false,
             totalSteps: 0,
             stdout: '',
-            stderr: errorMessage,
-            error: errorMessage,
+            stderr: errorMessage ?? '',
+            error: errorMessage ?? undefined,
           };
         }
 
