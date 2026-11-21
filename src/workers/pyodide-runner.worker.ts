@@ -469,21 +469,25 @@ def run_with_trace(user_code, max_steps=5000, user_input="", user_line_count=0):
     # Redirect stdin for competitive programming input() and sys.stdin
     old_stdin = sys.stdin
     stdin_lines = []
+    stdin_content = ""
     if user_input:
-        try:
-            parsed = json.loads(user_input)
-            def _extract_tokens(item):
-                if isinstance(item, (list, tuple)):
-                    return " ".join(str(x) for x in item)
-                return str(item)
-            if isinstance(parsed, list):
-                for elem in parsed:
-                    stdin_lines.append(_extract_tokens(elem))
-            else:
-                stdin_lines.append(str(parsed))
-        except Exception:
-            stdin_lines = [str(user_input)]
-    stdin_content = "\n".join(stdin_lines) + "\n" if stdin_lines else ""
+        if "\n" in str(user_input):
+            stdin_content = str(user_input) if str(user_input).endswith("\n") else str(user_input) + "\n"
+        else:
+            try:
+                parsed = json.loads(user_input)
+                def _extract_tokens(item):
+                    if isinstance(item, (list, tuple)):
+                        return " ".join(str(x) for x in item)
+                    return str(item)
+                if isinstance(parsed, list):
+                    for elem in parsed:
+                        stdin_lines.append(_extract_tokens(elem))
+                else:
+                    stdin_lines.append(str(parsed))
+                stdin_content = "\n".join(stdin_lines) + "\n" if stdin_lines else ""
+            except Exception:
+                stdin_content = str(user_input) + "\n"
     sys.stdin = io.StringIO(stdin_content)
 
     error = None
@@ -554,7 +558,7 @@ async function runPythonTrace(
   await py.runPythonAsync(TRACER_PYTHON_CODE);
 
   py.globals.set('__user_code_str__', request.code);
-  py.globals.set('__user_input_str__', request.input || '');
+  py.globals.set('__user_input_str__', request.stdin !== undefined ? request.stdin : (request.input || ''));
   py.globals.set('__max_steps__', request.maxSteps ?? 5000);
   py.globals.set('__user_line_count__', request.userLineCount ?? 0);
 

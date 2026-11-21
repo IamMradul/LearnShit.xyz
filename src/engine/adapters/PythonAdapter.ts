@@ -114,28 +114,68 @@ export class PythonAdapter implements LanguageAdapter {
     }
 
     // 2. Fallback Path: Full WebAssembly Pyodide sandbox in background worker
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       useTraceStore.getState().setPyodideLoading(true);
 
       const code = buildDriver(request.code, request.input, 'python', mode);
       const worker = this.getWorker();
 
-      const timeout = setTimeout(() => {
-        this.dispose();
+      const cleanup = () => {
+        clearTimeout(timeout);
+        worker.removeEventListener('message', handler);
+        worker.removeEventListener('error', errorHandler);
         useTraceStore.getState().setPyodideLoading(false);
-        reject(new Error('Execution timed out. The worker was terminated.'));
-      }, request.timeoutMs + 30000);
+      };
+
+      const timeout = setTimeout(() => {
+        cleanup();
+        this.dispose();
+        resolve({
+          steps: [],
+          language: 'python',
+          mode,
+          truncated: false,
+          totalSteps: 0,
+          stdout: '',
+          stderr: 'Python execution timed out (Pyodide CDN could not be loaded or execution took too long).',
+          error: 'Python execution timed out (Pyodide CDN could not be loaded or execution took too long).',
+        });
+      }, (request.timeoutMs || 10000) + 20000);
+
+      const errorHandler = (err: ErrorEvent) => {
+        cleanup();
+        resolve({
+          steps: [],
+          language: 'python',
+          mode,
+          truncated: false,
+          totalSteps: 0,
+          stdout: '',
+          stderr: `Pyodide runtime failed to load: ${err.message || 'Check network connection to Pyodide CDN.'}`,
+          error: `Pyodide runtime failed to load: ${err.message || 'Check network connection to Pyodide CDN.'}`,
+        });
+      };
 
       const handler = (e: MessageEvent) => {
-        if (e.data.type === 'result') {
-          clearTimeout(timeout);
-          worker.removeEventListener('message', handler);
-          useTraceStore.getState().setPyodideLoading(false);
+        if (e.data.type === 'loading') {
+          useTraceStore.getState().setPyodideLoading(true);
+        } else if (e.data.type === 'result') {
+          cleanup();
           resolve(e.data.result as TraceResult);
         }
       };
 
-      worker.postMessage({ ...request, code, mode, userLineCount, stdin, input: stdin || request.input });
+      worker.addEventListener('message', handler);
+      worker.addEventListener('error', errorHandler);
+
+      worker.postMessage({
+        ...request,
+        code,
+        mode,
+        userLineCount,
+        stdin,
+        input: stdin || request.input,
+      });
     });
   }
 
