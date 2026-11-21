@@ -1,1 +1,4 @@
-class Solution:\r\n    def addOne(self, x: int) -> int:\r\n        return x + 1\r\n# EOF comment without trailing newline
+class Solution:
+    def addOne(self, x: int) -> int:
+        return x + 1
+# EOF comment without trailing newline

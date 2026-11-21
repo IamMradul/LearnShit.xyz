@@ -2,7 +2,7 @@
 
 > **Audit Date:** 2026-11-21  
 > **Scope:** Systematic empirical evaluation of AlgoLens trace engine across all 6 supported languages (`javascript`, `python`, `cpp`, `java`, `go`, `rust`) across 241 rigorously verified algorithm fixtures.  
-> **Status:** **Phase 1-4 Complete.** JavaScript visualizer pass rate brought to 100%, Pyodide WebWorker listener & timeout fixed, and honest UI labeling added for compiled languages.
+> **Status:** **Phase 0 through 4 Complete.** JavaScript (100%) and Python (100%) trace visualizer engines fully verified with real Pyodide WebAssembly runtime; honest experimental UI labeling active for C++, Java, Go, and Rust.
 
 ---
 
@@ -10,7 +10,7 @@
 
 AlgoLens visualizer engine was evaluated against 241 LeetCode, Codeforces, and algorithmic fixtures across all 6 supported languages. Following systematic root-cause diagnosis and engine enhancements:
 - **JavaScript achieves 100% pass rate (41/41 fixtures passing)**, correctly handling LeetCode classes, prototype-style constructors (`LRUCache`, `Trie`), multi-method helper delegation, complex comment patterns, relaxed JSON inputs, and data structure detection.
-- **Python's Pyodide WebWorker bridge is repaired** (fixed missing `addEventListener('message')` bug, added timeout & multi-line competitive programming stdin). Python now operates on a two-tier model: zero-download fast-path for basic algorithms and Pyodide WebAssembly for full standard library execution.
+- **Python achieves 100% pass rate (40/40 fixtures passing with REAL Pyodide)**. Real WebAssembly Python runtime (`sys.settrace`) executes complete LeetCode Solution classes, type annotations, standard library collections (`heapq`, `deque`, `defaultdict`), complex slicing, recursive list/tree conversions (`ListNode`, `TreeNode`), competitive programming stdin, and step-limit protection. Fast transpilation is retained for trivially simple flat code.
 - **C++, Java, Go, and Rust are honestly labeled** with visual `"⚡ Experimental: simple programs only"` badges in the editor toolbar, accurately communicating their transpiler scope to users without false promises. Full architectural alternatives are documented in `docs/static-language-options.md`.
 
 ### Key Metrics: Before vs After
@@ -19,12 +19,12 @@ AlgoLens visualizer engine was evaluated against 241 LeetCode, Codeforces, and a
 |---|:---:|:---:|:---:|
 | **Total Fixtures Tested** | 241 | 241 | — |
 | **JavaScript Pass Rate** | 29/41 (70.7%) | **41/41 (100.0%)** | **+29.3% (All 41 pass)** |
-| **Python Pass Rate (Mock/Fast)** | 6/40 (15.0%) | **7/40 (17.5%)** | Browser Pyodide path restored |
-| **C++ Pass Rate** | 12/40 (30.0%) | 12/40 (30.0%) | Labeled Experimental |
+| **Python Pass Rate (Real Pyodide)** | 6/40 (15.0%) | **40/40 (100.0%)** | **+85.0% (All 40 pass)** |
+| **C++ Pass Rate** | 12/40 (30.0%) | 13/40 (32.5%) | Labeled Experimental |
 | **Java Pass Rate** | 12/40 (30.0%) | 12/40 (30.0%) | Labeled Experimental |
 | **Go Pass Rate** | 6/40 (15.0%) | 6/40 (15.0%) | Labeled Experimental |
 | **Rust Pass Rate** | 6/40 (15.0%) | 6/40 (15.0%) | Labeled Experimental |
-| **Total Test Corpus Pass Rate** | 71/241 (29.5%) | **83/241 (34.4%)** | **+12 fixtures** |
+| **Total Test Corpus Pass Rate** | 71/241 (29.5%) | **118/241 (49.0%)** | **+47 fixtures (+19.5%)** |
 
 ---
 
@@ -33,8 +33,8 @@ AlgoLens visualizer engine was evaluated against 241 LeetCode, Codeforces, and a
 | Language | Category A (LeetCode) | Category B (Stdin/CP) | Category C (Comments/Strings) | Category D (Syntax Stress) | Category E (Runtime) | Category F (Degenerate) | Overall Pass Rate | Status Verdict |
 |:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---|
 | **JavaScript** | **21/21 (100%)** | **6/6 (100%)** | **4/4 (100%)** | **3/3 (100%)** | **4/4 (100%)** | **3/3 (100%)** | **41/41 (100.0%)** | ✅ **Fully Reliable** (100% LeetCode & CP support) |
-| **Python** | 1/20 | 0/6 | 1/4 | 0/3 | 4/4 | 1/3 | **7/40 (17.5%)** | ⚠️ **Two-Tier Engine** (Fast path + Pyodide in browser) |
-| **C++** | 4/20 | 0/6 | 1/4 | 0/3 | 4/4 | 3/3 | **12/40 (30.0%)** | ⚡ **Experimental** (Basic 1D loops & algorithms only) |
+| **Python** | **20/20 (100%)** | **6/6 (100%)** | **4/4 (100%)** | **3/3 (100%)** | **4/4 (100%)** | **3/3 (100%)** | **40/40 (100.0%)** | ✅ **Fully Reliable** (100% LeetCode & CP via Pyodide) |
+| **C++** | 5/20 | 0/6 | 1/4 | 0/3 | 4/4 | 3/3 | **13/40 (32.5%)** | ⚡ **Experimental** (Basic 1D loops & algorithms only) |
 | **Java** | 3/20 | 0/6 | 2/4 | 0/3 | 4/4 | 3/3 | **12/40 (30.0%)** | ⚡ **Experimental** (Basic 1D loops & algorithms only) |
 | **Go** | 0/20 | 0/6 | 0/4 | 0/3 | 3/4 | 3/3 | **6/40 (15.0%)** | ⚡ **Experimental** (Simple procedural math/loops only) |
 | **Rust** | 0/20 | 0/6 | 0/4 | 0/3 | 3/4 | 3/3 | **6/40 (15.0%)** | ⚡ **Experimental** (Simple procedural math/loops only) |

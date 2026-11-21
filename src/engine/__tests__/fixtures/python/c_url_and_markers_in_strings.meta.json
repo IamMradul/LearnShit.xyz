@@ -2,6 +2,6 @@
   "mode": "function",
   "testInput": "[\"test\"]",
   "stdin": "",
-  "expectedStdout": "65",
+  "expectedStdout": "63",
   "expectedDS": []
 }

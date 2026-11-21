@@ -6,7 +6,7 @@ import type {
 } from '../TraceTypes';
 import { detectMode, buildDriver, parseDriverArgs, effectiveStdin } from '../ModeDetector';
 import { useTraceStore } from '../../store/traceStore';
-import { transpilePythonToJs } from '../transpilers/PythonTranspiler';
+import { canFastTranspilePython, transpilePythonToJs } from '../transpilers/PythonTranspiler';
 import { runTrace } from '../JSTracer';
 
 export class PythonAdapter implements LanguageAdapter {
@@ -73,44 +73,47 @@ export class PythonAdapter implements LanguageAdapter {
 
     // 1. Instant Fast Path: In-browser line-preserving transpilation to JS
     // Runs in < 5ms with zero network or Pyodide downloading delay!
-    try {
-      const transpiled = transpilePythonToJs(request.code);
-      let runnableJs = transpiled.code;
-      const args = parseDriverArgs(request.input, transpiled.paramCount ?? 0);
-      const argsRepr = args.map((a) => JSON.stringify(a)).join(', ');
+    // Kept only for trivially simple code that the fast transpiler can prove it handles.
+    if (canFastTranspilePython(request.code)) {
+      try {
+        const transpiled = transpilePythonToJs(request.code);
+        let runnableJs = transpiled.code;
+        const args = parseDriverArgs(request.input, transpiled.paramCount ?? 0);
+        const argsRepr = args.map((a) => JSON.stringify(a)).join(', ');
 
-      const helper = `\nfunction __py_in(item, container) {
+        const helper = `\nfunction __py_in(item, container) {
   if (container == null) return false;
   if (typeof container.has === 'function') return container.has(item);
   if (Array.isArray(container) || typeof container === 'string') return container.includes(item);
   return item in container;
 }`;
 
-      if (mode === 'function' && transpiled.className && transpiled.methodName) {
-        runnableJs += `\n\n// ── AlgoLens generated driver${helper}\ntry {\n  const __sol = new ${transpiled.className}();\n  const __ret = __sol.${transpiled.methodName}(${argsRepr});\n  if (__ret !== undefined) console.log('Return value:', JSON.stringify(__ret));\n} catch(e) { const msg = e && (e.stack || e.message) ? (e.name ? e.name + ': ' + e.message : e.message) : String(e); console.error(msg); }`;
-      } else if (mode === 'function' && transpiled.methodName) {
-        runnableJs += `\n\n// ── AlgoLens generated driver${helper}\ntry {\n  const __ret = ${transpiled.methodName}(${argsRepr});\n  if (__ret !== undefined) console.log('Return value:', JSON.stringify(__ret));\n} catch(e) { const msg = e && (e.stack || e.message) ? (e.name ? e.name + ': ' + e.message : e.message) : String(e); console.error(msg); }`;
-      } else {
-        runnableJs += `\n\n// ── AlgoLens generated driver${helper}\n`;
-      }
+        if (mode === 'function' && transpiled.className && transpiled.methodName) {
+          runnableJs += `\n\n// ── AlgoLens generated driver${helper}\ntry {\n  const __sol = new ${transpiled.className}();\n  const __ret = __sol.${transpiled.methodName}(${argsRepr});\n  if (__ret !== undefined) console.log('Return value:', JSON.stringify(__ret));\n} catch(e) { const msg = e && (e.stack || e.message) ? (e.name ? e.name + ': ' + e.message : e.message) : String(e); console.error(msg); }`;
+        } else if (mode === 'function' && transpiled.methodName) {
+          runnableJs += `\n\n// ── AlgoLens generated driver${helper}\ntry {\n  const __ret = ${transpiled.methodName}(${argsRepr});\n  if (__ret !== undefined) console.log('Return value:', JSON.stringify(__ret));\n} catch(e) { const msg = e && (e.stack || e.message) ? (e.name ? e.name + ': ' + e.message : e.message) : String(e); console.error(msg); }`;
+        } else {
+          runnableJs += `\n\n// ── AlgoLens generated driver${helper}\n`;
+        }
 
-      const fastResult = await runTrace({
-        code: runnableJs,
-        input: request.input,
-        stdin,
-        mode,
-        maxSteps: request.maxSteps || 10000,
-        timeoutMs: request.timeoutMs || 10000,
-        language: 'javascript',
-        userLineCount,
-      });
+        const fastResult = await runTrace({
+          code: runnableJs,
+          input: request.input,
+          stdin,
+          mode,
+          maxSteps: request.maxSteps || 10000,
+          timeoutMs: request.timeoutMs || 10000,
+          language: 'javascript',
+          userLineCount,
+        });
 
-      if (fastResult.steps.length > 0) {
-        fastResult.language = 'python';
-        return fastResult;
+        if (fastResult.steps.length > 0) {
+          fastResult.language = 'python';
+          return fastResult;
+        }
+      } catch {
+        // Fallback to Pyodide if code uses unsupported exotic syntax
       }
-    } catch {
-      // Fallback to Pyodide if code uses unsupported exotic syntax
     }
 
     // 2. Fallback Path: Full WebAssembly Pyodide sandbox in background worker

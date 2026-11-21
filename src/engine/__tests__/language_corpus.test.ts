@@ -10,6 +10,30 @@ import type { SupportedLanguage, TraceResult } from '../TraceTypes';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+let cachedPyodidePromise: Promise<any> | null = null;
+async function getRealNodePyodide() {
+  if (cachedPyodidePromise) return cachedPyodidePromise;
+  cachedPyodidePromise = (async () => {
+    const dir = path.resolve(__dirname, '../../../node_modules/.cache/pyodide');
+    const mjsPath = path.join(dir, 'pyodide.mjs');
+    if (!fs.existsSync(mjsPath)) return null;
+    const { pathToFileURL } = await import('node:url');
+    const { loadPyodide } = await import(pathToFileURL(mjsPath).href);
+    const py = await loadPyodide({ indexURL: dir });
+
+    const workerSrc = fs.readFileSync(path.resolve(__dirname, '../../workers/pyodide-runner.worker.ts'), 'utf8');
+    const startMarker = 'const TRACER_PYTHON_CODE = `';
+    const startIndex = workerSrc.indexOf(startMarker) + startMarker.length;
+    const endIndex = workerSrc.indexOf('`;\n\nasync function runPythonTrace', startIndex);
+    const tracerCode = workerSrc.slice(startIndex, endIndex);
+    await py.runPythonAsync(tracerCode);
+    return py;
+  })();
+  return cachedPyodidePromise;
+}
+
+let pyodideLock = Promise.resolve();
+
 // Web Worker shim for Node.js / Vitest environment to run the exact adapter pipeline
 class MockWorker extends EventTarget {
   url: URL | string;
@@ -20,26 +44,53 @@ class MockWorker extends EventTarget {
     this.options = options;
   }
   postMessage(data: any) {
-    setTimeout(async () => {
-      const urlStr = String(this.url);
-      if (urlStr.includes('pyodide')) {
-        const result: TraceResult = {
-          steps: [],
-          language: 'python',
-          mode: data.mode || 'function',
-          truncated: false,
-          totalSteps: 0,
-          stdout: '',
-          stderr: 'Pyodide fallback needed: transpiler could not produce steps in Node test',
-          error: 'transpiler: unsupported syntax, requires Pyodide WebAssembly worker (browser only)',
-        };
-        const event = new MessageEvent('message', {
-          data: { type: 'result', result },
-        });
-        this.dispatchEvent(event);
-        return;
-      }
+    const urlStr = String(this.url);
+    if (urlStr.includes('pyodide')) {
+      pyodideLock = pyodideLock.then(async () => {
+        const py = await getRealNodePyodide();
+        if (py) {
+          try {
+            py.globals.set('__user_code_str__', data.code);
+            py.globals.set('__user_input_str__', data.input || '');
+            py.globals.set('__max_steps__', data.maxSteps || 5000);
+            py.globals.set('__user_line_count__', data.userLineCount || 0);
 
+            const rawJson = await py.runPythonAsync(
+              'run_with_trace(__user_code_str__, __max_steps__, __user_input_str__, __user_line_count__)'
+            );
+            const parsed = JSON.parse(rawJson);
+            const result: TraceResult = {
+              steps: parsed.steps || [],
+              language: 'python',
+              mode: data.mode || 'function',
+              truncated: parsed.truncated || false,
+              totalSteps: parsed.totalSteps || (parsed.steps ? parsed.steps.length : 0),
+              stdout: parsed.stdout || '',
+              stderr: parsed.stderr || '',
+              error: parsed.error || null,
+            };
+            this.dispatchEvent(new MessageEvent('message', { data: { type: 'result', result } }));
+            return;
+          } catch (err: any) {
+            const result: TraceResult = {
+              steps: [],
+              language: 'python',
+              mode: data.mode || 'function',
+              truncated: false,
+              totalSteps: 0,
+              stdout: '',
+              stderr: String(err),
+              error: String(err),
+            };
+            this.dispatchEvent(new MessageEvent('message', { data: { type: 'result', result } }));
+            return;
+          }
+        }
+      });
+      return;
+    }
+
+    setTimeout(async () => {
       try {
         const result = await runTrace(data);
         const event = new MessageEvent('message', {
@@ -192,7 +243,7 @@ describe('Language Support Corpus Test Suite', () => {
             input: meta.testInput,
             stdin: meta.stdin,
             mode: meta.mode,
-            timeoutMs: 1500,
+            timeoutMs: language === 'python' ? 10000 : 1500,
             maxSteps: 5000,
             language,
           });
@@ -205,7 +256,7 @@ describe('Language Support Corpus Test Suite', () => {
                     'Adapter trace timed out (unregistered worker listener in adapter or worker hang)',
                   ),
                 ),
-              1000,
+              language === 'python' ? 25000 : 2000,
             ),
           );
 
@@ -384,7 +435,7 @@ describe('Language Support Corpus Test Suite', () => {
       // Verify that the record was generated
       expect(record).toBeDefined();
     },
-    15000,
+    30000,
   );
 });
 

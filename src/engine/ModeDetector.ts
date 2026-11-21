@@ -408,26 +408,40 @@ export function inferDefaultInput(code: string): string | null {
 // ─── Python driver ────────────────────────────────────────────────────────────
 
 function buildPythonDriver(code: string, input: string): string {
+  const cleanCode = stripCommentsPreservingLines(code);
   let targetClass = '';
   let methodName = '';
   let paramNames: string[] = [];
   let callerLines: string[] = [];
 
   // 1. Look for explicit class Solution
-  const solutionMatch = code.match(/class\s+(Solution[a-zA-Z0-9_]*)(?:\([^)]*\))?\s*:/);
+  const solutionMatch = cleanCode.match(/class\s+(Solution[a-zA-Z0-9_]*)(?:\([^)]*\))?\s*:/);
   if (solutionMatch) {
     targetClass = solutionMatch[1];
-    const classIdx = code.indexOf(solutionMatch[0]);
-    const afterClass = code.slice(classIdx);
+    const classIdx = cleanCode.indexOf(solutionMatch[0]);
+    const afterClass = cleanCode.slice(classIdx);
     const methodMatches = afterClass.matchAll(/def\s+([a-zA-Z0-9_]+)\s*\(\s*self\s*(?:,\s*([\s\S]*?))?\)\s*(?:->[^:]+)?\s*:/g);
+    const methods: Array<{ name: string; rawParams: string }> = [];
     for (const m of methodMatches) {
       if (!m[1].startsWith('__')) {
-        methodName = m[1];
-        paramNames = splitTopLevelParams(m[2] || '');
-        break;
+        methods.push({ name: m[1], rawParams: m[2] || '' });
       }
     }
-    if (methodName) {
+    if (methods.length > 0) {
+      let chosen = methods[0];
+      const knownProblem = methods.find((m) =>
+        /^(?:twoSum|reverseList|isValid|inorderTraversal|preorderTraversal|postorderTraversal|numIslands|maxSubArray|climbStairs|mergeTwoLists|lengthOfLongestSubstring|isPalindrome|coinChange|invertTree|hasCycle|search|binarySearch)$/i.test(m.name),
+      );
+      if (knownProblem) {
+        chosen = knownProblem;
+      } else if (methods.length > 1) {
+        const nonHelper = methods.find(
+          (m) => !/^(?:_|helper|dfs|bfs|solve|inorder$|preorder$|postorder$)/i.test(m.name),
+        );
+        if (nonHelper) chosen = nonHelper;
+      }
+      methodName = chosen.name;
+      paramNames = splitTopLevelParams(chosen.rawParams);
       callerLines = [`_sol = ${targetClass}()`, `_result = _sol.${methodName}(*_converted_args)`];
     }
   }
@@ -436,11 +450,11 @@ function buildPythonDriver(code: string, input: string): string {
   if (callerLines.length === 0) {
     const classRegex = /class\s+([a-zA-Z0-9_]+)(?:\([^)]*\))?\s*:/g;
     let cm: RegExpExecArray | null;
-    while ((cm = classRegex.exec(code)) !== null) {
+    while ((cm = classRegex.exec(cleanCode)) !== null) {
       const cName = cm[1];
       if (/^(ListNode|TreeNode|Node|TrieNode|GraphNode)$/i.test(cName)) continue;
       const classStart = cm.index;
-      const afterClass = code.slice(classStart);
+      const afterClass = cleanCode.slice(classStart);
       const mMatches = afterClass.matchAll(/def\s+([a-zA-Z0-9_]+)\s*\(\s*self\s*(?:,\s*([\s\S]*?))?\)\s*(?:->[^:]+)?\s*:/g);
       for (const m of mMatches) {
         if (!m[1].startsWith('__')) {
@@ -467,11 +481,11 @@ function buildPythonDriver(code: string, input: string): string {
 
   // 3. Fall back to top-level function outside classes
   if (callerLines.length === 0) {
-    const fnMatches = code.matchAll(/^\s*def\s+([a-zA-Z0-9_]+)\s*\(([\s\S]*?)\)\s*(?:->[^:]+)?\s*:/gm);
+    const fnMatches = cleanCode.matchAll(/^\s*def\s+([a-zA-Z0-9_]+)\s*\(([\s\S]*?)\)\s*(?:->[^:]+)?\s*:/gm);
     for (const fm of fnMatches) {
       const fName = fm[1];
       if (fName.startsWith('__')) continue;
-      const lineStart = code.lastIndexOf('\n', fm.index) + 1;
+      const lineStart = cleanCode.lastIndexOf('\n', fm.index) + 1;
       const indent = fm.index - lineStart;
       if (indent > 0) continue; // inside a class
 
@@ -495,6 +509,10 @@ function buildPythonDriver(code: string, input: string): string {
 import json as _json
 import math as _math
 
+null = None
+true = True
+false = False
+
 def _is_list_node(obj):
     return obj is not None and (type(obj).__name__ == 'ListNode' or (hasattr(obj, 'val') and hasattr(obj, 'next')))
 
@@ -504,6 +522,13 @@ def _is_tree_node(obj):
 def _to_list_node(vals, pos=-1):
     if vals is None:
         return None
+    if isinstance(vals, dict):
+        v = vals.get('val', vals.get('value', 0))
+        node = ListNode(v)
+        nxt = vals.get('next')
+        if nxt is not None:
+            node.next = _to_list_node(nxt)
+        return node
     if isinstance(vals, (list, tuple)) and len(vals) == 2 and isinstance(vals[0], (list, tuple)) and isinstance(vals[1], int) and pos == -1:
         vals, pos = vals[0], vals[1]
     if _is_list_node(vals):
@@ -532,6 +557,16 @@ def _to_list_node(vals, pos=-1):
 def _to_tree_node(vals):
     if vals is None:
         return None
+    if isinstance(vals, dict):
+        v = vals.get('val', vals.get('value', 0))
+        node = TreeNode(v)
+        left = vals.get('left')
+        right = vals.get('right')
+        if left is not None:
+            node.left = _to_tree_node(left)
+        if right is not None:
+            node.right = _to_tree_node(right)
+        return node
     if _is_tree_node(vals):
         return vals
     if isinstance(vals, (int, float)):
@@ -571,12 +606,13 @@ def _make_gettable(obj):
     return obj
 
 def _convert_arg(arg, name_hint=""):
-    hint = name_hint.strip().lower()
-    is_collection = any(k in hint for k in ['nums', 'arr', 'vals', 'values', 'list', 'items', 'elements', 'matrix', 'grid', 'queries', 'edges', 'nodes', 'points', 'intervals']) or (hint.endswith('s') and hint not in ('pos', 'radius'))
-    is_list_node = (any(k in hint for k in ['head', 'listnode', 'l1', 'l2']) or hint == 'node') and not is_collection
-    is_tree_node = (any(k in hint for k in ['root', 'treenode']) or (hint == 'tree' and not is_collection)) and not is_collection
+    raw_hint = name_hint.strip().lower()
+    hint = raw_hint.split(':', 1)[0].strip()
+    is_list_node = any(k in hint for k in ['head', 'l1', 'l2']) or hint == 'node' or 'listnode' in raw_hint
+    is_tree_node = any(k in hint for k in ['root']) or (hint == 'tree' and 'trees' not in hint) or 'treenode' in raw_hint
+    is_collection = not (is_list_node or is_tree_node) and (any(k in hint for k in ['nums', 'arr', 'vals', 'values', 'list', 'items', 'elements', 'matrix', 'grid', 'queries', 'edges', 'nodes', 'points', 'intervals']) or (hint.endswith('s') and hint not in ('pos', 'radius')))
     scalar_names = {'n', 'k', 'target', 'val', 'num', 'size', 'pos', 'index', 'idx', 'p', 'start', 'end', 'src', 'dst', 'u', 'v', 'mask', 'root_val', 'x', 'y', 'z', 'mid', 'low', 'high', 'limit', 'threshold', 'capacity', 'radius', 'scale', 'multiplier', 'amount'}
-    is_scalar_num = not is_collection and (hint in scalar_names or hint.endswith(('_id', '_idx', '_val', '_index', '_num')))
+    is_scalar_num = not is_collection and not (is_list_node or is_tree_node) and (hint in scalar_names or hint.endswith(('_id', '_idx', '_val', '_index', '_num')))
 
     if is_scalar_num and not (is_list_node or is_tree_node):
         if isinstance(arg, (int, float)):
@@ -617,14 +653,11 @@ def _serialize(obj):
             return "NaN"
         return obj
     if _is_list_node(obj):
-        res = []
-        curr = obj
-        count = 0
-        while curr and count < 100:
-            res.append(curr.val)
-            curr = curr.next
-            count += 1
-        return res
+        def _node_to_dict(n, depth=0):
+            if not n or depth > 100:
+                return None
+            return {"val": n.val, "next": _node_to_dict(n.next, depth + 1)}
+        return _node_to_dict(obj)
     if _is_tree_node(obj):
         res = []
         q = [obj]

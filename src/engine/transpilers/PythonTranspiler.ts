@@ -9,12 +9,68 @@
  * Executes in < 5ms without needing to download multi-megabyte Pyodide WebAssembly binaries.
  */
 
+import { stripCommentsPreservingLines } from '../ModeDetector';
+
 export interface PythonTranspileResult {
   code: string;
   isClassSolution: boolean;
   methodName?: string;
   className?: string;
   paramCount?: number;
+}
+
+/**
+ * Checks whether Python source code is trivially simple enough to be
+ * transpiled directly to JavaScript and executed on the fast path.
+ *
+ * If the code uses classes, type hints, imports, libraries (heapq, deque,
+ * defaultdict, bisect), enumerate, range, slicing, nested defs, stdin/input,
+ * dicts/sets, list comprehensions, or any complex Python construct,
+ * it returns false so the execution routes safely to Pyodide + sys.settrace.
+ */
+export function canFastTranspilePython(code: string): boolean {
+  const clean = stripCommentsPreservingLines(code);
+
+  // 1. Classes or inheritance
+  if (/\bclass\s+[a-zA-Z0-9_]+/i.test(clean)) return false;
+
+  // 2. Type hints (e.g. ->, : int, : List[...], etc.)
+  if (/->\s*[^:]+:/.test(clean)) return false;
+  if (/:\s*(?:int|str|float|bool|list|dict|set|tuple|List|Dict|Set|Tuple|Optional|Any|Union)\b/.test(clean)) return false;
+
+  // 3. Imports
+  if (/^\s*(?:import|from)\s+[a-zA-Z0-9_]+/m.test(clean)) return false;
+
+  // 4. Builtins/modules: enumerate, heapq, deque, defaultdict, Counter, bisect, etc.
+  if (/\b(?:enumerate|heapq|deque|defaultdict|Counter|bisect|zip|reversed|iter|next|lambda|yield)\b/.test(clean)) return false;
+
+  // 5. Complex range usage: 3 args (e.g. negative step) or range outside a simple for-in loop
+  const rangeMatches = [...clean.matchAll(/\brange\s*\(([^)]*)\)/g)];
+  for (const rm of rangeMatches) {
+    const args = rm[1].split(',');
+    if (args.length > 2) return false; // 3 args (like step)
+    const pre = clean.slice(0, rm.index).trim();
+    if (!pre.endsWith('in') && !/for\s+[a-zA-Z0-9_]+\s+in$/.test(pre)) return false;
+  }
+
+  // 6. Slicing with colon inside brackets e.g. [1:], [:5], [::]
+  if (/\[\s*[^:\]]*:[^\]]*\]/.test(clean)) return false;
+
+  // 6. Nested defs or multiple functions
+  const defMatches = [...clean.matchAll(/^[ \t]*def\s+([a-zA-Z0-9_]+)/gm)];
+  if (defMatches.length > 1) return false;
+  if (/^[ \t]+def\s+/m.test(clean)) return false;
+
+  // 7. Decorators
+  if (/^\s*@/m.test(clean)) return false;
+
+  // 8. Dictionaries or sets
+  if (/\{|\}/.test(clean)) return false;
+
+  // 9. List comprehensions
+  if (/\[\s*[^\]]+?\s+for\s+[a-zA-Z0-9_]+\s+in\s+[^\]]+?\]/.test(clean)) return false;
+
+  return true;
 }
 
 // Transform Python list comprehensions: [expr for item in iter (if cond)?]

@@ -112,6 +112,9 @@ class Node:
         self.next = next
         self.random = random
 
+class _StepLimitExceeded(Exception):
+    pass
+
 _steps = []
 _stdout_capture = io.StringIO()
 _MAX_STEPS = 5000
@@ -170,7 +173,9 @@ def _safe_repr(val, depth=0):
         return f"{cls_name}({attrs})"
     return repr(val)[:200]
 
-def _safe_clone(val, depth=0):
+def _safe_clone(val, depth=0, visited=None):
+    if visited is None:
+        visited = set()
     if depth > 8:
         return "..."
     if val is None or isinstance(val, (bool, int, str)):
@@ -182,36 +187,48 @@ def _safe_clone(val, depth=0):
             return "NaN"
         return val
     if _is_list_node(val):
-        nodes = []
-        curr = val
-        visited = set()
-        while curr and id(curr) not in visited and len(nodes) < 50:
-            visited.add(id(curr))
-            nodes.append({
-                "__id": f"node_{id(curr)}",
-                "val": curr.val,
-                "next": f"node_{id(curr.next)}" if curr.next else None,
-                "nextId": f"node_{id(curr.next)}" if curr.next else None,
-            })
-            curr = curr.next
-        return nodes
-    if _is_tree_node(val):
+        if id(val) in visited:
+            return {"__id": f"node_{id(val)}", "__ref": True}
+        visited.add(id(val))
         return {
+            "__id": f"node_{id(val)}",
+            "__type": "linkedList",
             "val": val.val,
-            "left": _safe_clone(val.left, depth + 1) if val.left else None,
-            "right": _safe_clone(val.right, depth + 1) if val.right else None,
+            "next": _safe_clone(val.next, depth + 1, visited) if val.next else None,
+            "nextId": f"node_{id(val.next)}" if val.next else None,
+        }
+    if _is_tree_node(val):
+        if id(val) in visited:
+            return {"__id": f"tree_{id(val)}", "__ref": True}
+        visited.add(id(val))
+        return {
+            "__id": f"tree_{id(val)}",
+            "__type": "binaryTree",
+            "val": val.val,
+            "left": _safe_clone(val.left, depth + 1, visited) if val.left else None,
+            "right": _safe_clone(val.right, depth + 1, visited) if val.right else None,
+            "leftId": f"tree_{id(val.left)}" if val.left else None,
+            "rightId": f"tree_{id(val.right)}" if val.right else None,
         }
     if isinstance(val, (list, tuple)):
-        return [_safe_clone(v, depth+1) for v in val[:50]]
+        return [_safe_clone(v, depth+1, visited) for v in val[:50]]
     if isinstance(val, dict):
-        return {str(k): _safe_clone(v, depth+1) for k, v in list(val.items())[:20]}
+        return {
+            "__id": f"map_{id(val)}",
+            "__type": "hashMap",
+            "entries": [{"key": _safe_clone(k, depth+1, visited), "value": _safe_clone(v, depth+1, visited)} for k, v in list(val.items())[:50]]
+        }
     if isinstance(val, set):
-        return list(val)[:20]
+        return {
+            "__id": f"set_{id(val)}",
+            "__type": "hashSet",
+            "items": [_safe_clone(v, depth+1, visited) for v in list(val)[:50]]
+        }
     if hasattr(val, '__dict__'):
         d = {"__class__": type(val).__name__}
         for k, v in val.__dict__.items():
             if not k.startswith('_'):
-                d[k] = _safe_clone(v, depth + 1)
+                d[k] = _safe_clone(v, depth + 1, visited)
         return d
     return repr(val)[:200]
 
@@ -231,13 +248,15 @@ def _get_type(val):
     if _is_tree_node(val):
         return "binaryTree"
     if isinstance(val, list):
-        return "list"
+        if len(val) > 0 and isinstance(val[0], list):
+            return "grid"
+        return "array"
     if isinstance(val, dict):
-        return "dict"
+        return "hashMap"
+    if isinstance(val, set):
+        return "hashSet"
     if isinstance(val, tuple):
         return "tuple"
-    if isinstance(val, set):
-        return "set"
     if hasattr(val, '__dict__'):
         cls_name = type(val).__name__
         cls_lower = cls_name.lower()
@@ -298,7 +317,7 @@ def _tracer_fn(frame, event, arg):
 
     if len(_steps) >= _MAX_STEPS:
         _TRUNCATED = True
-        return None
+        raise _StepLimitExceeded("Execution step limit reached")
 
     # Build variables snapshot
     local_vars = {k: v for k, v in frame.f_locals.items() if not _is_unwanted_var(k, v)}
@@ -387,11 +406,13 @@ def _tracer_fn(frame, event, arg):
         if isinstance(v, list):
             _last_vars_snapshot[k] = list(v)
 
-    # Build call stack
+    # Build call stack (capped at 50 to prevent quadratic slowdown on deep recursion)
     call_stack = []
     f = frame
-    while f is not None:
+    cs_depth = 0
+    while f is not None and cs_depth < 50:
         if f.f_code.co_filename in ('<algolens>', '<string>'):
+            cs_depth += 1
             frame_locals = {}
             arg_count = f.f_code.co_argcount
             arg_names = f.f_code.co_varnames[:arg_count]
@@ -422,7 +443,7 @@ def _tracer_fn(frame, event, arg):
 
     step = {
         "index": len(_steps),
-        "line": frame.f_lineno,
+        "line": max(1, frame.f_lineno),
         "event": ev,
         "variables": variables,
         "callStack": list(reversed(call_stack)),
@@ -515,6 +536,9 @@ def run_with_trace(user_code, max_steps=5000, user_input="", user_line_count=0):
     builtins_map["heapq"] = heapq
     builtins_map["bisect"] = bisect
     builtins_map["random"] = random
+    builtins_map["null"] = None
+    builtins_map["true"] = True
+    builtins_map["false"] = False
 
     def _worker_input(prompt=""):
         if prompt:
@@ -532,6 +556,8 @@ def run_with_trace(user_code, max_steps=5000, user_input="", user_line_count=0):
         compiled = compile(user_code, '<algolens>', 'exec')
         sys.settrace(_tracer_fn)
         exec(compiled, exec_globals)
+    except _StepLimitExceeded:
+        _TRUNCATED = True
     except Exception as e:
         error = _tb.format_exc()
     finally:
