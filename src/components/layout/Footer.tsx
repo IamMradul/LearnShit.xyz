@@ -227,125 +227,95 @@ export const Footer: React.FC = () => {
               Created by
             </span>
 
-            {CREATORS.map((c) => {
-              const hasImgError = imgErrors[c.handle];
-              return (
-                <div
-                  key={c.name}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 10,
-                    padding: '5px 12px 5px 6px',
-                    borderRadius: 24,
-                    background: '#0d0f14',
-                    border: '1px solid rgba(247, 245, 239, 0.08)',
-                    transition: 'all 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = 'rgba(214, 82, 58, 0.4)';
-                    e.currentTarget.style.background = '#13151b';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = 'rgba(247, 245, 239, 0.08)';
-                    e.currentTarget.style.background = '#0d0f14';
-                  }}
-                >
-                  {/* GitHub Profile Photo */}
+            {CREATORS.map((c) => (
+              <div
+                key={c.name}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  padding: '6px 14px',
+                  borderRadius: 20,
+                  background: '#0d0f14',
+                  border: '1px solid rgba(247, 245, 239, 0.08)',
+                  transition: 'all 0.2s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = 'rgba(214, 82, 58, 0.4)';
+                  e.currentTarget.style.background = '#13151b';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = 'rgba(247, 245, 239, 0.08)';
+                  e.currentTarget.style.background = '#0d0f14';
+                }}
+              >
+                {/* Name and Role */}
+                <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.25 }}>
                   <a
                     href={c.github}
                     target="_blank"
                     rel="noopener noreferrer"
-                    title={`View ${c.name} on GitHub`}
                     style={{
+                      fontFamily: "'Inter', sans-serif",
+                      fontSize: 13,
+                      fontWeight: 700,
+                      color: '#F7F5EF',
+                      textDecoration: 'none',
+                      transition: 'color 0.15s ease',
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--accent, #D6523A)')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = '#F7F5EF')}
+                  >
+                    {c.name}
+                  </a>
+                  <span
+                    style={{
+                      fontFamily: "'JetBrains Mono', monospace",
+                      fontSize: 10,
+                      color: 'rgba(247, 245, 239, 0.45)',
+                    }}
+                  >
+                    {c.role}
+                  </span>
+                </div>
+
+                {/* Actions (GitHub + Email) */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 2 }}>
+                  <a
+                    href={c.github}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title={`${c.name} on GitHub`}
+                    style={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: 6,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
+                      color: 'rgba(247, 245, 239, 0.65)',
                       textDecoration: 'none',
+                      transition: 'all 0.15s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = 'var(--accent, #D6523A)';
+                      e.currentTarget.style.background = 'rgba(214, 82, 58, 0.15)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = 'rgba(247, 245, 239, 0.65)';
+                      e.currentTarget.style.background = 'transparent';
                     }}
                   >
-                    {!hasImgError ? (
-                      <img
-                        src={c.avatarUrl}
-                        alt={`${c.name} GitHub profile`}
-                        width={30}
-                        height={30}
-                        style={{
-                          width: 30,
-                          height: 30,
-                          borderRadius: '50%',
-                          objectFit: 'cover',
-                          border: '1.5px solid rgba(214, 82, 58, 0.4)',
-                          boxShadow: '0 2px 6px rgba(0,0,0,0.4)',
-                        }}
-                        onError={() =>
-                          setImgErrors((prev) => ({ ...prev, [c.handle]: true }))
-                        }
-                      />
-                    ) : (
-                      <div
-                        style={{
-                          width: 30,
-                          height: 30,
-                          borderRadius: '50%',
-                          background: c.fallbackBg,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontWeight: 700,
-                          fontSize: 11,
-                          color: '#FFFFFF',
-                          fontFamily: "'Oswald', sans-serif",
-                          border: '1.5px solid rgba(214, 82, 58, 0.4)',
-                        }}
-                      >
-                        {c.initials}
-                      </div>
-                    )}
+                    <GithubIcon size={14} />
                   </a>
 
-                  {/* Name and Role */}
-                  <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <a
-                        href={c.github}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{
-                          fontFamily: "'Inter', sans-serif",
-                          fontSize: 13,
-                          fontWeight: 700,
-                          color: '#F7F5EF',
-                          textDecoration: 'none',
-                          transition: 'color 0.15s ease',
-                        }}
-                        onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--accent, #D6523A)')}
-                        onMouseLeave={(e) => (e.currentTarget.style.color = '#F7F5EF')}
-                      >
-                        {c.name}
-                      </a>
-                    </div>
-                    <span
-                      style={{
-                        fontFamily: "'JetBrains Mono', monospace",
-                        fontSize: 10,
-                        color: 'rgba(247, 245, 239, 0.45)',
-                      }}
-                    >
-                      {c.role}
-                    </span>
-                  </div>
-
-                  {/* Actions (GitHub + Email) */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 2 }}>
+                  {c.email && (
                     <a
-                      href={c.github}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title={`${c.name} on GitHub`}
+                      href={`mailto:${c.email}`}
+                      title={`Email ${c.name} (${c.email})`}
                       style={{
-                        width: 22,
-                        height: 22,
+                        width: 24,
+                        height: 24,
                         borderRadius: 6,
                         display: 'flex',
                         alignItems: 'center',
@@ -363,40 +333,12 @@ export const Footer: React.FC = () => {
                         e.currentTarget.style.background = 'transparent';
                       }}
                     >
-                      <GithubIcon size={13} />
+                      <Mail size={14} />
                     </a>
-
-                    {c.email && (
-                      <a
-                        href={`mailto:${c.email}`}
-                        title={`Email ${c.name} (${c.email})`}
-                        style={{
-                          width: 22,
-                          height: 22,
-                          borderRadius: 6,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: 'rgba(247, 245, 239, 0.65)',
-                          textDecoration: 'none',
-                          transition: 'all 0.15s ease',
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.color = 'var(--accent, #D6523A)';
-                          e.currentTarget.style.background = 'rgba(214, 82, 58, 0.15)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.color = 'rgba(247, 245, 239, 0.65)';
-                          e.currentTarget.style.background = 'transparent';
-                        }}
-                      >
-                        <Mail size={13} />
-                      </a>
-                    )}
-                  </div>
+                  )}
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
 
           {/* ── Right: Repo Link & Back to Top ── */}
