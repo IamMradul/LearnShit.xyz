@@ -157,12 +157,50 @@ export const EditorToolbar: React.FC = () => {
                 disabled={false}
                 id={`lang-opt-${l.id}`}
               >
-                {l.label}
+                <span>{l.label}</span>
+                {['cpp', 'java', 'go', 'rust'].includes(l.id) && (
+                  <span
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 500,
+                      padding: '1px 5px',
+                      borderRadius: 4,
+                      background: 'rgba(234, 179, 8, 0.15)',
+                      color: '#eab308',
+                      marginLeft: 6,
+                    }}
+                  >
+                    simple only
+                  </span>
+                )}
               </button>
             ))}
           </div>
         )}
       </div>
+
+      {/* Experimental badge for transpiled languages */}
+      {['cpp', 'java', 'go', 'rust'].includes(language) && (
+        <span
+          title="Experimental: only simple programs are supported in the visualizer for this language. Advanced standard library features and complex templates may fall back to code execution view."
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 4,
+            fontSize: 11,
+            fontWeight: 600,
+            padding: '2px 7px',
+            borderRadius: 12,
+            background: 'rgba(234, 179, 8, 0.15)',
+            color: '#eab308',
+            border: '1px solid rgba(234, 179, 8, 0.35)',
+            cursor: 'help',
+            userSelect: 'none',
+          }}
+        >
+          <span style={{ fontSize: 9 }}>⚡</span> Experimental: simple programs only
+        </span>
+      )}
 
       {/* Mode override */}
       <select

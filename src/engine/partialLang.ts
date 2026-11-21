@@ -1,7 +1,7 @@
 import type { TraceResult } from './TraceTypes';
 
 export const PARTIAL_LANG_NOTICE =
-  'This language is only partially supported in the visualizer';
+  'This language is only partially supported in the visualizer (experimental: only simple programs are supported)';
 
 export function partialLangResult(
   language: string,
