@@ -105,6 +105,105 @@ export function usePlayback() {
     useTraceStore.getState().setCurrentIndex(Math.max(0, steps.length - 1));
   }, []);
 
+  const stepOver = useCallback(() => {
+    const { steps, currentIndex } = useTraceStore.getState();
+    if (currentIndex >= steps.length - 1) return;
+    const currStep = steps[currentIndex];
+    const currDepth = currStep?.callStack?.length ?? 1;
+
+    useTraceStore.getState().setStatus('paused');
+
+    let nextIdx = currentIndex + 1;
+    while (nextIdx < steps.length) {
+      const nextStep = steps[nextIdx];
+      const nextDepth = nextStep?.callStack?.length ?? 1;
+      if (nextDepth <= currDepth) {
+        break;
+      }
+      nextIdx++;
+    }
+    useTraceStore.getState().setCurrentIndex(Math.min(nextIdx, steps.length - 1));
+  }, []);
+
+  const stepOut = useCallback(() => {
+    const { steps, currentIndex } = useTraceStore.getState();
+    if (currentIndex >= steps.length - 1) return;
+    const currStep = steps[currentIndex];
+    const currDepth = currStep?.callStack?.length ?? 1;
+
+    useTraceStore.getState().setStatus('paused');
+
+    let nextIdx = currentIndex + 1;
+    while (nextIdx < steps.length) {
+      const nextStep = steps[nextIdx];
+      const nextDepth = nextStep?.callStack?.length ?? 1;
+      if (nextDepth < currDepth) {
+        break;
+      }
+      nextIdx++;
+    }
+    useTraceStore.getState().setCurrentIndex(Math.min(nextIdx, steps.length - 1));
+  }, []);
+
+  const skipToNextIteration = useCallback(() => {
+    const { steps, currentIndex } = useTraceStore.getState();
+    if (currentIndex >= steps.length - 1) return;
+    const currStep = steps[currentIndex];
+    if (!currStep?.loop) {
+      useTraceStore.getState().setCurrentIndex(currentIndex + 1);
+      return;
+    }
+    const { headerLine, iteration } = currStep.loop;
+    useTraceStore.getState().setStatus('paused');
+
+    let nextIdx = currentIndex + 1;
+    while (nextIdx < steps.length) {
+      const s = steps[nextIdx];
+      if (!s.loop || s.loop.headerLine !== headerLine || s.loop.iteration > iteration) {
+        break;
+      }
+      nextIdx++;
+    }
+    useTraceStore.getState().setCurrentIndex(Math.min(nextIdx, steps.length - 1));
+  }, []);
+
+  const runToEndOfLoop = useCallback(() => {
+    const { steps, currentIndex } = useTraceStore.getState();
+    if (currentIndex >= steps.length - 1) return;
+    const currStep = steps[currentIndex];
+    if (!currStep?.loop) {
+      useTraceStore.getState().setCurrentIndex(currentIndex + 1);
+      return;
+    }
+    const { headerLine } = currStep.loop;
+    useTraceStore.getState().setStatus('paused');
+
+    let nextIdx = currentIndex + 1;
+    while (nextIdx < steps.length) {
+      const s = steps[nextIdx];
+      if (!s.loop || s.loop.headerLine !== headerLine) {
+        break;
+      }
+      nextIdx++;
+    }
+    useTraceStore.getState().setCurrentIndex(Math.min(nextIdx, steps.length - 1));
+  }, []);
+
+  const jumpToNextLineExecution = useCallback((line: number) => {
+    const { steps, currentIndex } = useTraceStore.getState();
+    if (currentIndex >= steps.length - 1) return;
+    useTraceStore.getState().setStatus('paused');
+
+    let nextIdx = currentIndex + 1;
+    while (nextIdx < steps.length) {
+      if (steps[nextIdx].line === line) {
+        useTraceStore.getState().setCurrentIndex(nextIdx);
+        return;
+      }
+      nextIdx++;
+    }
+  }, []);
+
   const seekTo = useCallback((fraction: number) => {
     const { steps } = useTraceStore.getState();
     if (!steps.length) return;
@@ -167,6 +266,11 @@ export function usePlayback() {
     stepBackward,
     jumpToStart,
     jumpToEnd,
+    stepOver,
+    stepOut,
+    skipToNextIteration,
+    runToEndOfLoop,
+    jumpToNextLineExecution,
     seekTo,
     setSpeed,
   };
