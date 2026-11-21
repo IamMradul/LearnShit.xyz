@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Mail, ExternalLink, ArrowUp, Heart } from 'lucide-react';
 
 /* ─── GitHub Icon (Crisp inline SVG) ────────────────────────────────────────── */
@@ -53,6 +53,10 @@ interface Creator {
   role: string;
   github: string;
   email?: string;
+  localAvatar: string;
+  remoteAvatar: string;
+  initials: string;
+  fallbackBg: string;
 }
 
 const CREATORS: Creator[] = [
@@ -62,16 +66,38 @@ const CREATORS: Creator[] = [
     role: 'Lead Architect',
     github: 'https://github.com/IamMradul',
     email: 'mradulg306@gmail.com',
+    localAvatar: '/avatars/mradul.jpg',
+    remoteAvatar: 'https://avatars.githubusercontent.com/u/108190254?v=4',
+    initials: 'M',
+    fallbackBg: 'linear-gradient(135deg, #D6523A 0%, #FF7854 100%)',
   },
   {
     name: 'Md Dilshan',
     handle: 'Imdilshan',
     role: 'Core Contributor',
     github: 'https://github.com/Imdilshan',
+    localAvatar: '/avatars/dilshan.jpg',
+    remoteAvatar: 'https://avatars.githubusercontent.com/u/158074772?v=4',
+    initials: 'MD',
+    fallbackBg: 'linear-gradient(135deg, #2563EB 0%, #60A5FA 100%)',
   },
 ];
 
 export const Footer: React.FC = () => {
+  const [avatarSources, setAvatarSources] = useState<Record<string, string>>({
+    IamMradul: '/avatars/mradul.jpg',
+    Imdilshan: '/avatars/dilshan.jpg',
+  });
+  const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
+
+  const handleImgError = (handle: string, remoteAvatar: string) => {
+    // If local asset fails to load, fall back to GitHub CDN directly
+    if (avatarSources[handle] !== remoteAvatar) {
+      setAvatarSources((prev: Record<string, string>) => ({ ...prev, [handle]: remoteAvatar }));
+    } else {
+      setImgErrors((prev: Record<string, boolean>) => ({ ...prev, [handle]: true }));
+    }
+  };
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -132,7 +158,7 @@ export const Footer: React.FC = () => {
           {/* ── Brand ── */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div
+              {/* <div
                 style={{
                   width: 28,
                   height: 28,
@@ -145,7 +171,10 @@ export const Footer: React.FC = () => {
                   boxShadow: '0 2px 8px rgba(214, 82, 58, 0.2)',
                 }}
               >
-                <AccentMark />
+                
+              </div> */}
+              <div className="hero-brand-logo" style={{ overflow: 'hidden' }}>
+                <img src="/learnshit.svg" alt="LearnShit Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
               <span
                 style={{
@@ -227,92 +256,127 @@ export const Footer: React.FC = () => {
               Created by
             </span>
 
-            {CREATORS.map((c) => (
-              <div
-                key={c.name}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 12,
-                  padding: '6px 14px',
-                  borderRadius: 20,
-                  background: '#0d0f14',
-                  border: '1px solid rgba(247, 245, 239, 0.08)',
-                  transition: 'all 0.2s ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = 'rgba(214, 82, 58, 0.4)';
-                  e.currentTarget.style.background = '#13151b';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = 'rgba(247, 245, 239, 0.08)';
-                  e.currentTarget.style.background = '#0d0f14';
-                }}
-              >
-                {/* Name and Role */}
-                <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.25 }}>
-                  <a
-                    href={c.github}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      fontFamily: "'Inter', sans-serif",
-                      fontSize: 13,
-                      fontWeight: 700,
-                      color: '#F7F5EF',
-                      textDecoration: 'none',
-                      transition: 'color 0.15s ease',
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--accent, #D6523A)')}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = '#F7F5EF')}
-                  >
-                    {c.name}
-                  </a>
-                  <span
-                    style={{
-                      fontFamily: "'JetBrains Mono', monospace",
-                      fontSize: 10,
-                      color: 'rgba(247, 245, 239, 0.45)',
-                    }}
-                  >
-                    {c.role}
-                  </span>
-                </div>
+            {CREATORS.map((c) => {
+              const currentSrc = avatarSources[c.handle] || c.localAvatar;
+              const hasFailed = imgErrors[c.handle];
 
-                {/* Actions (GitHub + Email) */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 2 }}>
+              return (
+                <div
+                  key={c.name}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    padding: '4px 12px 4px 6px',
+                    borderRadius: 22,
+                    background: '#0d0f14',
+                    border: '1px solid rgba(247, 245, 239, 0.08)',
+                    transition: 'all 0.2s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = 'rgba(214, 82, 58, 0.4)';
+                    e.currentTarget.style.background = '#13151b';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = 'rgba(247, 245, 239, 0.08)';
+                    e.currentTarget.style.background = '#0d0f14';
+                  }}
+                >
+                  {/* Creator Profile Photo */}
                   <a
                     href={c.github}
                     target="_blank"
                     rel="noopener noreferrer"
-                    title={`${c.name} on GitHub`}
+                    title={`View ${c.name} on GitHub`}
                     style={{
-                      width: 24,
-                      height: 24,
-                      borderRadius: 6,
+                      position: 'relative',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      color: 'rgba(247, 245, 239, 0.65)',
+                      width: 28,
+                      height: 28,
+                      borderRadius: '50%',
+                      overflow: 'hidden',
+                      flexShrink: 0,
                       textDecoration: 'none',
-                      transition: 'all 0.15s ease',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.color = 'var(--accent, #D6523A)';
-                      e.currentTarget.style.background = 'rgba(214, 82, 58, 0.15)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.color = 'rgba(247, 245, 239, 0.65)';
-                      e.currentTarget.style.background = 'transparent';
+                      border: '1.5px solid rgba(247, 245, 239, 0.15)',
+                      boxShadow: '0 2px 6px rgba(0, 0, 0, 0.35)',
                     }}
                   >
-                    <GithubIcon size={14} />
+                    {!hasFailed ? (
+                      <img
+                        src={currentSrc}
+                        alt={`${c.name} profile`}
+                        width={28}
+                        height={28}
+                        referrerPolicy="no-referrer"
+                        onError={() => handleImgError(c.handle, c.remoteAvatar)}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          display: 'block',
+                          borderRadius: '50%',
+                        }}
+                      />
+                    ) : (
+                      <div
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          background: c.fallbackBg,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontFamily: "'Oswald', sans-serif",
+                          fontSize: 11,
+                          fontWeight: 700,
+                          color: '#FFFFFF',
+                          letterSpacing: '0.02em',
+                        }}
+                      >
+                        {c.initials}
+                      </div>
+                    )}
                   </a>
 
-                  {c.email && (
+                  {/* Name and Role */}
+                  <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.25 }}>
                     <a
-                      href={`mailto:${c.email}`}
-                      title={`Email ${c.name} (${c.email})`}
+                      href={c.github}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        fontFamily: "'Inter', sans-serif",
+                        fontSize: 13,
+                        fontWeight: 700,
+                        color: '#F7F5EF',
+                        textDecoration: 'none',
+                        transition: 'color 0.15s ease',
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--accent, #D6523A)')}
+                      onMouseLeave={(e) => (e.currentTarget.style.color = '#F7F5EF')}
+                    >
+                      {c.name}
+                    </a>
+                    <span
+                      style={{
+                        fontFamily: "'JetBrains Mono', monospace",
+                        fontSize: 10,
+                        color: 'rgba(247, 245, 239, 0.45)',
+                      }}
+                    >
+                      {c.role}
+                    </span>
+                  </div>
+
+                  {/* Actions (GitHub + Email) */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 2 }}>
+                    <a
+                      href={c.github}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title={`${c.name} on GitHub`}
                       style={{
                         width: 24,
                         height: 24,
@@ -333,12 +397,40 @@ export const Footer: React.FC = () => {
                         e.currentTarget.style.background = 'transparent';
                       }}
                     >
-                      <Mail size={14} />
+                      <GithubIcon size={14} />
                     </a>
-                  )}
+
+                    {c.email && (
+                      <a
+                        href={`mailto:${c.email}`}
+                        title={`Email ${c.name} (${c.email})`}
+                        style={{
+                          width: 24,
+                          height: 24,
+                          borderRadius: 6,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: 'rgba(247, 245, 239, 0.65)',
+                          textDecoration: 'none',
+                          transition: 'all 0.15s ease',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.color = 'var(--accent, #D6523A)';
+                          e.currentTarget.style.background = 'rgba(214, 82, 58, 0.15)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.color = 'rgba(247, 245, 239, 0.65)';
+                          e.currentTarget.style.background = 'transparent';
+                        }}
+                      >
+                        <Mail size={14} />
+                      </a>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* ── Right: Repo Link & Back to Top ── */}
