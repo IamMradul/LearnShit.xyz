@@ -916,7 +916,32 @@ export const GallerySection: React.FC = () => {
         position: 'relative',
       }}
     >
-      <div style={{ maxWidth: 1360, margin: '0 auto' }}>
+      <style>{`
+        .gallery-playgrounds-grid {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 20px;
+        }
+        @media (max-width: 1200px) {
+          .gallery-playgrounds-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+          }
+        }
+        @media (max-width: 860px) {
+          .gallery-playgrounds-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+          }
+        }
+        @media (max-width: 560px) {
+          .gallery-playgrounds-grid {
+            grid-template-columns: 1fr;
+            gap: 14px;
+          }
+        }
+      `}</style>
+      <div style={{ maxWidth: 1600, margin: '0 auto' }}>
         {/* Header matching Hero aesthetic */}
         <div style={{ marginBottom: 36, textAlign: 'center' }}>
           <div
@@ -1014,14 +1039,8 @@ export const GallerySection: React.FC = () => {
           </div>
         </div>
 
-        {/* ── 26 Interactive Playgrounds Grid ───────────────────────────────── */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(330px, 1fr))',
-            gap: 24,
-          }}
-        >
+        {/* ── 26 Interactive Playgrounds Grid (4 Columns) ─────────────────── */}
+        <div className="gallery-playgrounds-grid">
           {filteredItems.map((item) => (
             <InteractivePlaygroundCard
               key={item.id}
