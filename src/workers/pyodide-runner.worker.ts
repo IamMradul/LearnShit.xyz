@@ -9,6 +9,7 @@
  */
 
 import type { TraceRequest, TraceResult } from '../engine/TraceTypes';
+import { normalizeTraceResult } from '../engine/normalizeTrace';
 
 declare function importScripts(...urls: string[]): void;
 declare const loadPyodide: (opts: { indexURL: string }) => Promise<PyodideInterface>;
@@ -705,7 +706,7 @@ async function runPythonTrace(
     totalSteps: number;
   };
 
-  return {
+  return normalizeTraceResult({
     steps: data.steps,
     language: 'python',
     mode: request.mode === 'auto' ? 'function' : request.mode,
@@ -714,5 +715,5 @@ async function runPythonTrace(
     stdout: data.stdout,
     stderr: data.stderr,
     error: data.error ?? undefined,
-  };
+  });
 }
