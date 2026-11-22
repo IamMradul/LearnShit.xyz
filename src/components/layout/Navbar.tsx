@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
   Code2,
-  BookOpen,
   Layers,
   Play,
   Menu,
@@ -132,7 +131,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   const isSheetsActive = isResourcesView && (currentResourceTab === 'sheets' || currentResourceTab === 'learnshit-sheet');
-  const isBooksActive = isResourcesView && currentResourceTab === 'books';
   const isDsaActive = isDsaView;
   const isIdeActive = isVisualizerView || (!isResourcesView && !isDsaView && activeSection === 'ide');
   const isGalleryActive = !isResourcesView && !isDsaView && !isVisualizerView && activeSection === 'gallery';
@@ -432,57 +430,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                 Sheets
               </span>
             </button>
-
-            {/* Books (CP Reference Books) */}
-            <button
-              onClick={() => handleResourcesClick('books')}
-              id="navbar-books-btn"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 7,
-                padding: '6px 13px',
-                borderRadius: 8,
-                background: isBooksActive ? 'rgba(214, 82, 58, 0.14)' : 'transparent',
-                border: isBooksActive ? '1px solid rgba(214, 82, 58, 0.35)' : '1px solid transparent',
-                color: isBooksActive ? '#F7F5EF' : 'rgba(247, 245, 239, 0.75)',
-                fontFamily: "'Inter', sans-serif",
-                fontSize: 13,
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'all 0.18s ease',
-              }}
-              onMouseEnter={(e) => {
-                if (!isBooksActive) {
-                  e.currentTarget.style.color = '#F7F5EF';
-                  e.currentTarget.style.background = 'rgba(247, 245, 239, 0.05)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isBooksActive) {
-                  e.currentTarget.style.color = 'rgba(247, 245, 239, 0.75)';
-                  e.currentTarget.style.background = 'transparent';
-                }
-              }}
-            >
-              <BookOpen size={15} style={{ color: isBooksActive ? 'var(--accent, #D6523A)' : 'inherit' }} />
-              <span>Books</span>
-              <span
-                style={{
-                  fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: 9.5,
-                  color: '#FFFFFF',
-                  background: 'linear-gradient(135deg, #D6523A 0%, #E2583E 100%)',
-                  padding: '1px 6px',
-                  borderRadius: 10,
-                  fontWeight: 700,
-                  letterSpacing: '0.04em',
-                  boxShadow: '0 1px 6px rgba(214, 82, 58, 0.35)',
-                }}
-              >
-                NEW
-              </span>
-            </button>
           </nav>
 
           {/* ── Action Buttons (Right) ── */}
@@ -495,7 +442,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             className="navbar-desktop-actions"
           >
             {/* GitHub Repo Pill Button */}
-            {/* <a
+            <a
               href="https://github.com/IamMradul/LearnShit.xyz"
               target="_blank"
               rel="noopener noreferrer"
@@ -527,44 +474,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <GithubIcon size={15} />
               <span>GitHub</span>
               <ExternalLink size={11} style={{ opacity: 0.55 }} />
-            </a> */}
-
-            {/* Launch Visualizer Primary CTA */}
-            <button
-              onClick={handleVisualizerClick}
-              id="navbar-launch-btn"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 8,
-                padding: '8px 18px',
-                borderRadius: 8,
-                background: 'linear-gradient(135deg, #D6523A 0%, #E2583E 100%)',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
-                color: '#FFFFFF',
-                fontFamily: "'Oswald', sans-serif",
-                fontSize: 13,
-                fontWeight: 700,
-                letterSpacing: '0.06em',
-                textTransform: 'uppercase',
-                cursor: 'pointer',
-                boxShadow: '0 2px 14px rgba(214, 82, 58, 0.35)',
-                transition: 'all 0.18s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-1px)';
-                e.currentTarget.style.boxShadow = '0 4px 20px rgba(214, 82, 58, 0.55)';
-                e.currentTarget.style.background = 'linear-gradient(135deg, #E2583E 0%, #FF684D 100%)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'none';
-                e.currentTarget.style.boxShadow = '0 2px 14px rgba(214, 82, 58, 0.35)';
-                e.currentTarget.style.background = 'linear-gradient(135deg, #D6523A 0%, #E2583E 100%)';
-              }}
-            >
-              <Play size={13} fill="#FFFFFF" />
-              <span>Launch IDE</span>
-            </button>
+            </a>
           </div>
 
           {/* ── Mobile Hamburger Toggle ── */}
@@ -706,31 +616,6 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
             <ChevronRight size={14} style={{ opacity: 0.5 }} />
           </button>
-
-          <button
-            onClick={() => handleResourcesClick('books')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '12px 16px',
-              borderRadius: 8,
-              background: isBooksActive ? 'rgba(214, 82, 58, 0.2)' : 'rgba(214, 82, 58, 0.1)',
-              border: '1px solid rgba(214, 82, 58, 0.35)',
-              color: '#F7F5EF',
-              fontFamily: "'Inter', sans-serif",
-              fontSize: 14,
-              fontWeight: 600,
-              cursor: 'pointer',
-              textAlign: 'left',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <BookOpen size={16} color="var(--accent, #D6523A)" />
-              <span>Reference Books</span>
-            </div>
-          </button>
-
 
           <button
             onClick={handleVisualizerClick}
