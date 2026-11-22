@@ -20,6 +20,7 @@ export const CodeEditorDrawer: React.FC = () => {
     setInput,
     modeOverride,
     setModeOverride,
+    isAutoDetecting,
     inputHighlighted,
     setInputHighlighted,
   } = useEditorStore();

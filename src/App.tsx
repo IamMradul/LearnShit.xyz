@@ -8,6 +8,7 @@ import { Footer } from './components/layout/Footer';
 import { DsaHub } from './components/dsa/DsaHub';
 import { useUIStore } from './store/uiStore';
 import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import { useRouter, navigate } from './utils/router';
 
 export default function App() {
@@ -149,6 +150,7 @@ export default function App() {
 
       {/* ── Vercel Web Analytics ── */}
       <Analytics />
+      <SpeedInsights />
     </div>
   );
 }
