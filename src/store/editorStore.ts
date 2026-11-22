@@ -114,6 +114,7 @@ interface EditorStore {
   autoDetectedLang: SupportedLanguage | null;
   isAutoDetecting: boolean;
   detectedPlatform: PlatformDetectionResult | null;
+  inputHighlighted: boolean;
 
   setLanguage: (lang: SupportedLanguage) => void;
   setCode: (code: string) => void;
@@ -123,6 +124,7 @@ interface EditorStore {
   setModeOverride: (mode: 'auto' | 'function' | 'full-program') => void;
   loadSample: (language: SupportedLanguage) => void;
   setIsAutoDetecting: (b: boolean) => void;
+  setInputHighlighted: (highlighted: boolean) => void;
 }
 
 export const useEditorStore = create<EditorStore>()(
@@ -137,12 +139,17 @@ export const useEditorStore = create<EditorStore>()(
       autoDetectedLang: null,
       isAutoDetecting: true,
       detectedPlatform: sharedPayload?.code ? identifyPlatform(sharedPayload.code) : null,
+      inputHighlighted: false,
 
       setLanguage: (lang) =>
         set({ language: lang, isAutoDetecting: false, autoDetectedLang: null }),
       setCode: (code) =>
         set((state) => {
-          const updates: Partial<EditorStore> = { code };
+          const isNewCode = code !== state.code && code.trim().length > 0;
+          const updates: Partial<EditorStore> = {
+            code,
+            inputHighlighted: isNewCode ? true : state.inputHighlighted,
+          };
           if (code.trim().length > 10) {
             const detected = detectLanguage(code);
             const platformInfo = identifyPlatform(code);
@@ -178,7 +185,9 @@ export const useEditorStore = create<EditorStore>()(
           code: DEFAULT_CODE[language],
           input: DEFAULT_INPUTS[language],
           autoDetectedLang: null,
+          inputHighlighted: true,
         }),
+      setInputHighlighted: (inputHighlighted) => set({ inputHighlighted }),
       setIsAutoDetecting: (isAutoDetecting) =>
         set((state) => {
           if (isAutoDetecting && state.code.trim().length > 10) {

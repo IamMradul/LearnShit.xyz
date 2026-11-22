@@ -383,6 +383,8 @@ export const DebuggerTraceView: React.FC<DebuggerTraceViewProps> = ({
   // Active loop info
   const loopInfo = step?.loop;
 
+  const isEnd = totalSteps === 0 || currentIndex >= totalSteps - 1;
+
   // Incremental stdout
   const currentStdout = step?.stdoutSoFar ?? step?.stdout ?? '';
 
@@ -998,7 +1000,7 @@ export const DebuggerTraceView: React.FC<DebuggerTraceViewProps> = ({
             </div>
           </div>
 
-          {/* Program Output (Incremental stdout) */}
+          {/* Program Output (Shown after end of visualization or when ended) */}
           <div
             style={{
               display: 'flex',
@@ -1025,10 +1027,14 @@ export const DebuggerTraceView: React.FC<DebuggerTraceViewProps> = ({
                 letterSpacing: '0.04em',
               }}
             >
-              <Terminal size={12} style={{ color: '#2ed573' }} />
-              <span>Program Output (stdout so far)</span>
+              <Terminal size={12} style={{ color: isEnd ? '#2ed573' : '#ffa502' }} />
+              <span>{isEnd ? 'Program Output (Execution Complete)' : 'Program Output'}</span>
             </div>
-            {currentStdout ? (
+            {!isEnd && totalSteps > 0 ? (
+              <span style={{ fontSize: 10.5, color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                Output will be displayed after visualization ends (Step {currentIndex + 1} of {totalSteps}).
+              </span>
+            ) : (result?.stdout || currentStdout) ? (
               <pre
                 style={{
                   margin: 0,
@@ -1039,11 +1045,11 @@ export const DebuggerTraceView: React.FC<DebuggerTraceViewProps> = ({
                   lineHeight: 1.4,
                 }}
               >
-                {currentStdout}
+                {result?.stdout || currentStdout}
               </pre>
             ) : (
               <span style={{ fontSize: 10.5, color: 'var(--text-muted)', fontStyle: 'italic' }}>
-                No stdout output produced up to this step.
+                No stdout output produced by program.
               </span>
             )}
           </div>

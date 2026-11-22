@@ -20,8 +20,8 @@ export const CodeEditorDrawer: React.FC = () => {
     setInput,
     modeOverride,
     setModeOverride,
-    isAutoDetecting,
-    setIsAutoDetecting,
+    inputHighlighted,
+    setInputHighlighted,
   } = useEditorStore();
   const {
     setResult,
@@ -329,10 +329,37 @@ export const CodeEditorDrawer: React.FC = () => {
         </div>
 
         {/* Input Textarea */}
-        <div style={{ padding: '8px 14px', flex: 1 }}>
+        <div
+          style={{ padding: '8px 14px', flex: 1, transition: 'all 0.3s ease' }}
+          className={inputHighlighted ? 'input-highlight-pulse' : ''}
+        >
+          {inputHighlighted && (
+            <div style={{ marginBottom: 4 }}>
+              <span
+                style={{
+                  fontSize: 9.5,
+                  background: 'rgba(214, 82, 58, 0.25)',
+                  border: '1px solid var(--accent)',
+                  color: '#F7F5EF',
+                  padding: '1px 6px',
+                  borderRadius: 4,
+                  fontWeight: 700,
+                  animation: 'pulse 1.5s infinite ease-in-out',
+                }}
+              >
+                ✨ New Code Added — Configure Input
+              </span>
+            </div>
+          )}
           <textarea
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => {
+              setInput(e.target.value);
+              if (inputHighlighted) setInputHighlighted(false);
+            }}
+            onFocus={() => {
+              if (inputHighlighted) setInputHighlighted(false);
+            }}
             placeholder="e.g. [[64, 34, 25, 12, 22, 11, 90]]"
             style={{
               width: '100%',

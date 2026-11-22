@@ -1,19 +1,13 @@
 import React, { useMemo, useRef, useEffect, useState, useCallback } from 'react';
 import {
-  Code2,
   ChevronDown,
   ChevronUp,
   Activity,
-  Flame,
   Layout,
-  Layers,
   Sparkles,
   Play,
-  RotateCcw,
   Edit3,
   Check,
-  AlertCircle,
-  Terminal,
   Loader2,
 } from 'lucide-react';
 import { useTraceStore } from '../../store/traceStore';
@@ -221,10 +215,21 @@ export const AnimatedCodeVisualizer: React.FC<AnimatedCodeVisualizerProps> = ({
   onToggleLayout,
   onRunTrace,
 }) => {
-  const { code, input, setInput, language, setLanguage, modeOverride } = useEditorStore();
+  const {
+    code,
+    input,
+    setInput,
+    language,
+    setLanguage,
+    modeOverride,
+    inputHighlighted,
+    setInputHighlighted,
+  } = useEditorStore();
   const {
     steps,
     currentIndex,
+    result,
+    status,
     setResult,
     setStatus,
     setRunning,
@@ -232,6 +237,18 @@ export const AnimatedCodeVisualizer: React.FC<AnimatedCodeVisualizerProps> = ({
     isRunning,
     setPyodideLoading,
   } = useTraceStore();
+
+  const isEnd = steps.length > 0 && (currentIndex >= steps.length - 1 || status === 'done');
+
+  const finalReturnValue = useMemo(() => {
+    for (let i = steps.length - 1; i >= 0; i--) {
+      if (steps[i].returnValue !== undefined) {
+        const val = steps[i].returnValue;
+        return typeof val === 'object' && val !== null ? JSON.stringify(val) : String(val);
+      }
+    }
+    return undefined;
+  }, [steps]);
 
   const [isExpanded, setIsExpanded] = useState(true);
   const [showLiveBadges, setShowLiveBadges] = useState(true);
@@ -576,6 +593,7 @@ export const AnimatedCodeVisualizer: React.FC<AnimatedCodeVisualizerProps> = ({
         <>
           {/* ── Interactive Editable Input Section (Center Stage) ───────────── */}
           <div
+            className={inputHighlighted ? 'input-highlight-pulse' : ''}
             style={{
               padding: isCenterMode ? '12px 18px' : '10px 14px',
               background: 'rgba(16, 20, 26, 0.85)',
@@ -583,6 +601,7 @@ export const AnimatedCodeVisualizer: React.FC<AnimatedCodeVisualizerProps> = ({
               display: 'flex',
               flexDirection: 'column',
               gap: 8,
+              transition: 'all 0.3s ease',
             }}
           >
             {/* Input Header & Mode / Explanation */}
@@ -608,6 +627,22 @@ export const AnimatedCodeVisualizer: React.FC<AnimatedCodeVisualizerProps> = ({
                 >
                   Editable Algorithm Input
                 </span>
+                {inputHighlighted && (
+                  <span
+                    style={{
+                      fontSize: 9.5,
+                      background: 'rgba(214, 82, 58, 0.25)',
+                      border: '1px solid var(--accent)',
+                      color: '#F7F5EF',
+                      padding: '1px 6px',
+                      borderRadius: 4,
+                      fontWeight: 700,
+                      animation: 'pulse 1.5s infinite ease-in-out',
+                    }}
+                  >
+                    ✨ New Code Added
+                  </span>
+                )}
                 <span
                   style={{
                     fontSize: 10,
@@ -654,8 +689,14 @@ export const AnimatedCodeVisualizer: React.FC<AnimatedCodeVisualizerProps> = ({
                 <input
                   type="text"
                   value={editingInput}
-                  onChange={(e) => setEditingInput(e.target.value)}
-                  onFocus={() => setIsInputFocused(true)}
+                  onChange={(e) => {
+                    setEditingInput(e.target.value);
+                    if (inputHighlighted) setInputHighlighted(false);
+                  }}
+                  onFocus={() => {
+                    setIsInputFocused(true);
+                    if (inputHighlighted) setInputHighlighted(false);
+                  }}
                   onBlur={() => setIsInputFocused(false)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
@@ -1029,6 +1070,106 @@ export const AnimatedCodeVisualizer: React.FC<AnimatedCodeVisualizerProps> = ({
               );
             })}
           </div>
+
+          {/* ── End of Visualization Output Banner ────────────────────────────── */}
+          {isEnd && (
+            <div
+              style={{
+                padding: isCenterMode ? '12px 18px' : '10px 14px',
+                background: 'rgba(14, 24, 18, 0.95)',
+                borderTop: '1px solid rgba(46, 213, 115, 0.35)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 6,
+                animation: 'fadeIn 0.25s ease-out',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <Check size={14} style={{ color: '#2ed573' }} />
+                  <span
+                    style={{
+                      fontFamily: "'Oswald', sans-serif",
+                      fontSize: 11.5,
+                      letterSpacing: '0.04em',
+                      textTransform: 'uppercase',
+                      color: '#2ed573',
+                      fontWeight: 700,
+                    }}
+                  >
+                    Visualization Completed — Output
+                  </span>
+                </div>
+                <span
+                  style={{
+                    fontSize: 10,
+                    color: 'var(--text-muted)',
+                    fontFamily: "'JetBrains Mono', monospace",
+                  }}
+                >
+                  Finished in {steps.length} steps
+                </span>
+              </div>
+
+              {result?.stdout ? (
+                <pre
+                  style={{
+                    margin: 0,
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: 11.5,
+                    color: '#2ed573',
+                    whiteSpace: 'pre-wrap',
+                    maxHeight: 90,
+                    overflowY: 'auto',
+                    lineHeight: 1.5,
+                    background: 'rgba(0, 0, 0, 0.3)',
+                    padding: '6px 10px',
+                    borderRadius: 6,
+                    border: '1px solid rgba(46, 213, 115, 0.15)',
+                  }}
+                >
+                  {result.stdout}
+                </pre>
+              ) : finalReturnValue === undefined ? (
+                <span
+                  style={{
+                    fontSize: 11,
+                    color: 'var(--text-muted)',
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontStyle: 'italic',
+                  }}
+                >
+                  Execution completed with no stdout output.
+                </span>
+              ) : null}
+
+              {finalReturnValue !== undefined && (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    fontSize: 11.5,
+                    fontFamily: "'JetBrains Mono', monospace",
+                    marginTop: 2,
+                  }}
+                >
+                  <span style={{ color: '#ffa502', fontWeight: 600 }}>Return Value:</span>
+                  <span
+                    style={{
+                      background: 'rgba(46, 213, 115, 0.15)',
+                      border: '1px solid rgba(46, 213, 115, 0.4)',
+                      color: '#2ed573',
+                      padding: '2px 8px',
+                      borderRadius: 4,
+                    }}
+                  >
+                    {finalReturnValue}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* ── Footer: Algorithm Signature, User Lines & Guidance ────────────── */}
           <div

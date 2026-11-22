@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import React, { useMemo, useEffect } from 'react';
+import { ChevronDown, ChevronUp, Check, Loader2 } from 'lucide-react';
 import { useUIStore } from '../../store/uiStore';
 import { useEditorStore } from '../../store/editorStore';
 import { useTraceStore } from '../../store/traceStore';
@@ -16,8 +16,49 @@ const TABS = [
 export const BottomPanel: React.FC = () => {
   const { activeBottomTab, setActiveBottomTab, bottomPanelOpen, setBottomPanelOpen, bottomPanelHeight, setBottomPanelHeight } =
     useUIStore();
-  const { input, setInput, stdin, setStdin, code, language } = useEditorStore();
-  const { result, steps, currentIndex } = useTraceStore();
+  const {
+    input,
+    setInput,
+    stdin,
+    setStdin,
+    code,
+    language,
+    inputHighlighted,
+    setInputHighlighted,
+  } = useEditorStore();
+  const { result, steps, currentIndex, status } = useTraceStore();
+
+  const isEnd = steps.length === 0 || currentIndex >= steps.length - 1 || status === 'done';
+
+  const finalReturnValue = useMemo(() => {
+    for (let i = steps.length - 1; i >= 0; i--) {
+      if (steps[i].returnValue !== undefined) {
+        return steps[i].returnValue;
+      }
+    }
+    return undefined;
+  }, [steps]);
+
+  // Highlight input area when new code is added for visualization
+  useEffect(() => {
+    if (inputHighlighted) {
+      setActiveBottomTab('input');
+      const timer = setTimeout(() => {
+        setInputHighlighted(false);
+      }, 4500);
+      return () => clearTimeout(timer);
+    }
+  }, [inputHighlighted, setActiveBottomTab, setInputHighlighted]);
+
+  // Show output automatically after end of visualization
+  useEffect(() => {
+    if (status === 'done' && steps.length > 0) {
+      setActiveBottomTab('output');
+      if (!bottomPanelOpen) {
+        setBottomPanelOpen(true);
+      }
+    }
+  }, [status, steps.length, setActiveBottomTab, setBottomPanelOpen, bottomPanelOpen]);
 
   const parsedInfo = useMemo(
     () => getParsedArgumentsInfo(code, input, language),
@@ -110,26 +151,60 @@ export const BottomPanel: React.FC = () => {
               }}
             >
               {/* Test Input (function arguments) */}
-              <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  height: '100%',
+                  borderRadius: 8,
+                  padding: inputHighlighted ? 8 : 0,
+                  transition: 'all 0.3s ease',
+                }}
+                className={inputHighlighted ? 'input-highlight-pulse' : ''}
+              >
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                  <label
-                    htmlFor="input-textarea"
-                    style={{
-                      fontFamily: "'Oswald', sans-serif",
-                      fontSize: 11,
-                      letterSpacing: '0.04em',
-                      textTransform: 'uppercase',
-                      color: 'var(--accent)',
-                      fontWeight: 600,
-                    }}
-                  >
-                    Test Input (function arguments)
-                  </label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <label
+                      htmlFor="input-textarea"
+                      style={{
+                        fontFamily: "'Oswald', sans-serif",
+                        fontSize: 11,
+                        letterSpacing: '0.04em',
+                        textTransform: 'uppercase',
+                        color: 'var(--accent)',
+                        fontWeight: 600,
+                      }}
+                    >
+                      Test Input (function arguments)
+                    </label>
+                    {inputHighlighted && (
+                      <span
+                        style={{
+                          fontSize: 9.5,
+                          background: 'rgba(214, 82, 58, 0.25)',
+                          border: '1px solid var(--accent)',
+                          color: '#F7F5EF',
+                          padding: '1px 6px',
+                          borderRadius: 4,
+                          fontWeight: 700,
+                          animation: 'pulse 1.5s infinite ease-in-out',
+                        }}
+                      >
+                        ✨ New Code Added
+                      </span>
+                    )}
+                  </div>
                   <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>JSON format</span>
                 </div>
                 <textarea
                   value={input}
-                  onChange={(e) => setInput(e.target.value)}
+                  onChange={(e) => {
+                    setInput(e.target.value);
+                    if (inputHighlighted) setInputHighlighted(false);
+                  }}
+                  onFocus={() => {
+                    if (inputHighlighted) setInputHighlighted(false);
+                  }}
                   id="input-textarea"
                   placeholder="e.g. [[2, 7, 11, 15], 9] or [1, 2, 3, 4, 5]"
                   style={{
@@ -197,26 +272,60 @@ export const BottomPanel: React.FC = () => {
               </div>
 
               {/* Custom Input (stdin) */}
-              <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  height: '100%',
+                  borderRadius: 8,
+                  padding: inputHighlighted ? 8 : 0,
+                  transition: 'all 0.3s ease',
+                }}
+                className={inputHighlighted ? 'input-highlight-pulse' : ''}
+              >
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                  <label
-                    htmlFor="stdin-textarea"
-                    style={{
-                      fontFamily: "'Oswald', sans-serif",
-                      fontSize: 11,
-                      letterSpacing: '0.04em',
-                      textTransform: 'uppercase',
-                      color: '#2ed573',
-                      fontWeight: 600,
-                    }}
-                  >
-                    Custom Input (stdin)
-                  </label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <label
+                      htmlFor="stdin-textarea"
+                      style={{
+                        fontFamily: "'Oswald', sans-serif",
+                        fontSize: 11,
+                        letterSpacing: '0.04em',
+                        textTransform: 'uppercase',
+                        color: '#2ed573',
+                        fontWeight: 600,
+                      }}
+                    >
+                      Custom Input (stdin)
+                    </label>
+                    {inputHighlighted && (
+                      <span
+                        style={{
+                          fontSize: 9.5,
+                          background: 'rgba(46, 213, 115, 0.25)',
+                          border: '1px solid #2ed573',
+                          color: '#F7F5EF',
+                          padding: '1px 6px',
+                          borderRadius: 4,
+                          fontWeight: 700,
+                          animation: 'pulse 1.5s infinite ease-in-out',
+                        }}
+                      >
+                        ✨ New Code Added
+                      </span>
+                    )}
+                  </div>
                   <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>Raw text stream</span>
                 </div>
                 <textarea
                   value={stdin}
-                  onChange={(e) => setStdin(e.target.value)}
+                  onChange={(e) => {
+                    setStdin(e.target.value);
+                    if (inputHighlighted) setInputHighlighted(false);
+                  }}
+                  onFocus={() => {
+                    if (inputHighlighted) setInputHighlighted(false);
+                  }}
                   id="stdin-textarea"
                   placeholder="Standard input lines for prompt, readline, fs.readFileSync(0), cin, or input()"
                   style={{
@@ -239,21 +348,89 @@ export const BottomPanel: React.FC = () => {
 
           {activeBottomTab === 'output' && (
             <div>
-              {result?.stdout ? (
-                <pre
-                  style={{
-                    fontFamily: 'JetBrains Mono, monospace',
-                    fontSize: 12,
-                    color: 'var(--green)',
-                    whiteSpace: 'pre-wrap',
-                    lineHeight: 1.6,
-                  }}
-                >
-                  {result.stdout}
-                </pre>
+              {!isEnd && steps.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '4px 0' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#ffa502', fontSize: 12, fontFamily: "'JetBrains Mono', monospace" }}>
+                    <Loader2 size={14} className="spin" />
+                    <span>Visualization in progress (Step {currentIndex + 1} of {steps.length})</span>
+                  </div>
+                  <p style={{ color: 'var(--text-muted)', fontSize: 12, margin: 0 }}>
+                    Output will be shown after the end of visualization.
+                  </p>
+                  <div>
+                    <button
+                      onClick={() => {
+                        useTraceStore.getState().setCurrentIndex(Math.max(0, steps.length - 1));
+                        useTraceStore.getState().setStatus('done');
+                      }}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 6,
+                        background: 'rgba(247, 245, 239, 0.08)',
+                        border: '1px solid rgba(247, 245, 239, 0.16)',
+                        borderRadius: 6,
+                        padding: '5px 12px',
+                        color: '#F7F5EF',
+                        fontFamily: "'JetBrains Mono', monospace",
+                        fontSize: 11,
+                        cursor: 'pointer',
+                        transition: 'background 0.15s ease',
+                      }}
+                    >
+                      <span>Skip to End to View Output ⏭</span>
+                    </button>
+                  </div>
+                </div>
+              ) : result?.stdout ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--green)', fontSize: 11, fontWeight: 600, fontFamily: "'Oswald', sans-serif", letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                    <Check size={13} />
+                    <span>Visualization Completed — Program Output</span>
+                  </div>
+                  <pre
+                    style={{
+                      fontFamily: 'JetBrains Mono, monospace',
+                      fontSize: 12,
+                      color: 'var(--green)',
+                      whiteSpace: 'pre-wrap',
+                      lineHeight: 1.6,
+                      margin: 0,
+                      background: 'rgba(0, 0, 0, 0.25)',
+                      padding: '8px 12px',
+                      borderRadius: 6,
+                      border: '1px solid rgba(46, 213, 115, 0.2)',
+                    }}
+                  >
+                    {result.stdout}
+                  </pre>
+                  {finalReturnValue !== undefined && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11.5, fontFamily: "'JetBrains Mono', monospace", marginTop: 4 }}>
+                      <span style={{ color: '#ffa502', fontWeight: 600 }}>Return Value:</span>
+                      <span style={{ background: 'rgba(46, 213, 115, 0.15)', border: '1px solid rgba(46, 213, 115, 0.4)', color: '#2ed573', padding: '2px 8px', borderRadius: 4 }}>
+                        {typeof finalReturnValue === 'object' ? JSON.stringify(finalReturnValue) : String(finalReturnValue)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              ) : finalReturnValue !== undefined ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--green)', fontSize: 11, fontWeight: 600, fontFamily: "'Oswald', sans-serif", letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                    <Check size={13} />
+                    <span>Visualization Completed — Return Value</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, fontFamily: "'JetBrains Mono', monospace" }}>
+                    <span style={{ color: '#ffa502', fontWeight: 600 }}>Return Value:</span>
+                    <span style={{ background: 'rgba(46, 213, 115, 0.15)', border: '1px solid rgba(46, 213, 115, 0.4)', color: '#2ed573', padding: '3px 10px', borderRadius: 4 }}>
+                      {typeof finalReturnValue === 'object' ? JSON.stringify(finalReturnValue) : String(finalReturnValue)}
+                    </span>
+                  </div>
+                </div>
               ) : (
                 <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>
-                  No output yet. Run the code to see results.
+                  {steps.length > 0
+                    ? 'Visualization completed with no stdout output.'
+                    : 'No output yet. Run the code to see results.'}
                 </span>
               )}
             </div>

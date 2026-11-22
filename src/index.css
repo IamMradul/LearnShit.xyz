@@ -295,6 +295,26 @@ body {
 @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 @keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
 
+@keyframes inputPulseGlow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(214, 82, 58, 0.7), 0 0 0 1px rgba(214, 82, 58, 0.8);
+    border-color: var(--accent);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(214, 82, 58, 0.35), 0 0 16px rgba(214, 82, 58, 0.5);
+    border-color: #ff7b72;
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(214, 82, 58, 0), 0 0 0 1px rgba(214, 82, 58, 0.8);
+    border-color: var(--accent);
+  }
+}
+
+.input-highlight-pulse {
+  animation: inputPulseGlow 1.6s ease-in-out infinite;
+  border-radius: 8px;
+}
+
 .animate-fade-in { animation: fadeIn 0.2s ease forwards; }
 .animate-slide-up { animation: slideUp 0.3s ease forwards; }
 
