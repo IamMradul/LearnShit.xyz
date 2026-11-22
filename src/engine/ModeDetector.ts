@@ -236,13 +236,102 @@ export function splitTopLevelParams(raw: string): string[] {
   return parts;
 }
 
-export function parseDriverArgs(input: string, paramCount: number = 0): unknown[] {
+export function isStringHint(hint: string): boolean {
+  if (!hint) return false;
+  const lower = hint.toLowerCase();
+  return (
+    lower.includes(': str') ||
+    lower.includes(':str') ||
+    lower.includes(': string') ||
+    lower.includes(':string') ||
+    lower === 'str' ||
+    lower === 'string' ||
+    lower.endsWith('str') ||
+    lower.endsWith('string')
+  );
+}
+
+export function parseDriverArgs(
+  input: string,
+  paramCount: number = 0,
+  paramHints?: string[],
+): unknown[] {
   if (!input || !input.trim()) return [];
   const trimmed = input.trim();
 
-  // Try standard JSON parse first
+  // Helper to parse a single line / argument
+  const parseVal = (raw: string, idx?: number): unknown => {
+    let s = raw.trim();
+    if (s.includes('=') && /^[a-zA-Z_]\w*\s*=/.test(s)) {
+      s = s.slice(s.indexOf('=') + 1).trim();
+    }
+    const hint = paramHints && idx !== undefined ? paramHints[idx] : undefined;
+    const isStr = hint ? isStringHint(hint) : false;
+
+    // Check if explicitly wrapped in quotes -> keep as string, never coerce to number
+    if (
+      (s.startsWith('"') && s.endsWith('"') && s.length >= 2) ||
+      (s.startsWith("'") && s.endsWith("'") && s.length >= 2)
+    ) {
+      try {
+        return JSON.parse(s);
+      } catch {
+        return s.slice(1, -1);
+      }
+    }
+
+    try {
+      const v = JSON.parse(s);
+      if (isStr && (typeof v === 'number' || typeof v === 'boolean')) {
+        return String(v);
+      }
+      return v;
+    } catch {
+      if (isStr) return s;
+      if (/^-?\d+(?:\.\d+)?$/.test(s)) return Number(s);
+      if (s === 'true') return true;
+      if (s === 'false') return false;
+      if (s === 'null' || s === 'None') return null;
+      return s;
+    }
+  };
+
+  // 1. Check if input has multiple lines (one argument per line)
+  const hasMultipleLines = trimmed.includes('\n');
+  const lines = hasMultipleLines
+    ? trimmed.split('\n').map((l) => l.trim()).filter(Boolean)
+    : [trimmed];
+
+  if (lines.length > 1) {
+    let isSingleJSON = false;
+    let singleParsed: unknown;
+    try {
+      singleParsed = JSON.parse(trimmed);
+      isSingleJSON = true;
+    } catch {
+      isSingleJSON = false;
+    }
+
+    // Split line-by-line if not valid single JSON, or if JSON array length doesn't match paramCount
+    // while line count does match paramCount
+    if (
+      !isSingleJSON ||
+      (paramCount > 1 &&
+        Array.isArray(singleParsed) &&
+        singleParsed.length !== paramCount &&
+        lines.length === paramCount)
+    ) {
+      const parsedLines = lines.map((line, idx) => parseVal(line, idx));
+      if (parsedLines.length === paramCount || parsedLines.length > 0) {
+        return parsedLines;
+      }
+    }
+  }
+
+  // 2. Try standard JSON parse
   try {
     const parsed = JSON.parse(trimmed);
+
     if (paramCount === 1) {
       if (Array.isArray(parsed)) {
         // LeetCode linked list cycle format: [[3, 2, 0, -4], 1]
@@ -252,31 +341,51 @@ export function parseDriverArgs(input: string, paramCount: number = 0): unknown[
         if (parsed.length === 1) {
           return parsed;
         }
+        // Top-level array whose length does not match paramCount 1 (e.g. [1, -2, 3]) -> treat as first argument
         return [parsed];
       }
       return [parsed];
     }
-    if (
-      paramCount > 1 &&
-      Array.isArray(parsed) &&
-      parsed.length !== paramCount &&
-      parsed.every((x) => typeof x !== 'object' || x === null || !Array.isArray(x))
-    ) {
+
+    if (paramCount > 1) {
+      if (Array.isArray(parsed)) {
+        // Map top-level array only if length matches paramCount
+        if (parsed.length === paramCount) {
+          return parsed.map((item, idx) => {
+            if (paramHints && paramHints[idx] && isStringHint(paramHints[idx])) {
+              if (typeof item === 'number' || typeof item === 'boolean') {
+                return String(item);
+              }
+            }
+            return item;
+          });
+        }
+        // Otherwise treat top-level array as the first argument (length mismatch)
+        return [parsed];
+      }
       return [parsed];
     }
+
     return Array.isArray(parsed) ? parsed : [parsed];
   } catch {
-    // Continue to advanced parsing
+    // Continue
   }
 
-  // Handle relaxed JS object / array expressions like [{ a: 1 }]
+  // 3. Relaxed JS object / array expressions
   if (!trimmed.includes('=')) {
     try {
       const fn = new Function('return (' + trimmed + ');');
       const parsed = fn();
       if (parsed !== undefined) {
         if (paramCount === 1) {
-          if (Array.isArray(parsed) && parsed.length === 1) return parsed;
+          if (Array.isArray(parsed)) {
+            if (parsed.length === 1) return parsed;
+            return [parsed];
+          }
+          return [parsed];
+        }
+        if (paramCount > 1 && Array.isArray(parsed)) {
+          if (parsed.length === paramCount) return parsed;
           return [parsed];
         }
         return Array.isArray(parsed) ? parsed : [parsed];
@@ -286,7 +395,7 @@ export function parseDriverArgs(input: string, paramCount: number = 0): unknown[
     }
   }
 
-  // Handle LeetCode format: "nums = [2,7,11,15], target = 9" or "head = [3,2,0,-4], pos = 1"
+  // 4. Handle LeetCode format: "nums = [2,7,11,15], target = 9"
   try {
     const cleaned = trimmed
       .replace(/^\s*(?:Input:\s*)?/i, '')
@@ -306,35 +415,146 @@ export function parseDriverArgs(input: string, paramCount: number = 0): unknown[
       }
       return [parsed];
     }
-    if (
-      paramCount > 1 &&
-      Array.isArray(parsed) &&
-      parsed.length !== paramCount &&
-      parsed.every((x) => typeof x !== 'object' || x === null || !Array.isArray(x))
-    ) {
+    if (paramCount > 1 && Array.isArray(parsed)) {
+      if (parsed.length === paramCount) return parsed;
       return [parsed];
     }
     return Array.isArray(parsed) ? parsed : [parsed];
   } catch {
-    // Fallback: line-by-line
-    const lines = trimmed.split('\n').map((l) => l.trim()).filter(Boolean);
-    const parsedLines: unknown[] = [];
-    for (const line of lines) {
-      const valPart = line.includes('=') ? line.slice(line.indexOf('=') + 1).trim() : line;
-      try {
-        parsedLines.push(JSON.parse(valPart));
-      } catch {
-        parsedLines.push(valPart);
-      }
-    }
+    // 5. Fallback: line-by-line
+    const parsedLines = lines.map((line, idx) => parseVal(line, idx));
     if (parsedLines.length > 0) {
-      if (paramCount === 1 && parsedLines.length === 1 && Array.isArray(parsedLines[0])) {
-        return parsedLines;
-      }
       return parsedLines;
     }
     return [trimmed];
   }
+}
+
+export interface ParsedArgDisplay {
+  name: string;
+  type: string;
+  value: unknown;
+  formatted: string;
+}
+
+export interface ParsedArgumentsResult {
+  functionName: string;
+  expectedCount: number;
+  paramNames: string[];
+  args: ParsedArgDisplay[];
+  mismatchError?: string | null;
+}
+
+export function getParsedArgumentsInfo(
+  code: string,
+  input: string,
+  language: SupportedLanguage = 'python',
+): ParsedArgumentsResult {
+  const cleanCode = stripCommentsPreservingLines(code || '');
+  let fnName = 'function';
+  let paramNames: string[] = [];
+
+  if (language === 'python') {
+    const solutionMatch = cleanCode.match(/class\s+(Solution[a-zA-Z0-9_]*)(?:\([^)]*\))?\s*:/);
+    if (solutionMatch) {
+      const classIdx = cleanCode.indexOf(solutionMatch[0]);
+      const afterClass = cleanCode.slice(classIdx);
+      const methodMatches = Array.from(
+        afterClass.matchAll(/def\s+([a-zA-Z0-9_]+)\s*\(\s*self\s*(?:,\s*([\s\S]*?))?\)\s*(?:->[^:]+)?\s*:/g),
+      );
+      if (methodMatches.length > 0) {
+        let chosen = methodMatches[0];
+        const knownProblem = methodMatches.find((m) =>
+          /^(?:twoSum|reverseList|isValid|inorderTraversal|preorderTraversal|postorderTraversal|numIslands|maxSubArray|climbStairs|mergeTwoLists|lengthOfLongestSubstring|isPalindrome|coinChange|invertTree|hasCycle|search|binarySearch|addBinary)$/i.test(m[1]),
+        );
+        if (knownProblem) chosen = knownProblem;
+        fnName = chosen[1];
+        paramNames = splitTopLevelParams(chosen[2] || '');
+      }
+    }
+    if (!paramNames.length) {
+      const fnMatches = Array.from(cleanCode.matchAll(/^\s*def\s+([a-zA-Z0-9_]+)\s*\(([\s\S]*?)\)\s*(?:->[^:]+)?\s*:/gm));
+      for (const fm of fnMatches) {
+        if (!fm[1].startsWith('__')) {
+          fnName = fm[1];
+          paramNames = splitTopLevelParams(fm[2] || '');
+          break;
+        }
+      }
+    }
+  } else {
+    const fnRegex =
+      /(?:(?:export\s+)?(?:async\s+)?function\s+([A-Za-z_$]\w*)\s*\(([^)]*)\)|(?:export\s+)?(?:const|let|var)\s+([A-Za-z_$]\w*)\s*=\s*(?:async\s+)?(?:function(?:\s+[A-Za-z_$]\w*)?\s*\(([^)]*)\)|(?:\(([^)]*)\)|([A-Za-z_$]\w*))\s*=>))/g;
+    let m: RegExpExecArray | null;
+    while ((m = fnRegex.exec(cleanCode)) !== null) {
+      const name = m[1] || m[3] || '';
+      const rawParams = m[2] || m[4] || m[5] || m[6] || '';
+      if (name && name !== 'main' && name !== 'ListNode' && name !== 'TreeNode') {
+        fnName = name;
+        paramNames = splitTopLevelParams(rawParams);
+        break;
+      }
+    }
+    if (!paramNames.length) {
+      const classMatch = cleanCode.match(/class\s+([A-Za-z_$]\w*)\s*\{([\s\S]*)\}/);
+      if (classMatch) {
+        const mm = /(?:async\s+)?([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\(([^)]*)\)\s*\{/g;
+        let methodMatch: RegExpExecArray | null;
+        while ((methodMatch = mm.exec(classMatch[2])) !== null) {
+          if (methodMatch[1] !== 'constructor') {
+            fnName = methodMatch[1];
+            paramNames = splitTopLevelParams(methodMatch[2] || '');
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  const cleanParamNames = paramNames.map((p) => p.split(':')[0].split('=')[0].trim());
+  const effectiveInput = input && input.trim() ? input : (inferDefaultInput(code) ?? '');
+  const rawArgs = parseDriverArgs(effectiveInput, paramNames.length, paramNames);
+
+  let mismatchError: string | null = null;
+  const minRequired = paramNames.filter((p) => !p.includes('=')).length;
+  if (paramNames.length > 0 && (rawArgs.length < minRequired || rawArgs.length > paramNames.length)) {
+    const countLabel = `${paramNames.length} argument${paramNames.length !== 1 ? 's' : ''}`;
+    mismatchError = `${fnName} expects ${countLabel} (${cleanParamNames.join(', ')}) but got ${rawArgs.length}`;
+  }
+
+  const args: ParsedArgDisplay[] = rawArgs.map((arg, idx) => {
+    const name = cleanParamNames[idx] || `arg${idx + 1}`;
+    let typeName: string = typeof arg;
+    if (arg === null) typeName = language === 'python' ? 'None' : 'null';
+    else if (Array.isArray(arg)) typeName = language === 'python' ? 'list' : 'Array';
+    else if (typeof arg === 'number') typeName = Number.isInteger(arg) ? 'int' : 'float';
+    else if (typeof arg === 'boolean') typeName = 'bool';
+    else if (typeof arg === 'string') typeName = language === 'python' ? 'str' : 'string';
+    else if (typeof arg === 'object') typeName = language === 'python' ? 'dict' : 'object';
+
+    let formatted = '';
+    try {
+      formatted = JSON.stringify(arg);
+      if (formatted.length > 60) formatted = formatted.slice(0, 57) + '...';
+    } catch {
+      formatted = String(arg);
+    }
+
+    return {
+      name,
+      type: typeName,
+      value: arg,
+      formatted,
+    };
+  });
+
+  return {
+    functionName: fnName,
+    expectedCount: paramNames.length,
+    paramNames: cleanParamNames,
+    args,
+    mismatchError,
+  };
 }
 
 /**
@@ -499,7 +719,7 @@ function buildPythonDriver(code: string, input: string): string {
   if (callerLines.length === 0) return code;
 
   const effectiveInput = input && input.trim() ? input : (inferDefaultInput(code) ?? '');
-  const args = parseDriverArgs(effectiveInput, paramNames.length);
+  const args = parseDriverArgs(effectiveInput, paramNames.length, paramNames);
   const argsRepr = args.map((a) => JSON.stringify(a)).join(', ');
   const indentedCaller = callerLines.map((l) => `    ${l}`).join('\n');
 
@@ -614,6 +834,14 @@ def _convert_arg(arg, name_hint=""):
     scalar_names = {'n', 'k', 'target', 'val', 'num', 'size', 'pos', 'index', 'idx', 'p', 'start', 'end', 'src', 'dst', 'u', 'v', 'mask', 'root_val', 'x', 'y', 'z', 'mid', 'low', 'high', 'limit', 'threshold', 'capacity', 'radius', 'scale', 'multiplier', 'amount'}
     is_scalar_num = not is_collection and not (is_list_node or is_tree_node) and (hint in scalar_names or hint.endswith(('_id', '_idx', '_val', '_index', '_num')))
 
+    # Preserve or convert to string if type hint indicates str / string
+    is_str = ': str' in raw_hint or ':str' in raw_hint or ': string' in raw_hint or hint == 's' or 'str' in hint or 'string' in hint
+    if is_str and not is_collection and not (is_list_node or is_tree_node):
+        if isinstance(arg, (int, float, bool)):
+            return str(arg)
+        if isinstance(arg, str):
+            return arg
+
     if is_scalar_num and not (is_list_node or is_tree_node):
         if isinstance(arg, (int, float)):
             return arg
@@ -682,23 +910,13 @@ if len(_params_names) == 1 and len(_raw_args) >= 2 and isinstance(_raw_args[1], 
 else:
     _converted_args = [_convert_arg(a, _params_names[i] if i < len(_params_names) else "") for i, a in enumerate(_raw_args)]
 
-while len(_converted_args) < len(_params_names):
-    _missing_idx = len(_converted_args)
-    _p_name = _params_names[_missing_idx].lower()
-    if any(k in _p_name for k in ['head', 'listnode', 'l1', 'l2']) or _p_name == 'node':
-        _converted_args.append(_to_list_node([5, 6, 4] if 'l2' in _p_name else [1, 2, 3]))
-    elif any(k in _p_name for k in ['root', 'treenode', 'tree']):
-        _converted_args.append(_to_tree_node([1, 2, 3]))
-    elif any(k in _p_name for k in ['start', 'src', 'source']):
-        _converted_args.append(0)
-    elif any(k in _p_name for k in ['target', 'k', 'val']):
-        _converted_args.append(9)
-    elif any(k in _p_name for k in ['memo', 'cache', 'seen', 'map', 'dict']):
-        _converted_args.append({})
-    elif any(k in _p_name for k in ['visited', 'visited_set']):
-        _converted_args.append(set())
-    else:
-        _converted_args.append(None)
+_param_clean = [p.split(':')[0].split('=')[0].strip() for p in _params_names]
+_param_list_str = ', '.join(_param_clean)
+_min_required = sum(1 for p in _params_names if '=' not in p)
+
+if len(_params_names) > 0 and (len(_converted_args) < _min_required or len(_converted_args) > len(_params_names)):
+    _count_label = f"{len(_params_names)} argument{'s' if len(_params_names) != 1 else ''}"
+    raise TypeError(f"${methodName || 'function'} expects {_count_label} ({_param_list_str}) but got {len(_converted_args)}")
 
 try:
 ${indentedCaller}
@@ -912,7 +1130,7 @@ function buildJSDriver(code: string, input: string): string {
   }
 
   const effectiveInput = input && input.trim() ? input : (inferDefaultInput(code) ?? '');
-  const args = parseDriverArgs(effectiveInput, paramNames.length || 1);
+  const args = parseDriverArgs(effectiveInput, paramNames.length || 1, paramNames);
   const argsRepr = args.map((a) => JSON.stringify(a)).join(', ');
 
   const needsConversion = paramNames.some((p) => {
@@ -963,6 +1181,17 @@ function buildJSDriver(code: string, input: string): string {
 // ── AlgoLens generated driver ──────────────────────────
 ${serializeFn}
 (function() {
+  const _raw_args = [${argsRepr}];
+  const _param_names = ${JSON.stringify(paramNames)};
+  const _param_clean = _param_names.map((p) => p.split(':')[0].split('=')[0].trim());
+  const _min_required = _param_names.filter((p) => !p.includes('=')).length;
+
+  if (_param_names.length > 0 && (_raw_args.length < _min_required || _raw_args.length > _param_names.length)) {
+    const fnDesc = "${methodName || fnName || 'function'}";
+    const countLabel = _param_names.length + ' argument' + (_param_names.length !== 1 ? 's' : '');
+    throw new TypeError(fnDesc + ' expects ' + countLabel + ' (' + _param_clean.join(', ') + ') but got ' + _raw_args.length);
+  }
+
   const _result = ${directCall};
   if (_result !== undefined) console.log(JSON.stringify(_serialize(_result)));
 })();
@@ -1038,27 +1267,36 @@ function _to_tree_node(vals) {
 (function() {
   const _raw_args = [${argsRepr}];
   const _param_names = ${JSON.stringify(paramNames)};
-  const _converted_args = _raw_args.map((arg, idx) => {
-    const hint = (_param_names[idx] || '').trim().toLowerCase();
-    const isCollection = ['nums', 'arr', 'vals', 'values', 'list', 'items', 'elements'].some((k) => hint.includes(k)) || (hint.endsWith('s') && !['pos', 'radius'].includes(hint));
-    const isListNode = (hint.includes('head') || hint.includes('listnode') || hint.includes('l1') || hint.includes('l2')) && !isCollection;
-    const isTreeNode = (hint.includes('root') || hint.includes('treenode') || (hint === 'tree' && !isCollection)) && !isCollection;
-    if (isListNode) return _to_list_node(arg);
-    if (isTreeNode) return _to_tree_node(arg);
-    return arg;
-  });
-  while (_converted_args.length < _param_names.length) {
-    const idx = _converted_args.length;
-    const hint = (_param_names[idx] || '').toLowerCase();
-    if (hint.includes('head') || hint.includes('listnode') || hint.includes('l1') || hint.includes('l2')) {
-      _converted_args.push(_to_list_node(hint.includes('l2') ? [5, 6, 4] : [1, 2, 3]));
-    } else if (hint.includes('memo') || hint.includes('cache') || hint.includes('seen') || hint.includes('map') || hint.includes('dict')) {
-      _converted_args.push({});
-    } else if (hint.includes('visited')) {
-      _converted_args.push(new Set());
-    } else {
-      _converted_args.push(null);
-    }
+  const _param_clean = _param_names.map((p) => p.split(':')[0].split('=')[0].trim());
+  const _min_required = _param_names.filter((p) => !p.includes('=')).length;
+
+  let _converted_args;
+  if (_param_names.length === 1 && _raw_args.length >= 2 && typeof _raw_args[1] === 'number' && _param_names.some((p) => p.toLowerCase().includes('head') || p.toLowerCase().includes('listnode'))) {
+    _converted_args = [_to_list_node(_raw_args[0], _raw_args[1])];
+  } else {
+    _converted_args = _raw_args.map((arg, idx) => {
+      const p = _param_names[idx] || '';
+      const rawHint = p.trim().toLowerCase();
+      const hint = rawHint.split(':')[0].trim();
+      const isStr = rawHint.includes(': str') || rawHint.includes(':str') || rawHint.includes(': string') || hint === 's' || hint.includes('str') || hint.includes('string');
+      const isCollection = ['nums', 'arr', 'vals', 'values', 'list', 'items', 'elements'].some((k) => hint.includes(k)) || (hint.endsWith('s') && !['pos', 'radius'].includes(hint));
+      const isListNode = (hint.includes('head') || hint.includes('listnode') || hint.includes('l1') || hint.includes('l2')) && !isCollection;
+      const isTreeNode = (hint.includes('root') || hint.includes('treenode') || (hint === 'tree' && !isCollection)) && !isCollection;
+
+      if (isStr && !isCollection && !isListNode && !isTreeNode) {
+        if (typeof arg !== 'object' && arg !== null && arg !== undefined) return String(arg);
+        if (typeof arg === 'string') return arg;
+      }
+      if (isListNode) return _to_list_node(arg);
+      if (isTreeNode) return _to_tree_node(arg);
+      return arg;
+    });
+  }
+
+  if (_param_names.length > 0 && (_converted_args.length < _min_required || _converted_args.length > _param_names.length)) {
+    const fnDesc = "${methodName || fnName || 'function'}";
+    const countLabel = _param_names.length + ' argument' + (_param_names.length !== 1 ? 's' : '');
+    throw new TypeError(fnDesc + ' expects ' + countLabel + ' (' + _param_clean.join(', ') + ') but got ' + _converted_args.length);
   }
 
   try {

@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useUIStore } from '../../store/uiStore';
 import { useEditorStore } from '../../store/editorStore';
 import { useTraceStore } from '../../store/traceStore';
+import { getParsedArgumentsInfo } from '../../engine/ModeDetector';
 
 const TABS = [
   { id: 'input', label: 'Input' },
@@ -15,8 +16,13 @@ const TABS = [
 export const BottomPanel: React.FC = () => {
   const { activeBottomTab, setActiveBottomTab, bottomPanelOpen, setBottomPanelOpen, bottomPanelHeight, setBottomPanelHeight } =
     useUIStore();
-  const { input, setInput, stdin, setStdin } = useEditorStore();
+  const { input, setInput, stdin, setStdin, code, language } = useEditorStore();
   const { result, steps, currentIndex } = useTraceStore();
+
+  const parsedInfo = useMemo(
+    () => getParsedArgumentsInfo(code, input, language),
+    [code, input, language],
+  );
 
   const step = steps[currentIndex] ?? null;
 
@@ -140,6 +146,54 @@ export const BottomPanel: React.FC = () => {
                     outline: 'none',
                   }}
                 />
+                {parsedInfo.mismatchError ? (
+                  <div
+                    style={{
+                      marginTop: 6,
+                      padding: '4px 8px',
+                      borderRadius: 4,
+                      background: 'rgba(214, 82, 58, 0.15)',
+                      border: '1px solid rgba(214, 82, 58, 0.35)',
+                      color: '#ff7b72',
+                      fontSize: 10.5,
+                      fontFamily: "'JetBrains Mono', monospace",
+                    }}
+                  >
+                    ⚠️ {parsedInfo.mismatchError}
+                  </div>
+                ) : parsedInfo.args.length > 0 ? (
+                  <div
+                    style={{
+                      marginTop: 6,
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: 6,
+                      alignItems: 'center',
+                    }}
+                  >
+                    <span style={{ fontSize: 9.5, color: 'var(--text-muted)', fontFamily: "'JetBrains Mono', monospace" }}>
+                      Args:
+                    </span>
+                    {parsedInfo.args.map((a, idx) => (
+                      <span
+                        key={idx}
+                        style={{
+                          fontSize: 10,
+                          fontFamily: "'JetBrains Mono', monospace",
+                          background: 'rgba(255, 255, 255, 0.04)',
+                          border: '1px solid var(--border)',
+                          padding: '1px 6px',
+                          borderRadius: 4,
+                        }}
+                      >
+                        <span style={{ color: 'var(--accent)', fontWeight: 600 }}>{a.name}</span>
+                        <span style={{ color: '#58a6ff' }}> ({a.type})</span>
+                        <span style={{ color: '#8b949e' }}> = </span>
+                        <span style={{ color: '#7ee787' }}>{a.formatted}</span>
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
               </div>
 
               {/* Custom Input (stdin) */}

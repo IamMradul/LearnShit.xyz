@@ -166,4 +166,145 @@ print('line 1\\nline 2\\t"tabs and quotes"')`;
     expect(res.stdout).toContain('world');
     expect(res.stdout).toContain('quoted');
   });
+
+  // ── Input Argument Forms & Count Validation Regression Tests ───────────
+
+  const pyAddBinaryCode = `class Solution:
+    def addBinary(self, a: str, b: str) -> str:
+        return bin(int(a, 2) + int(b, 2))[2:]`;
+
+  const jsAddBinaryCode = `class Solution {
+    addBinary(a, b) {
+      return (BigInt('0b' + a) + BigInt('0b' + b)).toString(2);
+    }
+  }`;
+
+  const pyMaxSubArrayCode = `from typing import List
+
+class Solution:
+    def maxSubArray(self, nums: List[int]) -> int:
+        cur = mx = nums[0]
+        for x in nums[1:]:
+            cur = max(x, cur + x)
+            mx = max(mx, cur)
+        return mx`;
+
+  const jsMaxSubArrayCode = `class Solution {
+    maxSubArray(nums) {
+      let cur = nums[0], mx = nums[0];
+      for (let i = 1; i < nums.length; i++) {
+        cur = Math.max(nums[i], cur + nums[i]);
+        mx = Math.max(mx, cur);
+      }
+      return mx;
+    }
+  }`;
+
+  describe('addBinary input forms in Python (real Pyodide)', () => {
+    test('Form 1: ["11","1"] passes two str args and returns 100', async () => {
+      const input = '["11","1"]';
+      const driver = buildDriver(pyAddBinaryCode, input, 'python', 'function');
+      py.globals.set('__user_code__', driver);
+      py.globals.set('__user_input__', input);
+      const rawJson = await py.runPythonAsync('run_with_trace(__user_code__, 5000, __user_input__, 3)');
+      const res = JSON.parse(rawJson);
+      expect(res.error).toBeNull();
+      expect(res.stdout).toContain('100');
+    });
+
+    test('Form 2: [["11","1"]] shows clear count mismatch error instead of Python TypeError', async () => {
+      const input = '[["11","1"]]';
+      const driver = buildDriver(pyAddBinaryCode, input, 'python', 'function');
+      py.globals.set('__user_code__', driver);
+      py.globals.set('__user_input__', input);
+      const rawJson = await py.runPythonAsync('run_with_trace(__user_code__, 5000, __user_input__, 3)');
+      const res = JSON.parse(rawJson);
+      expect(res.error).toContain('TypeError: addBinary expects 2 arguments (a, b) but got 1');
+      expect(res.error).not.toContain("int() can't convert non-string with explicit base");
+    });
+
+    test('Form 3: "11"\\n"1" passes two str args and returns 100', async () => {
+      const input = '"11"\n"1"';
+      const driver = buildDriver(pyAddBinaryCode, input, 'python', 'function');
+      py.globals.set('__user_code__', driver);
+      py.globals.set('__user_input__', input);
+      const rawJson = await py.runPythonAsync('run_with_trace(__user_code__, 5000, __user_input__, 3)');
+      const res = JSON.parse(rawJson);
+      expect(res.error).toBeNull();
+      expect(res.stdout).toContain('100');
+    });
+
+    test('Form 4: 11\\n1 coerces to str args using type hint and returns 100', async () => {
+      const input = '11\n1';
+      const driver = buildDriver(pyAddBinaryCode, input, 'python', 'function');
+      py.globals.set('__user_code__', driver);
+      py.globals.set('__user_input__', input);
+      const rawJson = await py.runPythonAsync('run_with_trace(__user_code__, 5000, __user_input__, 3)');
+      const res = JSON.parse(rawJson);
+      expect(res.error).toBeNull();
+      expect(res.stdout).toContain('100');
+    });
+  });
+
+  describe('One-argument function taking a list (maxSubArray) in Python', () => {
+    test('maxSubArray with [[1, -2, 3]] passes list and returns 3', async () => {
+      const input = '[[1, -2, 3]]';
+      const driver = buildDriver(pyMaxSubArrayCode, input, 'python', 'function');
+      py.globals.set('__user_code__', driver);
+      py.globals.set('__user_input__', input);
+      const rawJson = await py.runPythonAsync('run_with_trace(__user_code__, 5000, __user_input__, 3)');
+      const res = JSON.parse(rawJson);
+      expect(res.error).toBeNull();
+      expect(res.stdout).toContain('3');
+    });
+
+    test('maxSubArray with [1, -2, 3] treats top-level array as first arg and returns 3', async () => {
+      const input = '[1, -2, 3]';
+      const driver = buildDriver(pyMaxSubArrayCode, input, 'python', 'function');
+      py.globals.set('__user_code__', driver);
+      py.globals.set('__user_input__', input);
+      const rawJson = await py.runPythonAsync('run_with_trace(__user_code__, 5000, __user_input__, 3)');
+      const res = JSON.parse(rawJson);
+      expect(res.error).toBeNull();
+      expect(res.stdout).toContain('3');
+    });
+  });
+
+  describe('JavaScript Driver equivalence tests', () => {
+    test('Form 1: ["11","1"] runs cleanly in JS driver', () => {
+      const driver = buildDriver(jsAddBinaryCode, '["11","1"]', 'javascript', 'function');
+      const fn = new Function(driver);
+      expect(() => fn()).not.toThrow();
+    });
+
+    test('Form 2: [["11","1"]] throws count mismatch in JS driver', () => {
+      const driver = buildDriver(jsAddBinaryCode, '[["11","1"]]', 'javascript', 'function');
+      const fn = new Function(driver);
+      expect(() => fn()).toThrowError(/addBinary expects 2 arguments \(a, b\) but got 1/);
+    });
+
+    test('Form 3: "11"\\n"1" runs cleanly in JS driver', () => {
+      const driver = buildDriver(jsAddBinaryCode, '"11"\n"1"', 'javascript', 'function');
+      const fn = new Function(driver);
+      expect(() => fn()).not.toThrow();
+    });
+
+    test('Form 4: 11\\n1 runs cleanly in JS driver', () => {
+      const driver = buildDriver(jsAddBinaryCode, '11\n1', 'javascript', 'function');
+      const fn = new Function(driver);
+      expect(() => fn()).not.toThrow();
+    });
+
+    test('maxSubArray with [[1, -2, 3]] runs cleanly in JS driver', () => {
+      const driver = buildDriver(jsMaxSubArrayCode, '[[1, -2, 3]]', 'javascript', 'function');
+      const fn = new Function(driver);
+      expect(() => fn()).not.toThrow();
+    });
+
+    test('maxSubArray with [1, -2, 3] runs cleanly in JS driver', () => {
+      const driver = buildDriver(jsMaxSubArrayCode, '[1, -2, 3]', 'javascript', 'function');
+      const fn = new Function(driver);
+      expect(() => fn()).not.toThrow();
+    });
+  });
 });

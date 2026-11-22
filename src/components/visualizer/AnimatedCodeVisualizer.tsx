@@ -19,7 +19,7 @@ import {
 import { useTraceStore } from '../../store/traceStore';
 import { useEditorStore } from '../../store/editorStore';
 import { identifyPlatform, type PlatformDetectionResult } from '../../engine/PlatformDetector';
-import { inferDefaultInput, detectMode } from '../../engine/ModeDetector';
+import { inferDefaultInput, getParsedArgumentsInfo } from '../../engine/ModeDetector';
 import { detectLanguage } from '../../engine/LanguageDetector';
 import { getAdapter } from '../../engine/adapters/AdapterRegistry';
 
@@ -257,6 +257,12 @@ export const AnimatedCodeVisualizer: React.FC<AnimatedCodeVisualizerProps> = ({
 
   // Sample quick inputs
   const sampleInputs = useMemo(() => getSampleInputsForCode(code, platformInfo), [code, platformInfo]);
+
+  // Parsed argument metadata
+  const parsedInfo = useMemo(
+    () => getParsedArgumentsInfo(code, editingInput, language),
+    [code, editingInput, language],
+  );
 
   // Trace execution runner
   const executeTrace = useCallback(
@@ -714,6 +720,68 @@ export const AnimatedCodeVisualizer: React.FC<AnimatedCodeVisualizerProps> = ({
                 )}
               </button>
             </div>
+
+            {/* Parsed Arguments Preview */}
+            {parsedInfo.mismatchError ? (
+              <div
+                style={{
+                  padding: '5px 10px',
+                  borderRadius: 6,
+                  background: 'rgba(214, 82, 58, 0.15)',
+                  border: '1px solid rgba(214, 82, 58, 0.35)',
+                  color: '#ff7b72',
+                  fontSize: 11,
+                  fontFamily: "'JetBrains Mono', monospace",
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                }}
+              >
+                <span>⚠️</span>
+                <span>{parsedInfo.mismatchError}</span>
+              </div>
+            ) : parsedInfo.args.length > 0 ? (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: 6,
+                  padding: '2px 0',
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: 9.5,
+                    fontFamily: "'Oswald', sans-serif",
+                    letterSpacing: '0.04em',
+                    textTransform: 'uppercase',
+                    color: 'var(--text-muted)',
+                  }}
+                >
+                  Parsed Arguments:
+                </span>
+                {parsedInfo.args.map((a, idx) => (
+                  <span
+                    key={idx}
+                    style={{
+                      fontSize: 10.5,
+                      fontFamily: "'JetBrains Mono', monospace",
+                      background: 'rgba(0, 0, 0, 0.4)',
+                      padding: '2px 7px',
+                      borderRadius: 4,
+                      border: '1px solid rgba(247, 245, 239, 0.1)',
+                      color: '#F7F5EF',
+                    }}
+                  >
+                    <span style={{ color: badgeColor, fontWeight: 600 }}>{a.name}</span>
+                    <span style={{ color: '#58a6ff' }}> ({a.type})</span>
+                    <span style={{ color: '#8b949e' }}> = </span>
+                    <span style={{ color: '#7ee787' }}>{a.formatted}</span>
+                  </span>
+                ))}
+              </div>
+            ) : null}
 
             {/* Quick Sample Input Chips */}
             {sampleInputs.length > 0 && (

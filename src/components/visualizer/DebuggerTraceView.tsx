@@ -18,6 +18,8 @@ import {
 } from 'lucide-react';
 import type { TraceStep, TraceResult, TraceValue } from '../../engine/TraceTypes';
 import { usePlayback } from '../../engine/playback/usePlayback';
+import { useEditorStore } from '../../store/editorStore';
+import { getParsedArgumentsInfo } from '../../engine/ModeDetector';
 
 interface DebuggerTraceViewProps {
   step: TraceStep | null;
@@ -344,6 +346,12 @@ export const DebuggerTraceView: React.FC<DebuggerTraceViewProps> = ({
   const [deepStackExpanded, setDeepStackExpanded] = useState(false);
   const activeLineRef = useRef<HTMLDivElement>(null);
   const codeContainerRef = useRef<HTMLDivElement>(null);
+
+  const { input } = useEditorStore();
+  const parsedInfo = useMemo(
+    () => getParsedArgumentsInfo(code, input, language as any),
+    [code, input, language],
+  );
 
   const lines = useMemo(() => (code ? code.split('\n') : []), [code]);
   const activeLineNum = step?.line ?? 1;
@@ -769,6 +777,71 @@ export const DebuggerTraceView: React.FC<DebuggerTraceViewProps> = ({
           ))}
         </div>
       </div>
+
+      {/* ── Input Arguments Banner ── */}
+      {parsedInfo.mismatchError ? (
+        <div
+          style={{
+            padding: '6px 12px',
+            background: 'rgba(214, 82, 58, 0.15)',
+            border: '1px solid rgba(214, 82, 58, 0.35)',
+            borderRadius: 6,
+            color: '#ff7b72',
+            fontSize: 11,
+            fontFamily: "'JetBrains Mono', monospace",
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+          }}
+        >
+          <span>⚠️</span>
+          <span>{parsedInfo.mismatchError}</span>
+        </div>
+      ) : parsedInfo.args.length > 0 ? (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: 8,
+            padding: '6px 12px',
+            background: 'rgba(247, 245, 239, 0.03)',
+            border: '1px solid rgba(247, 245, 239, 0.08)',
+            borderRadius: 6,
+          }}
+        >
+          <span
+            style={{
+              fontSize: 10,
+              fontFamily: "'Oswald', sans-serif",
+              letterSpacing: '0.04em',
+              textTransform: 'uppercase',
+              color: 'var(--text-muted)',
+            }}
+          >
+            Input Arguments:
+          </span>
+          {parsedInfo.args.map((a, idx) => (
+            <span
+              key={idx}
+              style={{
+                fontSize: 11,
+                fontFamily: "'JetBrains Mono', monospace",
+                background: 'rgba(0, 0, 0, 0.45)',
+                border: '1px solid rgba(247, 245, 239, 0.1)',
+                padding: '2px 8px',
+                borderRadius: 4,
+                color: '#F7F5EF',
+              }}
+            >
+              <span style={{ color: 'var(--accent)', fontWeight: 600 }}>{a.name}</span>
+              <span style={{ color: '#58a6ff' }}> ({a.type})</span>
+              <span style={{ color: '#8b949e' }}> = </span>
+              <span style={{ color: '#7ee787' }}>{a.formatted}</span>
+            </span>
+          ))}
+        </div>
+      ) : null}
 
       {/* ── Main Two-Column Layout ───────────────────────────────────────────── */}
       <div

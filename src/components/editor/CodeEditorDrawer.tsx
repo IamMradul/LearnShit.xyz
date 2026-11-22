@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { X, Code2, Sliders, Terminal, Play, AlertCircle, Loader2 } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { X, Code2, Sliders, Play, AlertCircle, Loader2 } from 'lucide-react';
 import { useUIStore } from '../../store/uiStore';
 import { useEditorStore } from '../../store/editorStore';
 import { useTraceStore } from '../../store/traceStore';
 import { CodeEditor } from './CodeEditor';
-import { detectMode, inferDefaultInput } from '../../engine/ModeDetector';
+import { detectMode, inferDefaultInput, getParsedArgumentsInfo } from '../../engine/ModeDetector';
 import { getAdapter } from '../../engine/adapters/AdapterRegistry';
 import { detectLanguage } from '../../engine/LanguageDetector';
 import { identifyPlatform } from '../../engine/PlatformDetector';
@@ -35,6 +35,11 @@ export const CodeEditorDrawer: React.FC = () => {
   } = useTraceStore();
 
   const [activeTab, setActiveTab] = useState<'input' | 'console'>('input');
+
+  const parsedInfo = useMemo(
+    () => getParsedArgumentsInfo(code, input, language),
+    [code, input, language],
+  );
 
   const detected = detectMode(code, language);
   const effectiveMode = modeOverride === 'auto' ? detected : modeOverride;
@@ -344,6 +349,73 @@ export const CodeEditorDrawer: React.FC = () => {
             }}
           />
         </div>
+
+        {/* Parsed Arguments Preview */}
+        {parsedInfo.mismatchError ? (
+          <div
+            style={{
+              margin: '0 14px 8px',
+              padding: '6px 10px',
+              borderRadius: 6,
+              background: 'rgba(214, 82, 58, 0.15)',
+              border: '1px solid rgba(214, 82, 58, 0.35)',
+              color: '#ff7b72',
+              fontSize: 11,
+              fontFamily: "'JetBrains Mono', monospace",
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+            }}
+          >
+            <span>⚠️</span>
+            <span>{parsedInfo.mismatchError}</span>
+          </div>
+        ) : parsedInfo.args.length > 0 ? (
+          <div
+            style={{
+              margin: '0 14px 8px',
+              padding: '6px 10px',
+              borderRadius: 6,
+              background: 'rgba(247, 245, 239, 0.04)',
+              border: '1px solid rgba(247, 245, 239, 0.08)',
+              display: 'flex',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: 8,
+            }}
+          >
+            <span
+              style={{
+                fontSize: 9.5,
+                fontFamily: "'Oswald', sans-serif",
+                letterSpacing: '0.04em',
+                textTransform: 'uppercase',
+                color: 'var(--text-muted)',
+              }}
+            >
+              Passed Arguments:
+            </span>
+            {parsedInfo.args.map((a, idx) => (
+              <span
+                key={idx}
+                style={{
+                  fontSize: 10.5,
+                  fontFamily: "'JetBrains Mono', monospace",
+                  background: 'rgba(0, 0, 0, 0.4)',
+                  padding: '2px 8px',
+                  borderRadius: 4,
+                  border: '1px solid rgba(247, 245, 239, 0.1)',
+                  color: '#F7F5EF',
+                }}
+              >
+                <span style={{ color: 'var(--accent)', fontWeight: 600 }}>{a.name}</span>
+                <span style={{ color: '#58a6ff' }}> ({a.type})</span>
+                <span style={{ color: '#8b949e' }}> = </span>
+                <span style={{ color: '#7ee787' }}>{a.formatted}</span>
+              </span>
+            ))}
+          </div>
+        ) : null}
 
         {/* Action Button */}
         <div style={{ padding: '0 14px 10px', display: 'flex', justifyContent: 'flex-end' }}>
