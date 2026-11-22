@@ -13,11 +13,11 @@ import { useTraceStore } from '../../../store/traceStore';
 import { usePlayback } from '../../../engine/playback/usePlayback';
 
 const SPEEDS = [
-  { label: '0.25×', ms: 1200 },
-  { label: '0.5×', ms: 600 },
-  { label: '1×', ms: 300 },
-  { label: '2×', ms: 150 },
-  { label: '4×', ms: 75 },
+  { label: '0.25×', ms: 2400 },
+  { label: '0.5×', ms: 1600 },
+  { label: '1×', ms: 1000 },
+  { label: '2×', ms: 500 },
+  { label: '4×', ms: 200 },
 ];
 
 export const PlaybackControls: React.FC = () => {
@@ -66,7 +66,7 @@ export const PlaybackControls: React.FC = () => {
     [handleTrackClick, seekTo],
   );
 
-  const currentSpeed = SPEEDS.find((s) => s.ms === speed) ?? SPEEDS[1];
+  const currentSpeed = SPEEDS.find((s) => s.ms === speed) ?? SPEEDS[2];
 
   if (!total) return null;
 

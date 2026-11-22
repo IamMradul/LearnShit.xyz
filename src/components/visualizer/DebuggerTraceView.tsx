@@ -1,14 +1,12 @@
-import React, { useMemo, useRef, useEffect, useState, useCallback } from 'react';
+import React, { useMemo, useRef, useEffect, useState } from 'react';
 import {
   Play,
-  Pause,
   RotateCcw,
   ChevronLeft,
   ChevronRight,
   ChevronsRight,
   ArrowDownRight,
   ArrowUpRight,
-  FastForward,
   Activity,
   Layers,
   Terminal,
@@ -19,6 +17,7 @@ import {
 import type { TraceStep, TraceResult, TraceValue } from '../../engine/TraceTypes';
 import { usePlayback } from '../../engine/playback/usePlayback';
 import { useEditorStore } from '../../store/editorStore';
+import { useTraceStore } from '../../store/traceStore';
 import { getParsedArgumentsInfo } from '../../engine/ModeDetector';
 
 interface DebuggerTraceViewProps {
@@ -342,6 +341,7 @@ export const DebuggerTraceView: React.FC<DebuggerTraceViewProps> = ({
     jumpToNextLineExecution,
     setSpeed,
   } = usePlayback();
+  const { speed } = useTraceStore();
 
   const [deepStackExpanded, setDeepStackExpanded] = useState(false);
   const activeLineRef = useRef<HTMLDivElement>(null);
@@ -753,23 +753,25 @@ export const DebuggerTraceView: React.FC<DebuggerTraceViewProps> = ({
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 4 }}>
           <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>Speed:</span>
           {[
-            { label: '0.5×', ms: 600 },
-            { label: '1×', ms: 300 },
-            { label: '2×', ms: 150 },
-            { label: '4×', ms: 75 },
+            { label: '0.25×', ms: 2400 },
+            { label: '0.5×', ms: 1600 },
+            { label: '1×', ms: 1000 },
+            { label: '2×', ms: 500 },
+            { label: '4×', ms: 200 },
           ].map((sp) => (
             <button
               key={sp.label}
               onClick={() => setSpeed(sp.ms)}
               style={{
-                background: 'rgba(247, 245, 239, 0.06)',
-                border: '1px solid rgba(247, 245, 239, 0.1)',
+                background: speed === sp.ms ? 'rgba(214, 82, 58, 0.22)' : 'rgba(247, 245, 239, 0.06)',
+                border: speed === sp.ms ? '1px solid var(--accent)' : '1px solid rgba(247, 245, 239, 0.1)',
                 borderRadius: 4,
                 padding: '2px 6px',
-                color: 'var(--text-secondary)',
+                color: speed === sp.ms ? 'var(--accent)' : 'var(--text-secondary)',
                 fontSize: 10,
                 cursor: 'pointer',
                 fontFamily: "'JetBrains Mono', monospace",
+                fontWeight: speed === sp.ms ? 700 : 400,
               }}
             >
               {sp.label}

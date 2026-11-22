@@ -38,7 +38,7 @@ export const useTraceStore = create<TraceStore>((set, get) => ({
   steps: [],
   currentIndex: 0,
   status: 'idle',
-  speed: 600, // ms between steps (0.5x default speed)
+  speed: 1000, // ms between steps (1x default speed, decreased speed for clear observation)
   isRunning: false,
   error: null,
   pyodideLoading: false,
