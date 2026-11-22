@@ -857,11 +857,11 @@ export async function runTrace(
 
     const loopContext: LoopContext | undefined = matchingLoop
       ? {
-          type: matchingLoop.type,
-          headerLine: matchingLoop.headerLine,
-          iteration: Math.max(1, matchingLoop.iteration),
-          isHeader: matchingLoop.isHeader || matchingLoop.headerLine === line,
-        }
+        type: matchingLoop.type,
+        headerLine: matchingLoop.headerLine,
+        iteration: Math.max(1, matchingLoop.iteration),
+        isHeader: matchingLoop.isHeader || matchingLoop.headerLine === line,
+      }
       : undefined;
 
     steps.push({

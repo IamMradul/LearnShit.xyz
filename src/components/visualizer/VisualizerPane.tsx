@@ -119,7 +119,7 @@ function FallbackStateRenderer({
       code={code}
       language={language}
       result={result}
-      onSelectStep={onSelectStep || (() => {})}
+      onSelectStep={onSelectStep || (() => { })}
     />
   );
 }
