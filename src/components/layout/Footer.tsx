@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, ExternalLink, ArrowUp, Heart } from 'lucide-react';
+import { navigate } from '../../utils/router';
 
 /* ─── GitHub Icon (Crisp inline SVG) ────────────────────────────────────────── */
 function GithubIcon({ size = 15, color = 'currentColor' }: { size?: number; color?: string }) {
@@ -85,9 +86,10 @@ const CREATORS: Creator[] = [
 
 interface FooterProps {
   onOpenResources?: (tab?: 'sheets' | 'books') => void;
+  onOpenDsa?: () => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onOpenResources }) => {
+export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) => {
   const [avatarSources, setAvatarSources] = useState<Record<string, string>>({
     IamMradul: '/avatars/mradul.jpg',
     Imdilshan: '/avatars/dilshan.jpg',
@@ -226,7 +228,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources }) => {
             {/* Quick anchors */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <button
-                onClick={() => scrollToAnchor('ide-anchor')}
+                onClick={() => navigate('/visualizer')}
                 style={{
                   background: 'none',
                   border: 'none',
@@ -240,10 +242,16 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources }) => {
                 onMouseEnter={(e) => (e.currentTarget.style.color = '#F7F5EF')}
                 onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(247, 245, 239, 0.65)')}
               >
-                IDE
+                Visualizer
               </button>
               <button
-                onClick={() => scrollToAnchor('gallery-anchor')}
+                onClick={() => {
+                  if (window.location.pathname === '/') {
+                    scrollToAnchor('gallery-anchor');
+                  } else {
+                    navigate('/#gallery-anchor');
+                  }
+                }}
                 style={{
                   background: 'none',
                   border: 'none',
@@ -257,10 +265,27 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources }) => {
                 onMouseEnter={(e) => (e.currentTarget.style.color = '#F7F5EF')}
                 onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(247, 245, 239, 0.65)')}
               >
-                Gallery
+                Playgrounds
               </button>
               <button
-                onClick={() => (onOpenResources ? onOpenResources('sheets') : scrollToAnchor('resources-anchor'))}
+                onClick={() => (onOpenDsa ? onOpenDsa() : navigate('/dsa'))}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  padding: 0,
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: 12,
+                  color: 'rgba(247, 245, 239, 0.65)',
+                  cursor: 'pointer',
+                  transition: 'color 0.15s ease',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--accent, #D6523A)')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(247, 245, 239, 0.65)')}
+              >
+                DSA Guide
+              </button>
+              <button
+                onClick={() => (onOpenResources ? onOpenResources('sheets') : navigate('/resources?tab=sheets'))}
                 style={{
                   background: 'none',
                   border: 'none',
@@ -277,7 +302,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources }) => {
                 Resources
               </button>
               <button
-                onClick={() => (onOpenResources ? onOpenResources('books') : scrollToAnchor('resources-anchor'))}
+                onClick={() => (onOpenResources ? onOpenResources('books') : navigate('/resources?tab=books'))}
                 style={{
                   background: 'none',
                   border: 'none',

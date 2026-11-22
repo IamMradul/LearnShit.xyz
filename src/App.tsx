@@ -1,17 +1,18 @@
-import React, { useEffect, useRef, useCallback, useState } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { Navbar } from './components/layout/Navbar';
 import { MainLayout } from './components/layout/MainLayout';
 import { GallerySection } from './components/gallery/GallerySection';
 import { ResourcesSection, type ResourceTab } from './components/resources/ResourcesSection';
 import { HeroSection } from './components/landing/HeroSection';
 import { Footer } from './components/layout/Footer';
+import { DsaHub } from './components/dsa/DsaHub';
 import { useUIStore } from './store/uiStore';
 import { Analytics } from '@vercel/analytics/react';
+import { useRouter, navigate } from './utils/router';
 
 export default function App() {
   const { theme } = useUIStore();
-  const [showResources, setShowResources] = useState(false);
-  const [resourceTab, setResourceTab] = useState<ResourceTab>('sheets');
+  const { route, tab, hash } = useRouter();
   const ideRef = useRef<HTMLDivElement>(null);
 
   // Apply theme class to <html> on mount and whenever it changes
@@ -19,40 +20,46 @@ export default function App() {
     document.documentElement.className = theme === 'light' ? 'light' : '';
   }, [theme]);
 
-  const handleEnterApp = useCallback(() => {
-    if (showResources) {
-      setShowResources(false);
-      setTimeout(() => {
-        ideRef.current?.scrollIntoView({ behavior: 'smooth' });
-      }, 60);
-    } else {
-      ideRef.current?.scrollIntoView({ behavior: 'smooth' });
+  // Handle hash scrolling on home page (e.g. /#gallery-anchor)
+  useEffect(() => {
+    if (route === 'home' && hash) {
+      const anchorId = hash.replace(/^#/, '');
+      const el = document.getElementById(anchorId);
+      if (el) {
+        setTimeout(() => el.scrollIntoView({ behavior: 'smooth' }), 60);
+      }
     }
-  }, [showResources]);
+  }, [route, hash]);
+
+  const handleEnterApp = useCallback(() => {
+    navigate('/visualizer');
+  }, []);
 
   const handleOpenPlaygrounds = useCallback(() => {
-    if (showResources) {
-      setShowResources(false);
-      setTimeout(() => {
-        document.getElementById('gallery-anchor')?.scrollIntoView({ behavior: 'smooth' });
-      }, 60);
-    } else {
+    if (route === 'home') {
       document.getElementById('gallery-anchor')?.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      navigate('/#gallery-anchor');
     }
-  }, [showResources]);
+  }, [route]);
 
   const handleGoHome = useCallback(() => {
-    setShowResources(false);
-    window.scrollTo({ top: 0, behavior: 'instant' });
-    requestAnimationFrame(() => window.scrollTo(0, 0));
+    navigate('/');
   }, []);
 
-  const handleOpenResources = useCallback((tab: ResourceTab = 'sheets') => {
-    setResourceTab(tab);
-    setShowResources(true);
-    window.scrollTo({ top: 0, behavior: 'instant' });
-    requestAnimationFrame(() => window.scrollTo(0, 0));
+  const handleOpenResources = useCallback((targetTab: ResourceTab = 'sheets') => {
+    navigate(`/resources?tab=${targetTab}`);
   }, []);
+
+  const handleOpenDsa = useCallback(() => {
+    navigate('/dsa');
+  }, []);
+
+  const isResourcesView = route === 'resources';
+  const isVisualizerView = route === 'visualizer';
+  const isDsaView = route === 'dsa';
+  const currentResourceTab: ResourceTab =
+    tab === 'books' || tab === 'learnshit-sheet' ? tab : 'sheets';
 
   return (
     <div
@@ -68,21 +75,48 @@ export default function App() {
         onOpenVisualizer={handleEnterApp}
         onOpenPlaygrounds={handleOpenPlaygrounds}
         onOpenResources={handleOpenResources}
+        onOpenDsa={handleOpenDsa}
         onGoHome={handleGoHome}
-        isResourcesView={showResources}
-        currentResourceTab={resourceTab}
+        isResourcesView={isResourcesView}
+        isVisualizerView={isVisualizerView}
+        isDsaView={isDsaView}
+        currentResourceTab={currentResourceTab}
       />
 
-      {showResources ? (
+      {isResourcesView && (
         <div style={{ paddingTop: 62, minHeight: 'calc(100vh - 62px)', display: 'flex', flexDirection: 'column' }}>
           <ResourcesSection
-            initialTab={resourceTab}
-            onTabChange={setResourceTab}
+            initialTab={currentResourceTab}
+            onTabChange={(nextTab) => navigate(`/resources?tab=${nextTab}`, { scroll: false })}
             onBack={handleGoHome}
           />
-          <Footer onOpenResources={handleOpenResources} />
+          <Footer onOpenResources={handleOpenResources} onOpenDsa={handleOpenDsa} />
         </div>
-      ) : (
+      )}
+
+      {isDsaView && (
+        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+          <DsaHub onBackToHome={handleGoHome} />
+          <Footer onOpenResources={handleOpenResources} onOpenDsa={handleOpenDsa} />
+        </div>
+      )}
+
+      {isVisualizerView && (
+        <div
+          style={{
+            marginTop: 62,
+            height: 'calc(100vh - 62px)',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+            background: 'var(--bg-primary)',
+          }}
+        >
+          <MainLayout />
+        </div>
+      )}
+
+      {route === 'home' && (
         <>
           {/* ── Hero landing (100vh) ── */}
           <HeroSection
@@ -109,7 +143,7 @@ export default function App() {
           </div>
 
           {/* ── Platform Footer & Contact ── */}
-          <Footer onOpenResources={handleOpenResources} />
+          <Footer onOpenResources={handleOpenResources} onOpenDsa={handleOpenDsa} />
         </>
       )}
 

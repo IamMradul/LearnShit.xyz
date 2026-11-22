@@ -9,8 +9,10 @@ import {
   ExternalLink,
   ChevronRight,
   FileText,
+  Cpu,
 } from 'lucide-react';
 import type { ResourceTab } from '../resources/ResourcesSection';
+import { navigate } from '../../utils/router';
 
 /* ─── Crisp Inline GitHub SVG ────────────────────────────────────────────────── */
 function GithubIcon({ size = 16, color = 'currentColor' }: { size?: number; color?: string }) {
@@ -35,8 +37,11 @@ export interface NavbarProps {
   onOpenVisualizer?: () => void;
   onOpenPlaygrounds?: () => void;
   onOpenResources?: (tab?: ResourceTab) => void;
+  onOpenDsa?: () => void;
   onGoHome?: () => void;
   isResourcesView?: boolean;
+  isVisualizerView?: boolean;
+  isDsaView?: boolean;
   currentResourceTab?: ResourceTab;
 }
 
@@ -44,8 +49,11 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenVisualizer,
   onOpenPlaygrounds,
   onOpenResources,
+  onOpenDsa,
   onGoHome,
   isResourcesView = false,
+  isVisualizerView = false,
+  isDsaView = false,
   currentResourceTab = 'sheets',
 }) => {
   const [scrolled, setScrolled] = useState(false);
@@ -114,10 +122,20 @@ export const Navbar: React.FC<NavbarProps> = ({
     }
   };
 
+  const handleDsaClick = () => {
+    setMobileMenuOpen(false);
+    if (onOpenDsa) {
+      onOpenDsa();
+    } else {
+      navigate('/dsa');
+    }
+  };
+
   const isSheetsActive = isResourcesView && (currentResourceTab === 'sheets' || currentResourceTab === 'learnshit-sheet');
   const isBooksActive = isResourcesView && currentResourceTab === 'books';
-  const isIdeActive = !isResourcesView && activeSection === 'ide';
-  const isGalleryActive = !isResourcesView && activeSection === 'gallery';
+  const isDsaActive = isDsaView;
+  const isIdeActive = isVisualizerView || (!isResourcesView && !isDsaView && activeSection === 'ide');
+  const isGalleryActive = !isResourcesView && !isDsaView && !isVisualizerView && activeSection === 'gallery';
 
   return (
     <>
@@ -313,6 +331,57 @@ export const Navbar: React.FC<NavbarProps> = ({
               </span>
             </button>
 
+            {/* DSA Guide (Data Structures & Algorithms Encyclopedia) */}
+            <button
+              onClick={handleDsaClick}
+              id="navbar-dsa-btn"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 7,
+                padding: '6px 13px',
+                borderRadius: 8,
+                background: isDsaActive ? 'rgba(214, 82, 58, 0.14)' : 'transparent',
+                border: isDsaActive ? '1px solid rgba(214, 82, 58, 0.35)' : '1px solid transparent',
+                color: isDsaActive ? '#F7F5EF' : 'rgba(247, 245, 239, 0.75)',
+                fontFamily: "'Inter', sans-serif",
+                fontSize: 13,
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.18s ease',
+              }}
+              onMouseEnter={(e) => {
+                if (!isDsaActive) {
+                  e.currentTarget.style.color = '#F7F5EF';
+                  e.currentTarget.style.background = 'rgba(247, 245, 239, 0.05)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isDsaActive) {
+                  e.currentTarget.style.color = 'rgba(247, 245, 239, 0.75)';
+                  e.currentTarget.style.background = 'transparent';
+                }
+              }}
+            >
+              <Cpu size={15} style={{ color: isDsaActive ? 'var(--accent, #D6523A)' : 'inherit' }} />
+              <span>DSA Guide</span>
+              <span
+                style={{
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: 9.5,
+                  color: isDsaActive ? '#FFFFFF' : 'rgba(247, 245, 239, 0.55)',
+                  background: isDsaActive ? 'rgba(214, 82, 58, 0.35)' : 'rgba(247, 245, 239, 0.08)',
+                  border: isDsaActive ? '1px solid rgba(214, 82, 58, 0.5)' : '1px solid rgba(247, 245, 239, 0.12)',
+                  padding: '1px 5px',
+                  borderRadius: 4,
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                }}
+              >
+                INFO
+              </span>
+            </button>
+
             {/* Resources (Problem Sheets) */}
             <button
               onClick={() => handleResourcesClick('sheets')}
@@ -396,9 +465,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                 }
               }}
             >
-              {/* <BookOpen size={15} style={{ color: isBooksActive ? 'var(--accent, #D6523A)' : 'inherit' }} />
-              <span>Books</span> */}
-              {/* <span
+              <BookOpen size={15} style={{ color: isBooksActive ? 'var(--accent, #D6523A)' : 'inherit' }} />
+              <span>Books</span>
+              <span
                 style={{
                   fontFamily: "'JetBrains Mono', monospace",
                   fontSize: 9.5,
@@ -412,7 +481,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 }}
               >
                 NEW
-              </span> */}
+              </span>
             </button>
           </nav>
 
@@ -584,6 +653,31 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <Layers size={16} color="var(--accent, #D6523A)" />
               <span>Algorithm Playgrounds (26)</span>
+            </div>
+            <ChevronRight size={14} style={{ opacity: 0.5 }} />
+          </button>
+
+          <button
+            onClick={handleDsaClick}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '12px 16px',
+              borderRadius: 8,
+              background: isDsaActive ? 'rgba(214, 82, 58, 0.15)' : '#12141a',
+              border: isDsaActive ? '1px solid rgba(214, 82, 58, 0.4)' : '1px solid rgba(247, 245, 239, 0.08)',
+              color: '#F7F5EF',
+              fontFamily: "'Inter', sans-serif",
+              fontSize: 14,
+              fontWeight: 600,
+              cursor: 'pointer',
+              textAlign: 'left',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <Cpu size={16} color="var(--accent, #D6523A)" />
+              <span>Data Structures &amp; Algorithms Guide</span>
             </div>
             <ChevronRight size={14} style={{ opacity: 0.5 }} />
           </button>
