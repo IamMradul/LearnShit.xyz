@@ -4,16 +4,13 @@ import {
   ChevronUp,
   Activity,
   Layout,
-  Sparkles,
-  Play,
-  Edit3,
   Check,
-  Loader2,
+  Sparkles,
 } from 'lucide-react';
 import { useTraceStore } from '../../store/traceStore';
 import { useEditorStore } from '../../store/editorStore';
-import { identifyPlatform, type PlatformDetectionResult } from '../../engine/PlatformDetector';
-import { inferDefaultInput, getParsedArgumentsInfo } from '../../engine/ModeDetector';
+import { identifyPlatform } from '../../engine/PlatformDetector';
+import { inferDefaultInput } from '../../engine/ModeDetector';
 import { detectLanguage } from '../../engine/LanguageDetector';
 import { getAdapter } from '../../engine/adapters/AdapterRegistry';
 
@@ -87,123 +84,6 @@ function tokenizeCode(text: string, _lang: string): React.ReactNode[] {
   return tokens.length > 0 ? tokens : [text];
 }
 
-interface SampleOption {
-  label: string;
-  input: string;
-  desc?: string;
-}
-
-function getSampleInputsForCode(code: string, platformInfo: PlatformDetectionResult): SampleOption[] {
-  const samples: SampleOption[] = [];
-
-  if (platformInfo.defaultInput) {
-    samples.push({
-      label: 'Sample 1',
-      input: platformInfo.defaultInput,
-      desc: platformInfo.inputDescription || 'Default problem input',
-    });
-  }
-
-  const pName = (platformInfo.problemName || '').toLowerCase();
-
-  if (pName.includes('two sum')) {
-    samples.push(
-      { label: 'Sample 2', input: '[[3, 2, 4], 6]', desc: 'nums = [3, 2, 4], target = 6' },
-      { label: 'Sample 3', input: '[[3, 3], 6]', desc: 'nums = [3, 3], target = 6' }
-    );
-  } else if (pName.includes('binary search') || pName.includes('search')) {
-    samples.push(
-      { label: 'Found Mid', input: '[[2, 5, 8, 12, 16, 23], 12]', desc: 'nums = [2, 5, 8, 12, 16, 23], target = 12' },
-      { label: 'Not Found', input: '[[1, 3, 5, 7, 9], 4]', desc: 'target = 4 (not in array)' }
-    );
-  } else if (pName.includes('reverse linked list') || pName.includes('reverse list')) {
-    samples.push(
-      { label: 'Short', input: '[[1, 2]]', desc: 'head = [1, 2]' },
-      { label: 'Single', input: '[[42]]', desc: 'head = [42]' }
-    );
-  } else if (pName.includes('maximum subarray')) {
-    samples.push(
-      { label: 'All Positive', input: '[[5, 4, -1, 7, 8]]', desc: 'nums = [5, 4, -1, 7, 8]' },
-      { label: 'Single', input: '[[1]]', desc: 'nums = [1]' }
-    );
-  } else if (pName.includes('valid parentheses')) {
-    samples.push(
-      { label: 'Valid nested', input: '["{[]}"]', desc: 's = "{[]}" (true)' },
-      { label: 'Invalid', input: '["(]"]', desc: 's = "(]" (false)' }
-    );
-  } else if (pName.includes('climbing stairs')) {
-    samples.push(
-      { label: 'n = 3', input: '[3]', desc: '3 stairs' },
-      { label: 'n = 8', input: '[8]', desc: '8 stairs' }
-    );
-  } else if (pName.includes('coin change')) {
-    samples.push(
-      { label: 'amount = 7', input: '[[2, 5], 7]', desc: 'coins = [2, 5], amount = 7' },
-      { label: 'impossible', input: '[[2], 3]', desc: 'coins = [2], amount = 3' }
-    );
-  }
-
-  // If competitive programming with cin >>
-  if (/\bcin\s*>>/.test(code)) {
-    if (samples.length === 0) {
-      samples.push(
-        { label: 'Test 1', input: '5\n1 2 3 4 5', desc: 'n = 5, arr = 1 2 3 4 5' },
-        { label: 'Test 2', input: '6\n9 4 7 1 3 6', desc: 'n = 6, arr = 9 4 7 1 3 6' }
-      );
-    }
-  }
-
-  // Provide a Random Array option if code manipulates arrays
-  if (
-    code.includes('nums') ||
-    code.includes('arr') ||
-    code.includes('list') ||
-    code.includes('head') ||
-    code.includes('vector')
-  ) {
-    const r1 = Math.floor(Math.random() * 20) + 1;
-    const r2 = Math.floor(Math.random() * 20) + 1;
-    const r3 = Math.floor(Math.random() * 20) + 1;
-    const r4 = Math.floor(Math.random() * 20) + 1;
-    const r5 = Math.floor(Math.random() * 20) + 1;
-    const target = r1 + r3;
-    samples.push({
-      label: '🎲 Random',
-      input: pName.includes('two sum')
-        ? `[[${r1}, ${r2}, ${r3}, ${r4}, ${r5}], ${target}]`
-        : `[[${r1}, ${r2}, ${r3}, ${r4}, ${r5}]]`,
-      desc: 'Randomized sample input values',
-    });
-  }
-
-  return samples.slice(0, 4);
-}
-
-// Compute human readable breakdown of input args
-function getHumanReadableInput(inputStr: string): string {
-  if (!inputStr || !inputStr.trim()) return 'No input provided';
-  const trimmed = inputStr.trim();
-  try {
-    const parsed = JSON.parse(trimmed);
-    if (Array.isArray(parsed)) {
-      return parsed
-        .map((arg, idx) => {
-          const valStr = typeof arg === 'object' ? JSON.stringify(arg) : String(arg);
-          return `Arg ${idx + 1}: ${valStr}`;
-        })
-        .join('  •  ');
-    }
-    return `Input: ${JSON.stringify(parsed)}`;
-  } catch {
-    // Plain text / stdin
-    if (trimmed.includes('\n')) {
-      const lines = trimmed.split('\n').filter((l) => l.trim().length > 0);
-      return `Stdin (${lines.length} lines): ${lines.slice(0, 2).join(' ')}${lines.length > 2 ? ' ...' : ''}`;
-    }
-    return `Input: ${trimmed}`;
-  }
-}
-
 interface AnimatedCodeVisualizerProps {
   layoutMode?: 'center' | 'split' | 'docked' | 'overlay';
   onToggleLayout?: () => void;
@@ -222,8 +102,6 @@ export const AnimatedCodeVisualizer: React.FC<AnimatedCodeVisualizerProps> = ({
     language,
     setLanguage,
     modeOverride,
-    inputHighlighted,
-    setInputHighlighted,
   } = useEditorStore();
   const {
     steps,
@@ -252,16 +130,9 @@ export const AnimatedCodeVisualizer: React.FC<AnimatedCodeVisualizerProps> = ({
 
   const [isExpanded, setIsExpanded] = useState(true);
   const [showLiveBadges, setShowLiveBadges] = useState(true);
-  const [editingInput, setEditingInput] = useState(input);
-  const [isInputFocused, setIsInputFocused] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const activeLineRef = useRef<HTMLDivElement>(null);
-
-  // Keep local editing state synced if external input changes
-  useEffect(() => {
-    setEditingInput(input);
-  }, [input]);
 
   // Split strictly the user-entered code
   const lines = useMemo(() => (code ? code.split('\n') : []), [code]);
@@ -272,26 +143,14 @@ export const AnimatedCodeVisualizer: React.FC<AnimatedCodeVisualizerProps> = ({
   // Identified platform metadata
   const platformInfo = useMemo(() => identifyPlatform(code, language), [code, language]);
 
-  // Sample quick inputs
-  const sampleInputs = useMemo(() => getSampleInputsForCode(code, platformInfo), [code, platformInfo]);
-
-  // Parsed argument metadata
-  const parsedInfo = useMemo(
-    () => getParsedArgumentsInfo(code, editingInput, language),
-    [code, editingInput, language],
-  );
-
   // Trace execution runner
   const executeTrace = useCallback(
     async (customInput?: string) => {
-      const inputToUse = customInput !== undefined ? customInput : editingInput;
+      const inputToUse = customInput !== undefined ? customInput : input;
       if (!code.trim() || isRunning) return;
 
       if (customInput !== undefined && customInput !== input) {
         setInput(customInput);
-        setEditingInput(customInput);
-      } else if (editingInput !== input) {
-        setInput(editingInput);
       }
 
       if (onRunTrace) {
@@ -333,7 +192,7 @@ export const AnimatedCodeVisualizer: React.FC<AnimatedCodeVisualizerProps> = ({
         setPyodideLoading(false);
       }
     },
-    [code, editingInput, input, isRunning, language, modeOverride, onRunTrace, setError, setLanguage, setPyodideLoading, setResult, setRunning, setStatus, setInput],
+    [code, input, isRunning, language, modeOverride, onRunTrace, setError, setLanguage, setPyodideLoading, setResult, setRunning, setStatus, setInput],
   );
 
   // Auto-populate input and execute if code exists but has no input or no steps
@@ -343,7 +202,6 @@ export const AnimatedCodeVisualizer: React.FC<AnimatedCodeVisualizerProps> = ({
         input.trim() || platformInfo.defaultInput || inferDefaultInput(code) || '[[2, 7, 11, 15], 9]';
       if (!input.trim() || input !== fallbackInput) {
         setInput(fallbackInput);
-        setEditingInput(fallbackInput);
       }
       executeTrace(fallbackInput);
     }
@@ -474,43 +332,18 @@ export const AnimatedCodeVisualizer: React.FC<AnimatedCodeVisualizerProps> = ({
           userSelect: 'none',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
-          <div
-            style={{
-              padding: '3px 9px',
-              borderRadius: 8,
-              background: `${badgeColor}22`,
-              border: `1px solid ${badgeColor}55`,
-              color: badgeColor,
-              fontFamily: "'JetBrains Mono', monospace",
-              fontSize: isCenterMode ? 11 : 10,
-              fontWeight: 700,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 5,
-              flexShrink: 0,
-            }}
-          >
-            <span>{platformInfo.badgeIcon}</span>
-            <span>{platformInfo.platformName}</span>
-          </div>
-
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
           <div
             style={{
               fontFamily: "'Oswald', sans-serif",
-              fontSize: isCenterMode ? 14 : 12,
+              fontSize: isCenterMode ? 13 : 12,
               letterSpacing: '0.04em',
               textTransform: 'uppercase',
               color: '#F7F5EF',
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
             }}
-            title={platformInfo.problemName || 'Code Execution'}
           >
-            {platformInfo.problemName || 'Line-by-Line Execution'}
+            Trace Stepper
           </div>
-
           <div
             style={{
               fontSize: 11,
@@ -591,293 +424,6 @@ export const AnimatedCodeVisualizer: React.FC<AnimatedCodeVisualizerProps> = ({
 
       {isExpanded && (
         <>
-          {/* ── Interactive Editable Input Section (Center Stage) ───────────── */}
-          <div
-            className={inputHighlighted ? 'input-highlight-pulse' : ''}
-            style={{
-              padding: isCenterMode ? '12px 18px' : '10px 14px',
-              background: 'rgba(16, 20, 26, 0.85)',
-              borderBottom: '1px solid rgba(247, 245, 239, 0.08)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 8,
-              transition: 'all 0.3s ease',
-            }}
-          >
-            {/* Input Header & Mode / Explanation */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                flexWrap: 'wrap',
-                gap: 8,
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <Edit3 size={13} style={{ color: badgeColor }} />
-                <span
-                  style={{
-                    fontFamily: "'Oswald', sans-serif",
-                    fontSize: 11.5,
-                    letterSpacing: '0.05em',
-                    textTransform: 'uppercase',
-                    color: '#F7F5EF',
-                  }}
-                >
-                  Editable Algorithm Input
-                </span>
-                {inputHighlighted && (
-                  <span
-                    style={{
-                      fontSize: 9.5,
-                      background: 'rgba(214, 82, 58, 0.25)',
-                      border: '1px solid var(--accent)',
-                      color: '#F7F5EF',
-                      padding: '1px 6px',
-                      borderRadius: 4,
-                      fontWeight: 700,
-                      animation: 'pulse 1.5s infinite ease-in-out',
-                    }}
-                  >
-                    ✨ New Code Added
-                  </span>
-                )}
-                <span
-                  style={{
-                    fontSize: 10,
-                    padding: '1px 6px',
-                    borderRadius: 4,
-                    background: 'rgba(255, 255, 255, 0.06)',
-                    color: 'var(--text-muted)',
-                    fontFamily: "'JetBrains Mono', monospace",
-                  }}
-                >
-                  {code.includes('cin >>') || language === 'cpp'
-                    ? 'Standard Input (stdin)'
-                    : 'Function Args (JSON)'}
-                </span>
-              </div>
-
-              {/* Human Readable parameter breakdown */}
-              <div
-                style={{
-                  fontSize: 11,
-                  fontFamily: "'JetBrains Mono', monospace",
-                  color: '#9B9A95',
-                  maxWidth: 520,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
-                title={getHumanReadableInput(editingInput)}
-              >
-                {getHumanReadableInput(editingInput)}
-              </div>
-            </div>
-
-            {/* Editable Input Input Box & Run Button */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div
-                style={{
-                  flex: 1,
-                  position: 'relative',
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
-              >
-                <input
-                  type="text"
-                  value={editingInput}
-                  onChange={(e) => {
-                    setEditingInput(e.target.value);
-                    if (inputHighlighted) setInputHighlighted(false);
-                  }}
-                  onFocus={() => {
-                    setIsInputFocused(true);
-                    if (inputHighlighted) setInputHighlighted(false);
-                  }}
-                  onBlur={() => setIsInputFocused(false)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      executeTrace(editingInput);
-                    }
-                  }}
-                  placeholder="Enter input args: e.g. [[2, 7, 11, 15], 9]"
-                  style={{
-                    width: '100%',
-                    background: 'rgba(9, 11, 14, 0.95)',
-                    border: isInputFocused
-                      ? `1px solid ${badgeColor}`
-                      : '1px solid rgba(247, 245, 239, 0.16)',
-                    borderRadius: 8,
-                    padding: '7px 12px',
-                    color: '#F7F5EF',
-                    fontFamily: "'JetBrains Mono', monospace",
-                    fontSize: 12,
-                    outline: 'none',
-                    boxShadow: isInputFocused ? `0 0 10px ${badgeColor}33` : 'none',
-                    transition: 'all 0.18s ease',
-                  }}
-                />
-              </div>
-
-              {/* Run with Input Button */}
-              <button
-                onClick={() => executeTrace(editingInput)}
-                disabled={isRunning}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  background: isRunning
-                    ? 'rgba(214, 82, 58, 0.4)'
-                    : `linear-gradient(135deg, ${badgeColor} 0%, #ff7b72 100%)`,
-                  border: 'none',
-                  borderRadius: 8,
-                  padding: '7px 15px',
-                  color: '#FFFFFF',
-                  fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: 11.5,
-                  fontWeight: 700,
-                  cursor: isRunning ? 'not-allowed' : 'pointer',
-                  boxShadow: `0 4px 12px ${badgeColor}40`,
-                  transition: 'all 0.18s ease',
-                  flexShrink: 0,
-                }}
-                title="Run algorithm with the edited input values (Enter)"
-              >
-                {isRunning ? (
-                  <>
-                    <Loader2 size={13} className="spin" />
-                    <span>Running...</span>
-                  </>
-                ) : (
-                  <>
-                    <Play size={13} fill="currentColor" />
-                    <span>Run with Input</span>
-                  </>
-                )}
-              </button>
-            </div>
-
-            {/* Parsed Arguments Preview */}
-            {parsedInfo.mismatchError ? (
-              <div
-                style={{
-                  padding: '5px 10px',
-                  borderRadius: 6,
-                  background: 'rgba(214, 82, 58, 0.15)',
-                  border: '1px solid rgba(214, 82, 58, 0.35)',
-                  color: '#ff7b72',
-                  fontSize: 11,
-                  fontFamily: "'JetBrains Mono', monospace",
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 6,
-                }}
-              >
-                <span>⚠️</span>
-                <span>{parsedInfo.mismatchError}</span>
-              </div>
-            ) : parsedInfo.args.length > 0 ? (
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  flexWrap: 'wrap',
-                  gap: 6,
-                  padding: '2px 0',
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: 9.5,
-                    fontFamily: "'Oswald', sans-serif",
-                    letterSpacing: '0.04em',
-                    textTransform: 'uppercase',
-                    color: 'var(--text-muted)',
-                  }}
-                >
-                  Parsed Arguments:
-                </span>
-                {parsedInfo.args.map((a, idx) => (
-                  <span
-                    key={idx}
-                    style={{
-                      fontSize: 10.5,
-                      fontFamily: "'JetBrains Mono', monospace",
-                      background: 'rgba(0, 0, 0, 0.4)',
-                      padding: '2px 7px',
-                      borderRadius: 4,
-                      border: '1px solid rgba(247, 245, 239, 0.1)',
-                      color: '#F7F5EF',
-                    }}
-                  >
-                    <span style={{ color: badgeColor, fontWeight: 600 }}>{a.name}</span>
-                    <span style={{ color: '#58a6ff' }}> ({a.type})</span>
-                    <span style={{ color: '#8b949e' }}> = </span>
-                    <span style={{ color: '#7ee787' }}>{a.formatted}</span>
-                  </span>
-                ))}
-              </div>
-            ) : null}
-
-            {/* Quick Sample Input Chips */}
-            {sampleInputs.length > 0 && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                <span
-                  style={{
-                    fontSize: 10,
-                    color: 'var(--text-muted)',
-                    fontFamily: "'JetBrains Mono', monospace",
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.04em',
-                  }}
-                >
-                  Quick Inputs:
-                </span>
-                {sampleInputs.map((sample, idx) => {
-                  const isCurrent = editingInput === sample.input;
-                  return (
-                    <button
-                      key={idx}
-                      onClick={() => executeTrace(sample.input)}
-                      disabled={isRunning}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 4,
-                        background: isCurrent
-                          ? `${badgeColor}22`
-                          : 'rgba(247, 245, 239, 0.05)',
-                        border: isCurrent
-                          ? `1px solid ${badgeColor}66`
-                          : '1px solid rgba(247, 245, 239, 0.1)',
-                        borderRadius: 6,
-                        padding: '2px 8px',
-                        color: isCurrent ? badgeColor : '#c9d1d9',
-                        fontSize: 10.5,
-                        fontFamily: "'JetBrains Mono', monospace",
-                        cursor: 'pointer',
-                        transition: 'all 0.15s ease',
-                      }}
-                      title={sample.desc || sample.input}
-                    >
-                      <span>{sample.label}</span>
-                      {sample.desc && (
-                        <span style={{ color: 'var(--text-muted)', fontSize: 9.5 }}>
-                          ({sample.desc})
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
           {/* ── Mutation / Comparison Pill Banner ────────────────────────────── */}
           {activeMutation && (
             <div
@@ -1195,7 +741,7 @@ export const AnimatedCodeVisualizer: React.FC<AnimatedCodeVisualizerProps> = ({
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <Sparkles size={11} style={{ color: badgeColor }} />
-              <span>Edit input values above to test custom cases</span>
+              <span>Configure input in Code Editor</span>
             </div>
           </div>
         </>

@@ -16,7 +16,6 @@ import { GeometryRenderer } from './renderers/GeometryRenderer';
 import { BitmaskRenderer } from './renderers/BitmaskRenderer';
 import { PlaybackControls } from './playback/PlaybackControls';
 import { WalkthroughExplainer } from './WalkthroughExplainer';
-import { AnimatedCodeVisualizer } from './AnimatedCodeVisualizer';
 import { DebuggerTraceView } from './DebuggerTraceView';
 import { getAdapter } from '../../engine/adapters/AdapterRegistry';
 import { ALGORITHM_PRESETS } from '../../engine/presets';
@@ -448,7 +447,7 @@ export const VisualizerPane: React.FC = () => {
           pointerEvents: 'none',
         }}
       >
-        {/* Left: Mode Switcher Pills */}
+        {/* Left: View Mode Switcher (Visual / Trace / Split / [Call Tree]) */}
         <div
           style={{
             display: 'flex',
@@ -463,136 +462,88 @@ export const VisualizerPane: React.FC = () => {
             boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
           }}
         >
+          {/* Visual Tab */}
           <button
-            onClick={() => setCenterViewMode('code')}
+            onClick={() => setCenterViewMode('ds')}
+            title="Visual data structure canvas"
             style={{
-              background: centerViewMode === 'code' ? 'var(--accent)' : 'transparent',
+              background: centerViewMode === 'ds' && visualizerMode !== 'recursion' ? 'var(--accent)' : 'transparent',
               border: 'none',
               borderRadius: 16,
-              padding: '4px 12px',
-              color: centerViewMode === 'code' ? '#F7F5EF' : 'var(--text-secondary)',
+              padding: '4px 14px',
+              color: centerViewMode === 'ds' && visualizerMode !== 'recursion' ? '#F7F5EF' : 'var(--text-secondary)',
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: 11,
               cursor: 'pointer',
-              fontWeight: centerViewMode === 'code' ? 600 : 400,
+              fontWeight: centerViewMode === 'ds' && visualizerMode !== 'recursion' ? 600 : 400,
               display: 'flex',
               alignItems: 'center',
               gap: 5,
-            }}
-          >
-            <Code2 size={12} />
-            <span>Code Execution</span>
-          </button>
-
-          {/* Data Structure Pill: ALWAYS VISIBLE */}
-          <button
-            onClick={() => {
-              if (detectedDS.length > 0) {
-                setCenterViewMode('ds');
-              }
-            }}
-            disabled={detectedDS.length === 0}
-            title={
-              detectedDS.length === 0
-                ? 'No recognized data structures detected. Viewing execution in Trace view.'
-                : 'Data Structure Visualizer'
-            }
-            data-tooltip={
-              detectedDS.length === 0
-                ? 'No data structures detected'
-                : 'Data Structure Visualizer'
-            }
-            style={{
-              background:
-                centerViewMode === 'ds' && detectedDS.length > 0 ? 'var(--accent)' : 'transparent',
-              border: 'none',
-              borderRadius: 16,
-              padding: '4px 12px',
-              color:
-                centerViewMode === 'ds' && detectedDS.length > 0
-                  ? '#F7F5EF'
-                  : detectedDS.length === 0
-                    ? 'rgba(247, 245, 239, 0.35)'
-                    : 'var(--text-secondary)',
-              fontFamily: "'JetBrains Mono', monospace",
-              fontSize: 11,
-              cursor: detectedDS.length === 0 ? 'not-allowed' : 'pointer',
-              fontWeight: centerViewMode === 'ds' && detectedDS.length > 0 ? 600 : 400,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 5,
-              opacity: detectedDS.length === 0 ? 0.45 : 1,
             }}
           >
             <Layers size={12} />
-            <span>Data Structure</span>
+            <span>Visual</span>
           </button>
 
-          {/* Trace View Pill */}
+          {/* Trace View Tab */}
           <button
             onClick={() => setCenterViewMode('trace')}
+            title="Step-by-step trace timeline and variables"
             style={{
-              background:
-                centerViewMode === 'trace' || (centerViewMode === 'ds' && detectedDS.length === 0)
-                  ? 'var(--accent)'
-                  : 'transparent',
+              background: centerViewMode === 'trace' ? 'var(--accent)' : 'transparent',
               border: 'none',
               borderRadius: 16,
-              padding: '4px 12px',
-              color:
-                centerViewMode === 'trace' || (centerViewMode === 'ds' && detectedDS.length === 0)
-                  ? '#F7F5EF'
-                  : 'var(--text-secondary)',
+              padding: '4px 14px',
+              color: centerViewMode === 'trace' ? '#F7F5EF' : 'var(--text-secondary)',
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: 11,
               cursor: 'pointer',
-              fontWeight:
-                centerViewMode === 'trace' || (centerViewMode === 'ds' && detectedDS.length === 0)
-                  ? 600
-                  : 400,
+              fontWeight: centerViewMode === 'trace' ? 600 : 400,
               display: 'flex',
               alignItems: 'center',
               gap: 5,
             }}
           >
             <Activity size={12} />
-            <span>Trace View</span>
+            <span>Trace</span>
           </button>
 
-          {detectedDS.length > 0 && (
-            <button
-              onClick={() => setCenterViewMode('split')}
-              style={{
-                background: centerViewMode === 'split' ? 'var(--accent)' : 'transparent',
-                border: 'none',
-                borderRadius: 16,
-                padding: '4px 12px',
-                color: centerViewMode === 'split' ? '#F7F5EF' : 'var(--text-secondary)',
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: 11,
-                cursor: 'pointer',
-                fontWeight: centerViewMode === 'split' ? 600 : 400,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 5,
-              }}
-            >
-              <Layout size={12} />
-              <span>Split View</span>
-            </button>
-          )}
+          {/* Split View Tab */}
+          <button
+            onClick={() => setCenterViewMode('split')}
+            title="Side-by-side Trace and Visual"
+            style={{
+              background: centerViewMode === 'split' ? 'var(--accent)' : 'transparent',
+              border: 'none',
+              borderRadius: 16,
+              padding: '4px 14px',
+              color: centerViewMode === 'split' ? '#F7F5EF' : 'var(--text-secondary)',
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: 11,
+              cursor: 'pointer',
+              fontWeight: centerViewMode === 'split' ? 600 : 400,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 5,
+            }}
+          >
+            <Layout size={12} />
+            <span>Split</span>
+          </button>
 
+          {/* Call Tree (Only shown when recursion exists in trace) */}
           {hasRecursion && (
             <button
               onClick={() => {
                 setCenterViewMode('ds');
                 setVisualizerMode('recursion');
               }}
+              title="Recursive call tree visualization"
               style={{
                 background: centerViewMode === 'ds' && visualizerMode === 'recursion' ? 'var(--accent)' : 'transparent',
                 border: 'none',
                 borderRadius: 16,
-                padding: '4px 12px',
+                padding: '4px 14px',
                 color: centerViewMode === 'ds' && visualizerMode === 'recursion' ? '#F7F5EF' : 'var(--text-secondary)',
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: 11,
@@ -664,7 +615,7 @@ export const VisualizerPane: React.FC = () => {
           </div>
         )}
 
-        {/* Right: Empirical Big-O Complexity HUD */}
+        {/* Right: Unified Status Strip */}
         <div
           style={{
             display: 'flex',
@@ -674,34 +625,36 @@ export const VisualizerPane: React.FC = () => {
             backdropFilter: 'blur(12px)',
             border: '1px solid rgba(247, 245, 239, 0.12)',
             borderRadius: 20,
-            padding: '4px 12px',
+            padding: '4px 14px',
             boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
             pointerEvents: 'auto',
             flexShrink: 0,
+            fontSize: 11,
+            fontFamily: "'JetBrains Mono', monospace",
+            color: 'var(--text-secondary)',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-            <Activity size={12} color="#D6523A" />
-            <span style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Time:</span>
-            <span style={{ fontSize: 11, fontWeight: 700, color: '#D6523A', fontFamily: "'JetBrains Mono', monospace" }}>{profileMetrics.bigO}</span>
-          </div>
-          <div style={{ width: 1, height: 12, background: 'rgba(247, 245, 239, 0.15)' }} />
-          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-            <Layers size={12} color="#2ed573" />
-            <span style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Steps:</span>
-            <span style={{ fontSize: 11, fontWeight: 600, color: '#F7F5EF', fontFamily: "'JetBrains Mono', monospace" }}>
-              {steps.length > 0 ? currentIndex + 1 : 0}/{profileMetrics.totalSteps}
-            </span>
-          </div>
+          <span>
+            Time: <strong style={{ color: '#D6523A' }}>{profileMetrics.bigO}</strong>
+          </span>
+          <span style={{ opacity: 0.3 }}>•</span>
+          <span>
+            Steps: <strong style={{ color: '#F7F5EF' }}>{steps.length > 0 ? currentIndex + 1 : 0}/{profileMetrics.totalSteps}</strong>
+          </span>
+          {profileMetrics.totalMutations > 0 && (
+            <>
+              <span style={{ opacity: 0.3 }}>•</span>
+              <span>
+                Ops: <strong style={{ color: '#2ed573' }}>{profileMetrics.totalMutations}</strong>
+              </span>
+            </>
+          )}
           {profileMetrics.maxStackDepth > 1 && (
             <>
-              <div style={{ width: 1, height: 12, background: 'rgba(247, 245, 239, 0.15)' }} />
-              <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                <span style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Stack:</span>
-                <span style={{ fontSize: 11, fontWeight: 600, color: '#ffa502', fontFamily: "'JetBrains Mono', monospace" }}>
-                  {currentStep?.callStack?.length ?? 1}/{profileMetrics.maxStackDepth}
-                </span>
-              </div>
+              <span style={{ opacity: 0.3 }}>•</span>
+              <span>
+                Stack: <strong style={{ color: '#ffa502' }}>{currentStep?.callStack?.length ?? 1}/{profileMetrics.maxStackDepth}</strong>
+              </span>
             </>
           )}
         </div>
@@ -908,20 +861,7 @@ export const VisualizerPane: React.FC = () => {
                   <span>Load Sample (Bubble Sort)</span>
                 </button>
               </div>
-            ) : centerViewMode === 'code' ? (
-              <AnimatedCodeVisualizer layoutMode="center" />
-            ) : centerViewMode === 'trace' || (centerViewMode === 'ds' && detectedDS.length === 0) ? (
-              <FallbackStateRenderer
-                step={currentStep}
-                currentIndex={currentIndex}
-                totalSteps={steps.length}
-                steps={steps}
-                code={code}
-                language={language}
-                result={result}
-                onSelectStep={setCurrentIndex}
-              />
-            ) : centerViewMode === 'split' && detectedDS.length > 0 ? (
+            ) : centerViewMode === 'split' ? (
               <div
                 style={{
                   display: 'grid',
@@ -977,7 +917,27 @@ export const VisualizerPane: React.FC = () => {
                         varName={activeDS.varName}
                         height={340}
                       />
-                    ) : null}
+                    ) : (
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: 'var(--text-muted)',
+                          textAlign: 'center',
+                          padding: 20,
+                        }}
+                      >
+                        <Activity size={24} style={{ color: 'var(--accent)', marginBottom: 8 }} />
+                        <span style={{ fontSize: 13, color: '#F7F5EF', fontWeight: 600, marginBottom: 4 }}>
+                          Execution Trace Active
+                        </span>
+                        <span style={{ fontSize: 11.5, maxWidth: 260, lineHeight: 1.4 }}>
+                          No discrete array or tree structures detected. Variable states and call frames are tracked on the left.
+                        </span>
+                      </div>
+                    )}
                   </RendererErrorBoundary>
                 </div>
               </div>
@@ -1052,8 +1012,17 @@ export const VisualizerPane: React.FC = () => {
                 onSelectStep={setCurrentIndex}
               />
             ) : (
-              /* DEFAULT / PRIMARY: Animated Code Visualizer Centered */
-              <AnimatedCodeVisualizer layoutMode="center" />
+              /* DEFAULT / PRIMARY: Fallback Trace View Centered */
+              <FallbackStateRenderer
+                step={currentStep}
+                currentIndex={currentIndex}
+                totalSteps={steps.length}
+                steps={steps}
+                code={code}
+                language={language}
+                result={result}
+                onSelectStep={setCurrentIndex}
+              />
             )}
           </div>
         </div>

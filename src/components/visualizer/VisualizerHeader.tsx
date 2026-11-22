@@ -2,7 +2,6 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   Play,
   Code2,
-  Sliders,
   ZoomIn,
   ZoomOut,
   Camera,
@@ -44,7 +43,6 @@ export const VisualizerHeader: React.FC = () => {
     modeOverride,
     isAutoDetecting,
     setIsAutoDetecting,
-    autoDetectedLang,
   } = useEditorStore();
   const {
     isCodeEditorOpen,
@@ -170,7 +168,7 @@ export const VisualizerHeader: React.FC = () => {
         setPyodideLoading(false);
       }
     },
-    [language, modeOverride, setLanguage, setCode, setInput, setError, setRunning, setResult, setStatus, setPyodideLoading],
+    [language, modeOverride, setLanguage, setCode, setInput, setError, setRunning, setResult, setStatus, setPyodideLoading, setCenterViewMode],
   );
 
   // Take snapshot of SVG visualizer
@@ -433,6 +431,11 @@ export const VisualizerHeader: React.FC = () => {
                 • {platformInfo.problemName}
               </span>
             )}
+            {platformInfo.patternType && (
+              <span style={{ color: 'var(--text-muted)', fontSize: 10, marginLeft: 2, fontWeight: 500 }}>
+                ({platformInfo.patternType})
+              </span>
+            )}
           </div>
         )}
 
@@ -529,9 +532,10 @@ export const VisualizerHeader: React.FC = () => {
           )}
         </div>
 
-        {/* Toggle Code Editor Drawer (staying.fun signature button) */}
+        {/* Toggle Code Editor Drawer */}
         <button
           onClick={toggleCodeEditor}
+          title={isCodeEditorOpen ? 'Hide Code Editor' : 'Show Code Editor'}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -548,7 +552,7 @@ export const VisualizerHeader: React.FC = () => {
           }}
         >
           <Code2 size={15} />
-          <span>Edit Code</span>
+          <span>Code Editor</span>
           {isCodeEditorOpen && (
             <span
               style={{

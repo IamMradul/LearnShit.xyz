@@ -38,7 +38,7 @@ const DEFAULTS = {
   isCodeEditorOpen: true,
   visualizerZoom: 100,
   isVariablesWatchOpen: true,
-  centerViewMode: 'ds' as const,
+  centerViewMode: 'split' as const,
 };
 
 export const useUIStore = create<UIStore>()(
