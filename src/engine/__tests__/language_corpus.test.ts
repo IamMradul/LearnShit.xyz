@@ -21,11 +21,10 @@ async function getRealNodePyodide() {
     const { loadPyodide } = await import(pathToFileURL(mjsPath).href);
     const py = await loadPyodide({ indexURL: dir });
 
-    const workerSrc = fs.readFileSync(path.resolve(__dirname, '../../workers/pyodide-runner.worker.ts'), 'utf8');
-    const startMarker = 'const TRACER_PYTHON_CODE = `';
-    const startIndex = workerSrc.indexOf(startMarker) + startMarker.length;
-    const endIndex = workerSrc.indexOf('`;\n\nasync function runPythonTrace', startIndex);
-    const tracerCode = workerSrc.slice(startIndex, endIndex);
+    const tracerCode = fs.readFileSync(
+      path.resolve(__dirname, '../../workers/python-tracer.py'),
+      'utf8',
+    );
     await py.runPythonAsync(tracerCode);
     return py;
   })();
