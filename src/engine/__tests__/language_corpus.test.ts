@@ -201,6 +201,97 @@ function discoverFixtures(): DiscoveredFixture[] {
 const allFixtures = discoverFixtures();
 const recordedResults: CorpusRecord[] = [];
 
+const knownFailingPath = path.resolve(__dirname, '../../../docs/known-failing.json');
+function loadKnownFailing(): Set<string> {
+  if (!fs.existsSync(knownFailingPath)) {
+    throw new Error(`Missing required known-failing list at ${knownFailingPath}`);
+  }
+  const raw = JSON.parse(fs.readFileSync(knownFailingPath, 'utf-8'));
+  const set = new Set<string>();
+  if (Array.isArray(raw)) {
+    for (const item of raw) {
+      if (typeof item === 'string') set.add(item);
+      else if (item && item.language && (item.fixture || item.fixtureName)) {
+        set.add(`${item.language}/${item.fixture || item.fixtureName}`);
+      }
+    }
+  } else if (typeof raw === 'object' && raw !== null) {
+    for (const [lang, list] of Object.entries(raw)) {
+      if (Array.isArray(list)) {
+        for (const name of list) {
+          set.add(`${lang}/${name}`);
+        }
+      }
+    }
+  }
+  return set;
+}
+const knownFailingSet = loadKnownFailing();
+
+function extractErrorLocation(
+  errorMessage: string | null,
+  sourceLineCount: number,
+  sourceLines: string[],
+): {
+  failedJsLine: number | null;
+  failedSourceLine: number | null;
+  failingConstruct: string | null;
+} {
+  if (!errorMessage) {
+    return { failedJsLine: null, failedSourceLine: null, failingConstruct: null };
+  }
+
+  let line: number | null = null;
+
+  // 1. Python traceback: look for File "<algolens>" (or "<user_code>"), line (\d+)
+  const pyUserCodeMatches = Array.from(
+    errorMessage.matchAll(/File\s+["'](?:<algolens>|<user_code>)["'],\s+line\s+(\d+)/g),
+  );
+  if (pyUserCodeMatches.length > 0) {
+    for (let i = pyUserCodeMatches.length - 1; i >= 0; i--) {
+      const candidate = parseInt(pyUserCodeMatches[i][1], 10);
+      if (candidate >= 1 && candidate <= sourceLineCount) {
+        line = candidate;
+        break;
+      }
+    }
+  }
+
+  // 2. Babel error: "(line:col)" e.g. "Unexpected token (3:13)" or "Missing semicolon. (4:12)"
+  if (line === null) {
+    const babelMatch = errorMessage.match(/\((\d+):(\d+)\)/);
+    if (babelMatch) {
+      line = parseInt(babelMatch[1], 10);
+    } else {
+      // 3. Python / standard compiler message: "line 4" or "line: 4"
+      const lineWordMatch = errorMessage.match(/\bline\s*:?\s*(\d+)\b/i);
+      if (lineWordMatch) {
+        line = parseInt(lineWordMatch[1], 10);
+      } else {
+        // 4. Stack trace format: ":line:col" or ":line"
+        const stackMatch = errorMessage.match(/(?::|<anonymous>:|eval:)(\d+)(?::(\d+))?/);
+        if (stackMatch) {
+          line = parseInt(stackMatch[1], 10);
+        }
+      }
+    }
+  }
+
+  const failedJsLine = line;
+  if (line !== null && line >= 1 && line <= sourceLineCount) {
+    const failedSourceLine = line;
+    const text = sourceLines[line - 1]?.trim();
+    const failingConstruct = text && text.length > 0 ? text : 'could not locate the line';
+    return { failedJsLine, failedSourceLine, failingConstruct };
+  }
+
+  return {
+    failedJsLine,
+    failedSourceLine: null,
+    failingConstruct: 'could not locate the line',
+  };
+}
+
 describe('Language Support Corpus Test Suite', () => {
   afterAll(() => {
     const outputDir = path.resolve(process.cwd(), 'test-results');
@@ -285,16 +376,10 @@ describe('Language Support Corpus Test Suite', () => {
         }
 
         // Extract failed line
-        if (errorMessage) {
-          const m = errorMessage.match(/(?:line\s*|:)(\d+)(?::(\d+))?/i);
-          if (m) {
-            failedJsLine = parseInt(m[1], 10);
-            failedSourceLine = failedJsLine <= sourceLineCount ? failedJsLine : null;
-            if (failedSourceLine && sourceLines[failedSourceLine - 1]) {
-              failingConstruct = sourceLines[failedSourceLine - 1].trim();
-            }
-          }
-        }
+        const errorLoc = extractErrorLocation(errorMessage, sourceLineCount, sourceLines);
+        failedJsLine = errorLoc.failedJsLine;
+        failedSourceLine = errorLoc.failedSourceLine;
+        failingConstruct = errorLoc.failingConstruct;
 
         // Check line numbers in range
         lineNumbersInRange =
@@ -431,8 +516,39 @@ describe('Language Support Corpus Test Suite', () => {
 
       recordedResults.push(record);
 
-      // Verify that the record was generated
-      expect(record).toBeDefined();
+      // Regression assertions:
+      if (language === 'javascript' || language === 'python') {
+        const lineInfo = record.failedSourceLine
+          ? ` at line ${record.failedSourceLine} ("${record.failingConstruct}")`
+          : record.failingConstruct
+            ? ` (${record.failingConstruct})`
+            : '';
+        expect(
+          record.passed,
+          `Fixture ${language}/${fixtureName} failed${lineInfo}: ${record.errorMessage || record.failurePoint}`,
+        ).toBe(true);
+      } else {
+        const isKnownFailing = knownFailingSet.has(`${language}/${fixtureName}`);
+        if (isKnownFailing) {
+          // If listed in docs/known-failing.json, it is expected to fail.
+          // The test fails if a fixture ON the list starts passing (so docs/known-failing.json gets updated).
+          expect(
+            record.passed,
+            `Fixture ${language}/${fixtureName} PASSED, but is listed in docs/known-failing.json as failing. Please remove it from docs/known-failing.json!`,
+          ).toBe(false);
+        } else {
+          // If NOT listed in docs/known-failing.json, it must pass.
+          const lineInfo = record.failedSourceLine
+            ? ` at line ${record.failedSourceLine} ("${record.failingConstruct}")`
+            : record.failingConstruct
+              ? ` (${record.failingConstruct})`
+              : '';
+          expect(
+            record.passed,
+            `Unexpected failure in ${language}/${fixtureName}${lineInfo}: fixture is NOT listed in docs/known-failing.json, but failed with: ${record.errorMessage || record.failurePoint}`,
+          ).toBe(true);
+        }
+      }
     },
     30000,
   );
