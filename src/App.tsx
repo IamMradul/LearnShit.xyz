@@ -7,6 +7,7 @@ import { HeroSection } from './components/landing/HeroSection';
 import { Footer } from './components/layout/Footer';
 import { useUIStore } from './store/uiStore';
 import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 export default function App() {
   const { theme } = useUIStore();
@@ -115,6 +116,7 @@ export default function App() {
 
       {/* ── Vercel Web Analytics ── */}
       <Analytics />
+      <SpeedInsights />
     </div>
   );
 }
