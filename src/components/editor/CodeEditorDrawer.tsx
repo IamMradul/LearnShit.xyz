@@ -18,7 +18,6 @@ export const CodeEditorDrawer: React.FC = () => {
     input,
     stdin,
     setInput,
-    setStdin,
     modeOverride,
     setModeOverride,
     isAutoDetecting,
@@ -36,7 +35,7 @@ export const CodeEditorDrawer: React.FC = () => {
     setPyodideLoading,
   } = useTraceStore();
 
-  const [inputTab, setInputTab] = useState<'test-input' | 'stdin'>('test-input');
+  const [activeTab, setActiveTab] = useState<'input' | 'console'>('input');
 
   const parsedInfo = useMemo(
     () => getParsedArgumentsInfo(code, input, language),
@@ -151,7 +150,7 @@ export const CodeEditorDrawer: React.FC = () => {
               color: '#F7F5EF',
             }}
           >
-            Code Editor
+            Source Code
           </span>
           <span
             style={{
@@ -202,6 +201,44 @@ export const CodeEditorDrawer: React.FC = () => {
         </button>
       </div>
 
+      {/* ── Platform & Problem Auto-Identification Banner ───────────────────── */}
+      {code.trim().length > 10 && (
+        <div
+          style={{
+            padding: '7px 14px',
+            background: `${platformInfo.badgeColor}12`,
+            borderBottom: `1px solid ${platformInfo.badgeColor}30`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            fontSize: 11,
+            fontFamily: "'JetBrains Mono', monospace",
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+            <span>{platformInfo.badgeIcon}</span>
+            <span style={{ fontWeight: 700, color: platformInfo.badgeColor }}>
+              {platformInfo.platformName}
+            </span>
+            {platformInfo.problemName && (
+              <span
+                style={{
+                  color: '#F7F5EF',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                • {platformInfo.problemName}
+              </span>
+            )}
+          </div>
+          <span style={{ fontSize: 9.5, color: 'var(--text-muted)', flexShrink: 0 }}>
+            {platformInfo.patternType || 'Ready to Run'}
+          </span>
+        </div>
+      )}
+
       {/* ── Monaco Editor ─────────────────────────────────────────────────── */}
       <div style={{ flex: 1, minHeight: 0, position: 'relative' }}>
         <CodeEditor />
@@ -236,10 +273,10 @@ export const CodeEditorDrawer: React.FC = () => {
           background: '#0e1014',
           display: 'flex',
           flexDirection: 'column',
-          maxHeight: 240,
+          maxHeight: 220,
         }}
       >
-        {/* Tab Header & Mode Switch */}
+        {/* Tab Header */}
         <div
           style={{
             display: 'flex',
@@ -247,49 +284,27 @@ export const CodeEditorDrawer: React.FC = () => {
             justifyContent: 'space-between',
             padding: '6px 14px',
             borderBottom: '1px solid rgba(247, 245, 239, 0.06)',
-            gap: 8,
           }}
         >
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 12 }}>
             <button
-              onClick={() => setInputTab('test-input')}
+              onClick={() => setActiveTab('input')}
               style={{
                 background: 'transparent',
                 border: 'none',
-                color: inputTab === 'test-input' ? 'var(--accent)' : 'var(--text-secondary)',
+                color: activeTab === 'input' ? 'var(--accent)' : 'var(--text-secondary)',
                 fontSize: 11,
                 fontFamily: "'JetBrains Mono', monospace",
-                fontWeight: inputTab === 'test-input' ? 700 : 500,
+                fontWeight: 600,
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 gap: 5,
                 padding: '4px 0',
-                borderBottom: inputTab === 'test-input' ? '2px solid var(--accent)' : '2px solid transparent',
               }}
             >
               <Sliders size={12} />
-              <span>Test Input</span>
-            </button>
-
-            <button
-              onClick={() => setInputTab('stdin')}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: inputTab === 'stdin' ? 'var(--accent)' : 'var(--text-secondary)',
-                fontSize: 11,
-                fontFamily: "'JetBrains Mono', monospace",
-                fontWeight: inputTab === 'stdin' ? 700 : 500,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 5,
-                padding: '4px 0',
-                borderBottom: inputTab === 'stdin' ? '2px solid var(--accent)' : '2px solid transparent',
-              }}
-            >
-              <span>Custom Input (stdin)</span>
+              INPUT ARGUMENTS (JSON)
             </button>
           </div>
 
@@ -302,7 +317,7 @@ export const CodeEditorDrawer: React.FC = () => {
               border: '1px solid rgba(247, 245, 239, 0.1)',
               borderRadius: 4,
               color: 'var(--text-secondary)',
-              fontSize: 10.5,
+              fontSize: 11,
               fontFamily: "'JetBrains Mono', monospace",
               padding: '2px 6px',
               outline: 'none',
@@ -316,7 +331,7 @@ export const CodeEditorDrawer: React.FC = () => {
 
         {/* Input Textarea */}
         <div
-          style={{ padding: '8px 14px', flex: 1, display: 'flex', flexDirection: 'column', transition: 'all 0.3s ease' }}
+          style={{ padding: '8px 14px', flex: 1, transition: 'all 0.3s ease' }}
           className={inputHighlighted ? 'input-highlight-pulse' : ''}
         >
           {inputHighlighted && (
@@ -337,133 +352,101 @@ export const CodeEditorDrawer: React.FC = () => {
               </span>
             </div>
           )}
-
-          {inputTab === 'test-input' ? (
-            <textarea
-              value={input}
-              onChange={(e) => {
-                setInput(e.target.value);
-                if (inputHighlighted) setInputHighlighted(false);
-              }}
-              onFocus={() => {
-                if (inputHighlighted) setInputHighlighted(false);
-              }}
-              placeholder="e.g. [[2, 7, 11, 15], 9] or [1, 2, 3, 4]"
-              style={{
-                width: '100%',
-                height: 65,
-                background: '#14161b',
-                border: '1px solid rgba(247, 245, 239, 0.1)',
-                borderRadius: 6,
-                color: '#F7F5EF',
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: 12,
-                padding: 8,
-                outline: 'none',
-                resize: 'none',
-              }}
-            />
-          ) : (
-            <textarea
-              value={stdin}
-              onChange={(e) => {
-                setStdin(e.target.value);
-                if (inputHighlighted) setInputHighlighted(false);
-              }}
-              onFocus={() => {
-                if (inputHighlighted) setInputHighlighted(false);
-              }}
-              placeholder="e.g. 3\n1 2\n3 4"
-              style={{
-                width: '100%',
-                height: 65,
-                background: '#14161b',
-                border: '1px solid rgba(247, 245, 239, 0.1)',
-                borderRadius: 6,
-                color: '#F7F5EF',
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: 12,
-                padding: 8,
-                outline: 'none',
-                resize: 'none',
-              }}
-            />
-          )}
+          <textarea
+            value={input}
+            onChange={(e) => {
+              setInput(e.target.value);
+              if (inputHighlighted) setInputHighlighted(false);
+            }}
+            onFocus={() => {
+              if (inputHighlighted) setInputHighlighted(false);
+            }}
+            placeholder="e.g. [[64, 34, 25, 12, 22, 11, 90]]"
+            style={{
+              width: '100%',
+              height: 70,
+              background: '#14161b',
+              border: '1px solid rgba(247, 245, 239, 0.1)',
+              borderRadius: 6,
+              color: '#F7F5EF',
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: 12,
+              padding: 8,
+              outline: 'none',
+              resize: 'none',
+            }}
+          />
         </div>
 
-        {/* Parsed Arguments Preview (shown once) */}
-        {inputTab === 'test-input' && (
-          <>
-            {parsedInfo.mismatchError ? (
-              <div
+        {/* Parsed Arguments Preview */}
+        {parsedInfo.mismatchError ? (
+          <div
+            style={{
+              margin: '0 14px 8px',
+              padding: '6px 10px',
+              borderRadius: 6,
+              background: 'rgba(214, 82, 58, 0.15)',
+              border: '1px solid rgba(214, 82, 58, 0.35)',
+              color: '#ff7b72',
+              fontSize: 11,
+              fontFamily: "'JetBrains Mono', monospace",
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+            }}
+          >
+            <span>⚠️</span>
+            <span>{parsedInfo.mismatchError}</span>
+          </div>
+        ) : parsedInfo.args.length > 0 ? (
+          <div
+            style={{
+              margin: '0 14px 8px',
+              padding: '6px 10px',
+              borderRadius: 6,
+              background: 'rgba(247, 245, 239, 0.04)',
+              border: '1px solid rgba(247, 245, 239, 0.08)',
+              display: 'flex',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: 8,
+            }}
+          >
+            <span
+              style={{
+                fontSize: 9.5,
+                fontFamily: "'Oswald', sans-serif",
+                letterSpacing: '0.04em',
+                textTransform: 'uppercase',
+                color: 'var(--text-muted)',
+              }}
+            >
+              Passed Arguments:
+            </span>
+            {parsedInfo.args.map((a, idx) => (
+              <span
+                key={idx}
                 style={{
-                  margin: '0 14px 6px',
-                  padding: '5px 10px',
-                  borderRadius: 6,
-                  background: 'rgba(214, 82, 58, 0.15)',
-                  border: '1px solid rgba(214, 82, 58, 0.35)',
-                  color: '#ff7b72',
                   fontSize: 10.5,
                   fontFamily: "'JetBrains Mono', monospace",
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 6,
+                  background: 'rgba(0, 0, 0, 0.4)',
+                  padding: '2px 8px',
+                  borderRadius: 4,
+                  border: '1px solid rgba(247, 245, 239, 0.1)',
+                  color: '#F7F5EF',
                 }}
               >
-                <span>⚠️</span>
-                <span>{parsedInfo.mismatchError}</span>
-              </div>
-            ) : parsedInfo.args.length > 0 ? (
-              <div
-                style={{
-                  margin: '0 14px 6px',
-                  padding: '5px 10px',
-                  borderRadius: 6,
-                  background: 'rgba(247, 245, 239, 0.04)',
-                  border: '1px solid rgba(247, 245, 239, 0.08)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  flexWrap: 'wrap',
-                  gap: 6,
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: 9.5,
-                    fontFamily: "'Oswald', sans-serif",
-                    letterSpacing: '0.04em',
-                    textTransform: 'uppercase',
-                    color: 'var(--text-muted)',
-                  }}
-                >
-                  Passed Arguments:
-                </span>
-                {parsedInfo.args.map((a, idx) => (
-                  <span
-                    key={idx}
-                    style={{
-                      fontSize: 10,
-                      fontFamily: "'JetBrains Mono', monospace",
-                      background: 'rgba(0, 0, 0, 0.4)',
-                      padding: '2px 6px',
-                      borderRadius: 4,
-                      border: '1px solid rgba(247, 245, 239, 0.1)',
-                      color: '#F7F5EF',
-                    }}
-                  >
-                    <span style={{ color: 'var(--accent)', fontWeight: 600 }}>{a.name}</span>
-                    <span style={{ color: '#58a6ff' }}> ({a.type})</span>
-                    <span style={{ color: '#8b949e' }}> = </span>
-                    <span style={{ color: '#7ee787' }}>{a.formatted}</span>
-                  </span>
-                ))}
-              </div>
-            ) : null}
-          </>
-        )}
+                <span style={{ color: 'var(--accent)', fontWeight: 600 }}>{a.name}</span>
+                <span style={{ color: '#58a6ff' }}> ({a.type})</span>
+                <span style={{ color: '#8b949e' }}> = </span>
+                <span style={{ color: '#7ee787' }}>{a.formatted}</span>
+              </span>
+            ))}
+          </div>
+        ) : null}
 
-        {/* Action Button (Secondary run button) */}
-        <div style={{ padding: '0 14px 8px', display: 'flex', justifyContent: 'flex-end' }}>
+        {/* Action Button */}
+        <div style={{ padding: '0 14px 10px', display: 'flex', justifyContent: 'flex-end' }}>
           <button
             id="drawer-trace-btn"
             onClick={handleRun}
@@ -472,27 +455,29 @@ export const CodeEditorDrawer: React.FC = () => {
               display: 'flex',
               alignItems: 'center',
               gap: 6,
-              padding: '5px 14px',
-              background: 'rgba(247, 245, 239, 0.07)',
-              border: '1px solid rgba(247, 245, 239, 0.16)',
+              padding: '6px 16px',
+              background: 'var(--accent)',
+              border: 'none',
               borderRadius: 6,
               color: '#F7F5EF',
-              fontSize: 11.5,
-              fontWeight: 600,
+              fontSize: 12,
+              fontWeight: 700,
               cursor: isRunning ? 'wait' : 'pointer',
-              fontFamily: "'JetBrains Mono', monospace",
-              transition: 'all 0.15s ease',
+              fontFamily: "'Oswald', sans-serif",
+              letterSpacing: '0.04em',
+              opacity: isRunning ? 0.75 : 1,
+              transition: 'opacity 0.15s, transform 0.15s',
             }}
           >
             {isRunning ? (
               <>
                 <Loader2 size={12} className="animate-spin" />
-                <span>{pyodideLoading ? 'Loading Pyodide…' : 'Tracing…'}</span>
+                <span>{pyodideLoading ? 'LOADING PYODIDE…' : 'TRACING…'}</span>
               </>
             ) : (
               <>
-                <Play size={11} fill="#F7F5EF" />
-                <span>Run</span>
+                <Play size={12} fill="#F7F5EF" />
+                <span>TRACE & VISUALIZE</span>
               </>
             )}
           </button>

@@ -5,7 +5,6 @@ import {
   VolumeX,
   Sparkles,
   BarChart2,
-  MoreHorizontal,
 } from 'lucide-react';
 import { ProfilerModal } from '../profiler/ProfilerModal';
 
@@ -13,20 +12,7 @@ export const WalkthroughExplainer: React.FC = () => {
   const { steps, currentIndex } = useTraceStore();
   const [isAudioEnabled, setIsAudioEnabled] = useState(false);
   const [isProfilerOpen, setIsProfilerOpen] = useState(false);
-  const [showMenu, setShowMenu] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
   const prevIndexRef = useRef(currentIndex);
-
-  // Close overflow menu on outside click
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setShowMenu(false);
-      }
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, []);
 
   const currentStep = steps[currentIndex] || null;
 
@@ -119,103 +105,49 @@ export const WalkthroughExplainer: React.FC = () => {
           </span>
         </div>
 
-        {/* Overflow Menu: Voice & Profiler */}
-        <div ref={menuRef} style={{ position: 'relative', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+          {/* Audio narration button */}
           <button
-            onClick={() => setShowMenu(!showMenu)}
-            title="More Options (Voice Narration & Runtime Profiler)"
+            onClick={toggleAudio}
+            title={isAudioEnabled ? 'Mute AI Audio Narration' : 'Enable AI Audio Narration'}
             style={{
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
+              gap: 5,
               padding: '4px 8px',
               borderRadius: 6,
-              background: showMenu ? 'rgba(247, 245, 239, 0.12)' : 'rgba(255, 255, 255, 0.05)',
-              border: '1px solid rgba(247, 245, 239, 0.12)',
-              color: 'var(--text-secondary)',
+              background: isAudioEnabled ? 'rgba(214, 82, 58, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+              border: `1px solid ${isAudioEnabled ? 'rgba(214, 82, 58, 0.4)' : 'rgba(247, 245, 239, 0.1)'}`,
+              color: isAudioEnabled ? '#D6523A' : 'var(--text-muted)',
+              fontSize: 11,
               cursor: 'pointer',
-              transition: 'all 0.15s ease',
             }}
           >
-            <MoreHorizontal size={14} />
+            {isAudioEnabled ? <Volume2 size={13} /> : <VolumeX size={13} />}
+            <span>Voice</span>
           </button>
 
-          {showMenu && (
-            <div
-              style={{
-                position: 'absolute',
-                bottom: 'calc(100% + 6px)',
-                right: 0,
-                background: '#14161b',
-                border: '1px solid rgba(247, 245, 239, 0.15)',
-                borderRadius: 8,
-                padding: '4px 0',
-                minWidth: 165,
-                zIndex: 60,
-                boxShadow: '0 8px 24px rgba(0,0,0,0.6)',
-              }}
-            >
-              {/* Voice Walkthrough Toggle */}
-              <button
-                onClick={() => {
-                  toggleAudio();
-                }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  width: '100%',
-                  padding: '7px 12px',
-                  background: 'transparent',
-                  border: 'none',
-                  color: isAudioEnabled ? 'var(--accent)' : '#F7F5EF',
-                  fontSize: 11.5,
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                }}
-              >
-                {isAudioEnabled ? <Volume2 size={13} /> : <VolumeX size={13} />}
-                <span>Voice Walkthrough</span>
-                <span
-                  style={{
-                    marginLeft: 'auto',
-                    fontSize: 9.5,
-                    fontFamily: "'JetBrains Mono', monospace",
-                    padding: '1px 5px',
-                    borderRadius: 3,
-                    background: isAudioEnabled ? 'rgba(214, 82, 58, 0.2)' : 'rgba(255, 255, 255, 0.06)',
-                    color: isAudioEnabled ? 'var(--accent)' : 'var(--text-muted)',
-                  }}
-                >
-                  {isAudioEnabled ? 'ON' : 'OFF'}
-                </span>
-              </button>
-
-              {/* Runtime Profiler Trigger */}
-              <button
-                onClick={() => {
-                  setIsProfilerOpen(true);
-                  setShowMenu(false);
-                }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  width: '100%',
-                  padding: '7px 12px',
-                  background: 'transparent',
-                  border: 'none',
-                  color: '#F7F5EF',
-                  fontSize: 11.5,
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                }}
-              >
-                <BarChart2 size={13} style={{ color: '#2ed573' }} />
-                <span>Runtime Profiler</span>
-              </button>
-            </div>
-          )}
+          {/* Profiler Modal trigger */}
+          <button
+            onClick={() => setIsProfilerOpen(true)}
+            title="Open Empirical Runtime & Memory Profiler"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 5,
+              padding: '4px 10px',
+              borderRadius: 6,
+              background: 'rgba(255, 255, 255, 0.06)',
+              border: '1px solid rgba(247, 245, 239, 0.12)',
+              color: '#F7F5EF',
+              fontSize: 11,
+              cursor: 'pointer',
+              fontWeight: 600,
+            }}
+          >
+            <BarChart2 size={13} style={{ color: '#2ed573' }} />
+            <span>Profiler</span>
+          </button>
         </div>
       </div>
 

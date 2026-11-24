@@ -3,7 +3,7 @@ import { Mail, ExternalLink, ArrowUp, Heart } from 'lucide-react';
 import { navigate } from '../../utils/router';
 
 /* ─── GitHub Icon (Crisp inline SVG) ────────────────────────────────────────── */
-function GithubIcon({ size = 15, color = 'currentColor' }: { size?: number; color?: string }) {
+function GithubIcon({ size = 14, color = 'currentColor' }: { size?: number; color?: string }) {
   return (
     <svg
       width={size}
@@ -21,44 +21,19 @@ function GithubIcon({ size = 15, color = 'currentColor' }: { size?: number; colo
   );
 }
 
-/* ─── Accent Mark SVG ───────────────────────────────────────────────────────── */
-function AccentMark() {
-  return (
-    <svg
-      viewBox="0 0 52 52"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-      style={{ width: 16, height: 16, overflow: 'visible' }}
-    >
-      <circle
-        cx="26"
-        cy="26"
-        r="23"
-        stroke="#D6523A"
-        strokeWidth="2"
-        strokeDasharray="98.3 46.3"
-        transform="rotate(2.5 26 26)"
-      />
-      <g stroke="#D6523A" strokeWidth="2" strokeLinecap="round">
-        <circle cx="26.5" cy="26.1" r="2.3" />
-        <path d="M28.9 27.6C31.6 29 32.9 31.2 31.8 33.3 30.7 35.4 27.2 36.1 24.2 35.1" />
-      </g>
-    </svg>
-  );
-}
-
 interface Creator {
   name: string;
   handle: string;
   role: string;
   github: string;
-  email?: string;
+  email: string;
   localAvatar: string;
   remoteAvatar: string;
   initials: string;
   fallbackBg: string;
 }
+
+const OFFICIAL_EMAIL = 'learnshit.xyz@gmail.com';
 
 const CREATORS: Creator[] = [
   {
@@ -66,7 +41,7 @@ const CREATORS: Creator[] = [
     handle: 'IamMradul',
     role: 'Co-Founder & CTO',
     github: 'https://github.com/IamMradul',
-    email: 'mradulg306@gmail.com',
+    email: OFFICIAL_EMAIL,
     localAvatar: '/avatars/mradul.jpg',
     remoteAvatar: 'https://avatars.githubusercontent.com/u/108190254?v=4',
     initials: 'MG',
@@ -77,6 +52,7 @@ const CREATORS: Creator[] = [
     handle: 'Imdilshan',
     role: 'Co-Founder & CEO',
     github: 'https://github.com/Imdilshan',
+    email: OFFICIAL_EMAIL,
     localAvatar: '/avatars/dilshan.jpg',
     remoteAvatar: 'https://avatars.githubusercontent.com/u/158074772?v=4',
     initials: 'MD',
@@ -97,7 +73,6 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
   const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
 
   const handleImgError = (handle: string, remoteAvatar: string) => {
-    // If local asset fails to load, fall back to GitHub CDN directly
     if (avatarSources[handle] !== remoteAvatar) {
       setAvatarSources((prev: Record<string, string>) => ({ ...prev, [handle]: remoteAvatar }));
     } else {
@@ -107,13 +82,6 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const scrollToAnchor = (id: string) => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
   };
 
   return (
@@ -133,7 +101,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
           top: 0,
           left: '50%',
           transform: 'translateX(-50%)',
-          width: '70%',
+          width: '75%',
           height: '1px',
           background: 'linear-gradient(90deg, transparent 0%, rgba(214, 82, 58, 0.45) 50%, transparent 100%)',
           pointerEvents: 'none',
@@ -144,52 +112,50 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
         style={{
           maxWidth: 1400,
           margin: '0 auto',
-          padding: '18px 24px 14px',
+          padding: '36px 28px 22px',
           boxSizing: 'border-box',
           display: 'flex',
           flexDirection: 'column',
-          gap: 14,
+          gap: 28,
         }}
       >
-        {/* Main Row: Brand + Creators + Actions */}
+        {/* ── Top Main Grid: Brand + Nav Columns + Maintainers ── */}
         <div
+          className="footer-grid-container"
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: 16,
+            display: 'grid',
+            gridTemplateColumns: 'minmax(250px, 1.3fr) repeat(2, minmax(130px, 0.9fr)) minmax(260px, 1.2fr)',
+            gap: 28,
+            alignItems: 'start',
           }}
         >
-          {/* ── Brand ── */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              {/* <div
-                style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: 7,
-                  background: '#13151b',
-                  border: '1px solid rgba(247, 245, 239, 0.15)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: '0 2px 8px rgba(214, 82, 58, 0.2)',
-                }}
-              >
-                
-              </div> */}
+          {/* ── Column 1: Brand & Contact Email ── */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <a
+              href="/"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate('/');
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 10,
+                textDecoration: 'none',
+                width: 'fit-content',
+              }}
+            >
               <div
                 style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: 7,
+                  width: 30,
+                  height: 30,
+                  borderRadius: 8,
                   background: '#14161c',
-                  border: '1px solid rgba(247, 245, 239, 0.16)',
+                  border: '1px solid rgba(247, 245, 239, 0.18)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: '0 2px 8px rgba(214, 82, 58, 0.2)',
+                  boxShadow: '0 3px 10px rgba(214, 82, 58, 0.22)',
                   overflow: 'hidden',
                   flexShrink: 0,
                 }}
@@ -197,132 +163,89 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
                 <img
                   src="/learnshit.svg"
                   alt="LearnShit Logo"
+                  width={30}
+                  height={30}
                   style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                 />
               </div>
               <span
                 style={{
                   fontFamily: "'Oswald', sans-serif",
-                  fontSize: 17,
+                  fontSize: 19,
                   fontWeight: 700,
-                  letterSpacing: '0.06em',
+                  letterSpacing: '0.07em',
                   color: '#F7F5EF',
                   textTransform: 'uppercase',
                 }}
               >
                 LEARNSHIT<span style={{ color: 'var(--accent, #D6523A)' }}>.XYZ</span>
               </span>
-            </div>
+            </a>
 
-            <span
+            <p
               style={{
                 fontFamily: "'Inter', sans-serif",
-                fontSize: 12,
-                color: 'rgba(247, 245, 239, 0.4)',
-                display: 'inline-block',
+                fontSize: 12.5,
+                lineHeight: 1.6,
+                color: 'rgba(247, 245, 239, 0.65)',
+                margin: 0,
+                maxWidth: 320,
               }}
             >
-              |
-            </span>
+              Interactive algorithm &amp; data structure visualizer. Step through code, inspect memory mutations,
+              and master computer science concepts locally in your browser.
+            </p>
 
-            {/* Quick anchors */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <button
-                onClick={() => navigate('/visualizer')}
+            {/* Official Email Pill */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 5, marginTop: 2 }}>
+              <span
                 style={{
-                  background: 'none',
-                  border: 'none',
-                  padding: 0,
-                  fontFamily: "'Inter', sans-serif",
-                  fontSize: 12,
-                  color: 'rgba(247, 245, 239, 0.65)',
-                  cursor: 'pointer',
-                  transition: 'color 0.15s ease',
+                  fontFamily: "'Oswald', sans-serif",
+                  fontSize: 10.5,
+                  fontWeight: 600,
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                  color: 'rgba(247, 245, 239, 0.45)',
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = '#F7F5EF')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(247, 245, 239, 0.65)')}
               >
-                Visualizer
-              </button>
-              <button
-                onClick={() => {
-                  if (window.location.pathname === '/') {
-                    scrollToAnchor('gallery-anchor');
-                  } else {
-                    navigate('/#gallery-anchor');
-                  }
-                }}
+                Official Support
+              </span>
+              <a
+                href={`mailto:${OFFICIAL_EMAIL}`}
+                title={`Email ${OFFICIAL_EMAIL}`}
                 style={{
-                  background: 'none',
-                  border: 'none',
-                  padding: 0,
-                  fontFamily: "'Inter', sans-serif",
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 7,
+                  padding: '6px 12px',
+                  borderRadius: 7,
+                  background: 'rgba(214, 82, 58, 0.08)',
+                  border: '1px solid rgba(214, 82, 58, 0.24)',
+                  color: '#F7F5EF',
+                  fontFamily: "'JetBrains Mono', monospace",
                   fontSize: 12,
-                  color: 'rgba(247, 245, 239, 0.65)',
-                  cursor: 'pointer',
-                  transition: 'color 0.15s ease',
+                  fontWeight: 500,
+                  textDecoration: 'none',
+                  width: 'fit-content',
+                  transition: 'all 0.18s ease',
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = '#F7F5EF')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(247, 245, 239, 0.65)')}
-              >
-                Playgrounds
-              </button>
-              <button
-                onClick={() => (onOpenDsa ? onOpenDsa() : navigate('/dsa'))}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  padding: 0,
-                  fontFamily: "'Inter', sans-serif",
-                  fontSize: 12,
-                  color: 'rgba(247, 245, 239, 0.65)',
-                  cursor: 'pointer',
-                  transition: 'color 0.15s ease',
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = 'rgba(214, 82, 58, 0.55)';
+                  e.currentTarget.style.background = 'rgba(214, 82, 58, 0.16)';
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--accent, #D6523A)')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(247, 245, 239, 0.65)')}
-              >
-                DSA Guide
-              </button>
-              <button
-                onClick={() => (onOpenResources ? onOpenResources('sheets') : navigate('/resources?tab=sheets'))}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  padding: 0,
-                  fontFamily: "'Inter', sans-serif",
-                  fontSize: 12,
-                  color: 'rgba(247, 245, 239, 0.65)',
-                  cursor: 'pointer',
-                  transition: 'color 0.15s ease',
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = 'rgba(214, 82, 58, 0.24)';
+                  e.currentTarget.style.background = 'rgba(214, 82, 58, 0.08)';
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = '#F7F5EF')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(247, 245, 239, 0.65)')}
               >
-                Resources
-              </button>
-              <button
-                onClick={() => (onOpenResources ? onOpenResources('books') : navigate('/resources?tab=books'))}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  padding: 0,
-                  fontFamily: "'Inter', sans-serif",
-                  fontSize: 12,
-                  color: 'rgba(247, 245, 239, 0.65)',
-                  cursor: 'pointer',
-                  transition: 'color 0.15s ease',
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--accent, #D6523A)')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(247, 245, 239, 0.65)')}
-              >
-                Books
-              </button>
+                <Mail size={13} style={{ color: 'var(--accent, #D6523A)', flexShrink: 0 }} />
+                <span>{OFFICIAL_EMAIL}</span>
+              </a>
             </div>
           </div>
 
-          {/* ── Creators Contact Cards (Compact) ── */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+          {/* ── Column 2: Platform Links ── */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             <span
               style={{
                 fontFamily: "'Oswald', sans-serif",
@@ -331,169 +254,355 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
                 letterSpacing: '0.08em',
                 textTransform: 'uppercase',
                 color: 'rgba(247, 245, 239, 0.45)',
-                marginRight: 2,
               }}
             >
-              Created by
+              Platform
+            </span>
+            <nav
+              aria-label="Platform Links"
+              style={{ display: 'flex', flexDirection: 'column', gap: 8 }}
+            >
+              <a
+                href="/visualizer"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/visualizer');
+                }}
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: 12.5,
+                  color: 'rgba(247, 245, 239, 0.72)',
+                  textDecoration: 'none',
+                  transition: 'color 0.15s ease',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = '#F7F5EF')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(247, 245, 239, 0.72)')}
+              >
+                Code Visualizer
+              </a>
+              <a
+                href="/playgrounds"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/playgrounds');
+                }}
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: 12.5,
+                  color: 'rgba(247, 245, 239, 0.72)',
+                  textDecoration: 'none',
+                  transition: 'color 0.15s ease',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = '#F7F5EF')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(247, 245, 239, 0.72)')}
+              >
+                Algorithm Playgrounds
+              </a>
+              <a
+                href="/dsa"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (onOpenDsa) onOpenDsa();
+                  else navigate('/dsa');
+                }}
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: 12.5,
+                  color: 'rgba(247, 245, 239, 0.72)',
+                  textDecoration: 'none',
+                  transition: 'color 0.15s ease',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--accent, #D6523A)')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(247, 245, 239, 0.72)')}
+              >
+                DSA Guides &amp; Patterns
+              </a>
+              <a
+                href="/resources?tab=sheets"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (onOpenResources) onOpenResources('sheets');
+                  else navigate('/resources?tab=sheets');
+                }}
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: 12.5,
+                  color: 'rgba(247, 245, 239, 0.72)',
+                  textDecoration: 'none',
+                  transition: 'color 0.15s ease',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = '#F7F5EF')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(247, 245, 239, 0.72)')}
+              >
+                Practice Problem Sheets
+              </a>
+              <a
+                href="/resources?tab=books"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (onOpenResources) onOpenResources('books');
+                  else navigate('/resources?tab=books');
+                }}
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: 12.5,
+                  color: 'rgba(247, 245, 239, 0.72)',
+                  textDecoration: 'none',
+                  transition: 'color 0.15s ease',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = '#F7F5EF')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(247, 245, 239, 0.72)')}
+              >
+                Curated Books
+              </a>
+            </nav>
+          </div>
+
+          {/* ── Column 3: Company & Information ── */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <span
+              style={{
+                fontFamily: "'Oswald', sans-serif",
+                fontSize: 11,
+                fontWeight: 700,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                color: 'rgba(247, 245, 239, 0.45)',
+              }}
+            >
+              LearnShit
+            </span>
+            <nav
+              aria-label="Company Links"
+              style={{ display: 'flex', flexDirection: 'column', gap: 8 }}
+            >
+              <a
+                href="/about"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/about');
+                }}
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: 12.5,
+                  color: 'rgba(247, 245, 239, 0.72)',
+                  textDecoration: 'none',
+                  transition: 'color 0.15s ease',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = '#F7F5EF')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(247, 245, 239, 0.72)')}
+              >
+                About Our Mission
+              </a>
+              <a
+                href="/contact"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/contact');
+                }}
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: 12.5,
+                  color: 'rgba(247, 245, 239, 0.72)',
+                  textDecoration: 'none',
+                  transition: 'color 0.15s ease',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = '#F7F5EF')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(247, 245, 239, 0.72)')}
+              >
+                Contact &amp; Support
+              </a>
+              <a
+                href="/privacy"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/privacy');
+                }}
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: 12.5,
+                  color: 'rgba(247, 245, 239, 0.72)',
+                  textDecoration: 'none',
+                  transition: 'color 0.15s ease',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = '#F7F5EF')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(247, 245, 239, 0.72)')}
+              >
+                Privacy &amp; Local Sandbox
+              </a>
+              <a
+                href="https://github.com/IamMradul/LearnShit.xyz/issues"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: 12.5,
+                  color: 'rgba(247, 245, 239, 0.72)',
+                  textDecoration: 'none',
+                  transition: 'color 0.15s ease',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 4,
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = '#F7F5EF')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(247, 245, 239, 0.72)')}
+              >
+                <span>Report an Issue</span>
+                <ExternalLink size={10} style={{ opacity: 0.5 }} />
+              </a>
+            </nav>
+          </div>
+
+          {/* ── Column 4: Maintainers & GitHub ── */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <span
+              style={{
+                fontFamily: "'Oswald', sans-serif",
+                fontSize: 11,
+                fontWeight: 700,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                color: 'rgba(247, 245, 239, 0.45)',
+              }}
+            >
+              Maintained By
             </span>
 
-            {CREATORS.map((c) => {
-              const currentSrc = avatarSources[c.handle] || c.localAvatar;
-              const hasFailed = imgErrors[c.handle];
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {CREATORS.map((c) => {
+                const currentSrc = avatarSources[c.handle] || c.localAvatar;
+                const hasFailed = imgErrors[c.handle];
 
-              return (
-                <div
-                  key={c.name}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 10,
-                    padding: '4px 12px 4px 6px',
-                    borderRadius: 22,
-                    background: '#0d0f14',
-                    border: '1px solid rgba(247, 245, 239, 0.08)',
-                    transition: 'all 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = 'rgba(214, 82, 58, 0.4)';
-                    e.currentTarget.style.background = '#13151b';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = 'rgba(247, 245, 239, 0.08)';
-                    e.currentTarget.style.background = '#0d0f14';
-                  }}
-                >
-                  {/* Creator Profile Photo */}
-                  <a
-                    href={c.github}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title={`View ${c.name} on GitHub`}
+                return (
+                  <div
+                    key={c.name}
                     style={{
-                      position: 'relative',
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center',
-                      width: 28,
-                      height: 28,
-                      borderRadius: '50%',
-                      overflow: 'hidden',
-                      flexShrink: 0,
-                      textDecoration: 'none',
-                      border: '1.5px solid rgba(247, 245, 239, 0.15)',
-                      boxShadow: '0 2px 6px rgba(0, 0, 0, 0.35)',
+                      justifyContent: 'space-between',
+                      padding: '6px 12px 6px 8px',
+                      borderRadius: 10,
+                      background: '#0d0f14',
+                      border: '1px solid rgba(247, 245, 239, 0.08)',
+                      transition: 'all 0.18s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = 'rgba(214, 82, 58, 0.4)';
+                      e.currentTarget.style.background = '#13151b';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = 'rgba(247, 245, 239, 0.08)';
+                      e.currentTarget.style.background = '#0d0f14';
                     }}
                   >
-                    {!hasFailed ? (
-                      <img
-                        src={currentSrc}
-                        alt={`${c.name} profile`}
-                        width={28}
-                        height={28}
-                        referrerPolicy="no-referrer"
-                        onError={() => handleImgError(c.handle, c.remoteAvatar)}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      {/* Creator Avatar */}
+                      <a
+                        href={c.github}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title={`View ${c.name} on GitHub`}
                         style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover',
-                          display: 'block',
-                          borderRadius: '50%',
-                        }}
-                      />
-                    ) : (
-                      <div
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          background: c.fallbackBg,
+                          position: 'relative',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          fontFamily: "'Oswald', sans-serif",
-                          fontSize: 11,
-                          fontWeight: 700,
-                          color: '#FFFFFF',
-                          letterSpacing: '0.02em',
+                          width: 30,
+                          height: 30,
+                          borderRadius: '50%',
+                          overflow: 'hidden',
+                          flexShrink: 0,
+                          textDecoration: 'none',
+                          border: '1.5px solid rgba(247, 245, 239, 0.16)',
+                          boxShadow: '0 2px 6px rgba(0, 0, 0, 0.35)',
                         }}
                       >
-                        {c.initials}
+                        {!hasFailed ? (
+                          <img
+                            src={currentSrc}
+                            alt={`Portrait of ${c.name}, ${c.role}`}
+                            width={30}
+                            height={30}
+                            loading="lazy"
+                            referrerPolicy="no-referrer"
+                            onError={() => handleImgError(c.handle, c.remoteAvatar)}
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover',
+                              display: 'block',
+                              borderRadius: '50%',
+                            }}
+                          />
+                        ) : (
+                          <div
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              background: c.fallbackBg,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontFamily: "'Oswald', sans-serif",
+                              fontSize: 11,
+                              fontWeight: 700,
+                              color: '#FFFFFF',
+                              letterSpacing: '0.02em',
+                            }}
+                          >
+                            {c.initials}
+                          </div>
+                        )}
+                      </a>
+
+                      {/* Name and Role */}
+                      <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
+                        <a
+                          href={c.github}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            fontFamily: "'Inter', sans-serif",
+                            fontSize: 12.5,
+                            fontWeight: 700,
+                            color: '#F7F5EF',
+                            textDecoration: 'none',
+                            transition: 'color 0.15s ease',
+                          }}
+                          onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--accent, #D6523A)')}
+                          onMouseLeave={(e) => (e.currentTarget.style.color = '#F7F5EF')}
+                        >
+                          {c.name}
+                        </a>
+                        <span
+                          style={{
+                            fontFamily: "'JetBrains Mono', monospace",
+                            fontSize: 10,
+                            color: 'rgba(247, 245, 239, 0.45)',
+                          }}
+                        >
+                          {c.role}
+                        </span>
                       </div>
-                    )}
-                  </a>
+                    </div>
 
-                  {/* Name and Role */}
-                  <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.25 }}>
-                    <a
-                      href={c.github}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        fontFamily: "'Inter', sans-serif",
-                        fontSize: 13,
-                        fontWeight: 700,
-                        color: '#F7F5EF',
-                        textDecoration: 'none',
-                        transition: 'color 0.15s ease',
-                      }}
-                      onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--accent, #D6523A)')}
-                      onMouseLeave={(e) => (e.currentTarget.style.color = '#F7F5EF')}
-                    >
-                      {c.name}
-                    </a>
-                    <span
-                      style={{
-                        fontFamily: "'JetBrains Mono', monospace",
-                        fontSize: 10,
-                        color: 'rgba(247, 245, 239, 0.45)',
-                      }}
-                    >
-                      {c.role}
-                    </span>
-                  </div>
-
-                  {/* Actions (GitHub + Email) */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 2 }}>
-                    <a
-                      href={c.github}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title={`${c.name} on GitHub`}
-                      style={{
-                        width: 24,
-                        height: 24,
-                        borderRadius: 6,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: 'rgba(247, 245, 239, 0.65)',
-                        textDecoration: 'none',
-                        transition: 'all 0.15s ease',
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.color = 'var(--accent, #D6523A)';
-                        e.currentTarget.style.background = 'rgba(214, 82, 58, 0.15)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.color = 'rgba(247, 245, 239, 0.65)';
-                        e.currentTarget.style.background = 'transparent';
-                      }}
-                    >
-                      <GithubIcon size={14} />
-                    </a>
-
-                    {c.email && (
+                    {/* Action Links */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                       <a
-                        href={`mailto:${c.email}`}
-                        title={`Email ${c.name} (${c.email})`}
+                        href={c.github}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title={`${c.name} on GitHub`}
                         style={{
-                          width: 24,
-                          height: 24,
+                          width: 26,
+                          height: 26,
                           borderRadius: 6,
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                           color: 'rgba(247, 245, 239, 0.65)',
                           textDecoration: 'none',
+                          background: 'rgba(247, 245, 239, 0.04)',
                           transition: 'all 0.15s ease',
                         }}
                         onMouseEnter={(e) => {
@@ -502,20 +611,44 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
                         }}
                         onMouseLeave={(e) => {
                           e.currentTarget.style.color = 'rgba(247, 245, 239, 0.65)';
-                          e.currentTarget.style.background = 'transparent';
+                          e.currentTarget.style.background = 'rgba(247, 245, 239, 0.04)';
                         }}
                       >
-                        <Mail size={14} />
+                        <GithubIcon size={13} />
                       </a>
-                    )}
+                      <a
+                        href={`mailto:${c.email}`}
+                        title={`Email ${c.name} (${c.email})`}
+                        style={{
+                          width: 26,
+                          height: 26,
+                          borderRadius: 6,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: 'rgba(247, 245, 239, 0.65)',
+                          textDecoration: 'none',
+                          background: 'rgba(247, 245, 239, 0.04)',
+                          transition: 'all 0.15s ease',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.color = 'var(--accent, #D6523A)';
+                          e.currentTarget.style.background = 'rgba(214, 82, 58, 0.15)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.color = 'rgba(247, 245, 239, 0.65)';
+                          e.currentTarget.style.background = 'rgba(247, 245, 239, 0.04)';
+                        }}
+                      >
+                        <Mail size={13} />
+                      </a>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
 
-          {/* ── Right: Repo Link & Back to Top ── */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            {/* GitHub Repo Pill Button */}
             <a
               href="https://github.com/IamMradul/LearnShit.xyz"
               target="_blank"
@@ -523,77 +656,52 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: 6,
-                padding: '6px 12px',
+                justifyContent: 'center',
+                gap: 7,
+                padding: '7px 14px',
                 borderRadius: 7,
                 background: '#12141a',
-                border: '1px solid rgba(247, 245, 239, 0.1)',
+                border: '1px solid rgba(247, 245, 239, 0.12)',
                 color: '#F7F5EF',
                 fontFamily: "'Inter', sans-serif",
                 fontSize: 12,
                 fontWeight: 600,
                 textDecoration: 'none',
-                transition: 'all 0.15s ease',
+                transition: 'all 0.18s ease',
+                marginTop: 2,
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.borderColor = 'rgba(214, 82, 58, 0.5)';
                 e.currentTarget.style.background = '#181b22';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(247, 245, 239, 0.1)';
+                e.currentTarget.style.borderColor = 'rgba(247, 245, 239, 0.12)';
                 e.currentTarget.style.background = '#12141a';
               }}
             >
               <GithubIcon size={14} />
-              <span>GitHub</span>
+              <span>Star on GitHub</span>
               <ExternalLink size={11} style={{ opacity: 0.6 }} />
             </a>
-
-            <button
-              onClick={scrollToTop}
-              title="Back to Top"
-              style={{
-                width: 30,
-                height: 30,
-                borderRadius: 7,
-                background: '#12141a',
-                border: '1px solid rgba(247, 245, 239, 0.1)',
-                color: 'rgba(247, 245, 239, 0.75)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(214, 82, 58, 0.5)';
-                e.currentTarget.style.color = '#F7F5EF';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(247, 245, 239, 0.1)';
-                e.currentTarget.style.color = 'rgba(247, 245, 239, 0.75)';
-              }}
-            >
-              <ArrowUp size={14} />
-            </button>
           </div>
         </div>
 
-        {/* ── Sub-row: Micro Credits ── */}
+        {/* ── Bottom Sub-Row: Copyright, Badges & Back to Top ── */}
         <div
           style={{
-            paddingTop: 10,
-            borderTop: '1px solid rgba(247, 245, 239, 0.05)',
+            paddingTop: 18,
+            borderTop: '1px solid rgba(247, 245, 239, 0.08)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             flexWrap: 'wrap',
-            gap: 10,
+            gap: 14,
             fontFamily: "'Inter', sans-serif",
-            fontSize: 11,
-            color: 'rgba(247, 245, 239, 0.4)',
+            fontSize: 11.5,
+            color: 'rgba(247, 245, 239, 0.5)',
           }}
         >
+          {/* Copyright notice */}
           <div>
             &copy; {new Date().getFullYear()} <strong style={{ color: '#F7F5EF', fontWeight: 600 }}>LearnShit.xyz</strong>. Built with{' '}
             <Heart size={11} style={{ display: 'inline', color: 'var(--accent, #D6523A)', verticalAlign: 'middle' }} />{' '}
@@ -622,13 +730,95 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
             .
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span style={{ fontFamily: "'JetBrains Mono', monospace" }}>MIT License</span>
-            <span>&bull;</span>
-            <span style={{ fontFamily: "'JetBrains Mono', monospace" }}>Client-Side Tracer</span>
+          {/* Badges / Tech details */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            <span
+              style={{
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: 10.5,
+                background: 'rgba(247, 245, 239, 0.05)',
+                padding: '2px 7px',
+                borderRadius: 4,
+                color: 'rgba(247, 245, 239, 0.65)',
+              }}
+            >
+              MIT License
+            </span>
+            <span
+              style={{
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: 10.5,
+                background: 'rgba(247, 245, 239, 0.05)',
+                padding: '2px 7px',
+                borderRadius: 4,
+                color: 'rgba(247, 245, 239, 0.65)',
+              }}
+            >
+              Client Sandbox
+            </span>
+            <span
+              style={{
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: 10.5,
+                background: 'rgba(247, 245, 239, 0.05)',
+                padding: '2px 7px',
+                borderRadius: 4,
+                color: 'rgba(247, 245, 239, 0.65)',
+              }}
+            >
+              Zero Telemetry
+            </span>
+
+            {/* Back to Top Button */}
+            <button
+              onClick={scrollToTop}
+              title="Back to Top"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 5,
+                padding: '4px 10px',
+                borderRadius: 6,
+                background: '#12141a',
+                border: '1px solid rgba(247, 245, 239, 0.12)',
+                color: 'rgba(247, 245, 239, 0.75)',
+                fontFamily: "'Inter', sans-serif",
+                fontSize: 11.5,
+                fontWeight: 500,
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = 'rgba(214, 82, 58, 0.5)';
+                e.currentTarget.style.color = '#F7F5EF';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = 'rgba(247, 245, 239, 0.12)';
+                e.currentTarget.style.color = 'rgba(247, 245, 239, 0.75)';
+              }}
+            >
+              <span>Top</span>
+              <ArrowUp size={12} />
+            </button>
           </div>
         </div>
       </div>
+
+      {/* Responsive Styles for Footer */}
+      <style>{`
+        @media (max-width: 960px) {
+          .footer-grid-container {
+            grid-template-columns: 1fr 1fr !important;
+            gap: 24px !important;
+          }
+        }
+        @media (max-width: 600px) {
+          .footer-grid-container {
+            grid-template-columns: 1fr !important;
+            gap: 20px !important;
+          }
+        }
+      `}</style>
     </footer>
   );
 };

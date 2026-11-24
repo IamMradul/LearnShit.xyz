@@ -1,4 +1,4 @@
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useState, useEffect } from 'react';
 import MonacoEditor from '@monaco-editor/react';
 import type { editor } from 'monaco-editor';
 import { useEditorStore } from '../../store/editorStore';
@@ -16,6 +16,11 @@ export const CodeEditor: React.FC = () => {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const decorationsRef = useRef<string[]>([]);
   const monacoRef = useRef<typeof import('monaco-editor') | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleEditorDidMount = useCallback(
     (editorInstance: editor.IStandaloneCodeEditor, monaco: typeof import('monaco-editor')) => {
@@ -149,39 +154,58 @@ export const CodeEditor: React.FC = () => {
           </div>
         </div>
       )}
-      <MonacoEditor
-        height="100%"
-        language={monacoLanguage}
-        value={code}
-        onChange={(val) => {
-          setCode(val ?? '');
-          useUIStore.getState().setCenterViewMode('code');
-        }}
-        onMount={handleEditorDidMount}
-        options={{
-          fontSize,
-          fontFamily: 'JetBrains Mono, Fira Code, monospace',
-          fontLigatures: true,
-          lineNumbers: 'on',
-          minimap: { enabled: false },
-          scrollBeyondLastLine: false,
-          wordWrap: 'on',
-          tabSize: language === 'python' ? 4 : 2,
-          insertSpaces: true,
-          automaticLayout: true,
-          padding: { top: 12 },
-          glyphMargin: true,
-          folding: true,
-          renderLineHighlight: 'gutter',
-          smoothScrolling: true,
-          cursorBlinking: 'smooth',
-          bracketPairColorization: { enabled: true },
-          scrollbar: {
-            verticalScrollbarSize: 6,
-            horizontalScrollbarSize: 6,
-          },
-        }}
-      />
+      {!mounted ? (
+        <pre
+          style={{
+            height: '100%',
+            margin: 0,
+            padding: '14px 18px',
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: fontSize,
+            color: '#e6edf3',
+            background: '#0d1117',
+            overflow: 'auto',
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-word',
+          }}
+        >
+          <code>{code}</code>
+        </pre>
+      ) : (
+        <MonacoEditor
+          height="100%"
+          language={monacoLanguage}
+          value={code}
+          onChange={(val) => {
+            setCode(val ?? '');
+            useUIStore.getState().setCenterViewMode('code');
+          }}
+          onMount={handleEditorDidMount}
+          options={{
+            fontSize,
+            fontFamily: 'JetBrains Mono, Fira Code, monospace',
+            fontLigatures: true,
+            lineNumbers: 'on',
+            minimap: { enabled: false },
+            scrollBeyondLastLine: false,
+            wordWrap: 'on',
+            tabSize: language === 'python' ? 4 : 2,
+            insertSpaces: true,
+            automaticLayout: true,
+            padding: { top: 12 },
+            glyphMargin: true,
+            folding: true,
+            renderLineHighlight: 'gutter',
+            smoothScrolling: true,
+            cursorBlinking: 'smooth',
+            bracketPairColorization: { enabled: true },
+            scrollbar: {
+              verticalScrollbarSize: 6,
+              horizontalScrollbarSize: 6,
+            },
+          }}
+        />
+      )}
     </div>
   );
 };

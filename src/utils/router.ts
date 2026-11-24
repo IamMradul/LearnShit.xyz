@@ -1,6 +1,15 @@
 import { useState, useEffect } from 'react';
 
-export type AppRoute = 'home' | 'visualizer' | 'resources' | 'dsa';
+export type AppRoute =
+  | 'home'
+  | 'visualizer'
+  | 'resources'
+  | 'dsa'
+  | 'playgrounds'
+  | 'about'
+  | 'contact'
+  | 'privacy'
+  | 'not-found';
 
 export interface RouteState {
   route: AppRoute;
@@ -19,6 +28,24 @@ export function parseRoute(
   const searchParams = new URLSearchParams(search);
   const tab = searchParams.get('tab') || undefined;
 
+  if (cleanPath === '/' || cleanPath === '') {
+    return { route: 'home', pathname: cleanPath, search, tab, hash };
+  }
+  if (cleanPath === '/playgrounds' || cleanPath.startsWith('/playgrounds/')) {
+    return { route: 'playgrounds', pathname: cleanPath, search, tab, hash };
+  }
+  if (cleanPath === '/about' || cleanPath.startsWith('/about/')) {
+    return { route: 'about', pathname: cleanPath, search, tab, hash };
+  }
+  if (cleanPath === '/contact' || cleanPath.startsWith('/contact/')) {
+    return { route: 'contact', pathname: cleanPath, search, tab, hash };
+  }
+  if (cleanPath === '/privacy' || cleanPath.startsWith('/privacy/')) {
+    return { route: 'privacy', pathname: cleanPath, search, tab, hash };
+  }
+  if (cleanPath === '/404') {
+    return { route: 'not-found', pathname: cleanPath, search, tab, hash };
+  }
   if (cleanPath === '/resources' || cleanPath.startsWith('/resources/')) {
     return { route: 'resources', pathname: cleanPath, search, tab, hash };
   }
@@ -34,7 +61,7 @@ export function parseRoute(
     return { route: 'dsa', pathname: cleanPath, search, tab, hash };
   }
 
-  return { route: 'home', pathname: cleanPath, search, tab, hash };
+  return { route: 'not-found', pathname: cleanPath, search, tab, hash };
 }
 
 export function navigate(to: string, options: { replace?: boolean; scroll?: boolean } = {}) {

@@ -1,0 +1,22 @@
+{
+  "name": "LearnShit",
+  "short_name": "LearnShit",
+  "description": "Interactive Algorithm & Data Structure Visualizer and Code Execution Tracer",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0b0c",
+  "theme_color": "#0a0b0c",
+  "icons": [
+    {
+      "src": "/learnshit.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

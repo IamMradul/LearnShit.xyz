@@ -1,5 +1,17 @@
 {
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.learnshit.xyz"
+        }
+      ],
+      "destination": "https://learnshit.xyz/:path*",
+      "permanent": true
+    }
   ]
 }

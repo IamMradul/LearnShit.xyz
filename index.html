@@ -3,25 +3,69 @@
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/learnshit.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Algorithm &amp; Data Structure Visualizer | LearnShit</title>
+  <meta name="description"
+    content="Interactive step-by-step code execution visualizer for Python, JavaScript, and C++. Master DSA with animated data structures, real traces, and playgrounds." />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
+  <meta name="theme-color" content="#0a0b0c" />
+
+  <!-- Canonical -->
+  <link rel="canonical" href="https://learnshit.xyz/" />
+
+  <!-- Icons & Manifest -->
+  <link rel="icon" type="image/svg+xml" href="/learnshit.svg" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+
+  <!-- Open Graph -->
+  <meta property="og:site_name" content="LearnShit" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Algorithm &amp; Data Structure Visualizer | LearnShit" />
+  <meta property="og:description"
+    content="Interactive step-by-step code execution visualizer for Python, JavaScript, and C++. Master DSA with animated data structures, real traces, and playgrounds." />
+  <meta property="og:url" content="https://learnshit.xyz/" />
+  <meta property="og:image" content="https://learnshit.xyz/og-image.png" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Algorithm &amp; Data Structure Visualizer | LearnShit" />
+  <meta name="twitter:description"
+    content="Interactive step-by-step code execution visualizer for Python, JavaScript, and C++. Master DSA with animated data structures, real traces, and playgrounds." />
+  <meta name="twitter:image" content="https://learnshit.xyz/og-image.png" />
+
+  <!-- Google Fonts with font-display: swap -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Oswald:wght@400;500;600;700&family=Syne:wght@700;800&display=swap"
     rel="stylesheet" />
-  <title>LearnShit — Code Visualizer</title>
-  <meta name="description"
-    content="Paste code, run it, watch every step animate. LearnShit is a production-quality algorithm visualizer with a live code editor, execution tracer, and interactive gallery." />
-  <meta name="theme-color" content="#0a0b0d" />
-  <!-- Open Graph -->
-  <meta property="og:title" content="LearnShit — Algorithm Visualizer" />
-  <meta property="og:description" content="Watch your code execute step by step." />
-  <meta property="og:type" content="website" />
+
+  <!-- Structured Data (Homepage WebSite schema) -->
+  <script id="seo-structured-data" type="application/ld+json">
+    [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "LearnShit",
+        "alternateName": ["learnshit.xyz", "Learn Shit"],
+        "url": "https://learnshit.xyz/",
+        "description": "Interactive step-by-step code execution visualizer for Python, JavaScript, and C++. Master DSA with animated data structures, real traces, and playgrounds."
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "EducationalOrganization",
+        "name": "LearnShit",
+        "url": "https://learnshit.xyz/",
+        "logo": "https://learnshit.xyz/learnshit.svg",
+        "sameAs": ["https://github.com/IamMradul/LearnShit.xyz"]
+      }
+    ]
+  </script>
 </head>
 
 <body>
-  <div id="root"></div>
+  <div id="root"><!--app-html--></div>
   <script type="module" src="/src/main.tsx"></script>
 </body>
 

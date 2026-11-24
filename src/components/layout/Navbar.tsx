@@ -41,6 +41,7 @@ export interface NavbarProps {
   isResourcesView?: boolean;
   isVisualizerView?: boolean;
   isDsaView?: boolean;
+  isPlaygroundsView?: boolean;
   currentResourceTab?: ResourceTab;
 }
 
@@ -53,6 +54,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   isResourcesView = false,
   isVisualizerView = false,
   isDsaView = false,
+  isPlaygroundsView = false,
   currentResourceTab = 'sheets',
 }) => {
   const [scrolled, setScrolled] = useState(false);
@@ -133,7 +135,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const isSheetsActive = isResourcesView && (currentResourceTab === 'sheets' || currentResourceTab === 'learnshit-sheet');
   const isDsaActive = isDsaView;
   const isIdeActive = isVisualizerView || (!isResourcesView && !isDsaView && activeSection === 'ide');
-  const isGalleryActive = !isResourcesView && !isDsaView && !isVisualizerView && activeSection === 'gallery';
+  const isGalleryActive = isPlaygroundsView || (!isResourcesView && !isDsaView && !isVisualizerView && activeSection === 'gallery');
 
   return (
     <>
@@ -180,14 +182,19 @@ export const Navbar: React.FC<NavbarProps> = ({
           }}
         >
           {/* ── Brand Logo & Title (Left) ── */}
-          <div
-            onClick={handleBrandClick}
+          <a
+            href="/"
+            onClick={(e) => {
+              e.preventDefault();
+              handleBrandClick();
+            }}
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: 10,
               cursor: 'pointer',
               userSelect: 'none',
+              textDecoration: 'none',
             }}
             title="Go to LearnShit Home"
           >
@@ -217,6 +224,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               <img
                 src="/learnshit.svg"
                 alt="LearnShit Logo"
+                width={32}
+                height={32}
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
             </div>
@@ -235,7 +244,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 LEARNSHIT<span style={{ color: 'var(--accent, #D6523A)' }}>.XYZ</span>
               </span>
             </div>
-          </div>
+          </a>
 
           {/* ── Desktop Navigation Links (Center) ── */}
           <nav
@@ -248,8 +257,12 @@ export const Navbar: React.FC<NavbarProps> = ({
             aria-label="Main Navigation"
           >
             {/* Visualizer / IDE */}
-            <button
-              onClick={handleVisualizerClick}
+            <a
+              href="/visualizer"
+              onClick={(e) => {
+                e.preventDefault();
+                handleVisualizerClick();
+              }}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -263,6 +276,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 fontSize: 13,
                 fontWeight: 600,
                 cursor: 'pointer',
+                textDecoration: 'none',
                 transition: 'all 0.18s ease',
               }}
               onMouseEnter={(e) => {
@@ -280,11 +294,15 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <Code2 size={15} style={{ color: isIdeActive ? 'var(--accent, #D6523A)' : 'inherit' }} />
               <span>Visualizer</span>
-            </button>
+            </a>
 
             {/* Algorithm Playgrounds / Catalog */}
-            <button
-              onClick={handlePlaygroundsClick}
+            <a
+              href="/playgrounds"
+              onClick={(e) => {
+                e.preventDefault();
+                handlePlaygroundsClick();
+              }}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -298,6 +316,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 fontSize: 13,
                 fontWeight: 600,
                 cursor: 'pointer',
+                textDecoration: 'none',
                 transition: 'all 0.18s ease',
               }}
               onMouseEnter={(e) => {
@@ -327,11 +346,15 @@ export const Navbar: React.FC<NavbarProps> = ({
               >
                 26
               </span>
-            </button>
+            </a>
 
             {/* DSA Guide (Data Structures & Algorithms Encyclopedia) */}
-            <button
-              onClick={handleDsaClick}
+            <a
+              href="/dsa"
+              onClick={(e) => {
+                e.preventDefault();
+                handleDsaClick();
+              }}
               id="navbar-dsa-btn"
               style={{
                 display: 'inline-flex',
@@ -346,6 +369,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 fontSize: 13,
                 fontWeight: 600,
                 cursor: 'pointer',
+                textDecoration: 'none',
                 transition: 'all 0.18s ease',
               }}
               onMouseEnter={(e) => {
@@ -378,11 +402,15 @@ export const Navbar: React.FC<NavbarProps> = ({
               >
                 INFO
               </span>
-            </button>
+            </a>
 
             {/* Resources (Problem Sheets) */}
-            <button
-              onClick={() => handleResourcesClick('sheets')}
+            <a
+              href="/resources?tab=sheets"
+              onClick={(e) => {
+                e.preventDefault();
+                handleResourcesClick('sheets');
+              }}
               id="navbar-resources-btn"
               style={{
                 display: 'inline-flex',
@@ -397,6 +425,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 fontSize: 13,
                 fontWeight: 600,
                 cursor: 'pointer',
+                textDecoration: 'none',
                 transition: 'all 0.18s ease',
               }}
               onMouseEnter={(e) => {
@@ -429,7 +458,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               >
                 Sheets
               </span>
-            </button>
+            </a>
           </nav>
 
           {/* ── Action Buttons (Right) ── */}
@@ -517,8 +546,12 @@ export const Navbar: React.FC<NavbarProps> = ({
             boxShadow: '0 20px 40px rgba(0,0,0,0.8)',
           }}
         >
-          <button
-            onClick={handleVisualizerClick}
+          <a
+            href="/visualizer"
+            onClick={(e) => {
+              e.preventDefault();
+              handleVisualizerClick();
+            }}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -531,6 +564,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               fontFamily: "'Inter', sans-serif",
               fontSize: 14,
               fontWeight: 600,
+              textDecoration: 'none',
               cursor: 'pointer',
               textAlign: 'left',
             }}
@@ -540,10 +574,14 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span>Visualizer (IDE)</span>
             </div>
             <ChevronRight size={14} style={{ opacity: 0.5 }} />
-          </button>
+          </a>
 
-          <button
-            onClick={handlePlaygroundsClick}
+          <a
+            href="/playgrounds"
+            onClick={(e) => {
+              e.preventDefault();
+              handlePlaygroundsClick();
+            }}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -556,6 +594,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               fontFamily: "'Inter', sans-serif",
               fontSize: 14,
               fontWeight: 600,
+              textDecoration: 'none',
               cursor: 'pointer',
               textAlign: 'left',
             }}
@@ -565,10 +604,14 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span>Algorithm Playgrounds (26)</span>
             </div>
             <ChevronRight size={14} style={{ opacity: 0.5 }} />
-          </button>
+          </a>
 
-          <button
-            onClick={handleDsaClick}
+          <a
+            href="/dsa"
+            onClick={(e) => {
+              e.preventDefault();
+              handleDsaClick();
+            }}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -581,6 +624,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               fontFamily: "'Inter', sans-serif",
               fontSize: 14,
               fontWeight: 600,
+              textDecoration: 'none',
               cursor: 'pointer',
               textAlign: 'left',
             }}
@@ -590,10 +634,14 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span>Data Structures &amp; Algorithms Guide</span>
             </div>
             <ChevronRight size={14} style={{ opacity: 0.5 }} />
-          </button>
+          </a>
 
-          <button
-            onClick={() => handleResourcesClick('sheets')}
+          <a
+            href="/resources?tab=sheets"
+            onClick={(e) => {
+              e.preventDefault();
+              handleResourcesClick('sheets');
+            }}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -606,6 +654,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               fontFamily: "'Inter', sans-serif",
               fontSize: 14,
               fontWeight: 600,
+              textDecoration: 'none',
               cursor: 'pointer',
               textAlign: 'left',
             }}
@@ -615,10 +664,14 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span>Resources &amp; Problem Sheets</span>
             </div>
             <ChevronRight size={14} style={{ opacity: 0.5 }} />
-          </button>
+          </a>
 
-          <button
-            onClick={handleVisualizerClick}
+          <a
+            href="/visualizer"
+            onClick={(e) => {
+              e.preventDefault();
+              handleVisualizerClick();
+            }}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -634,13 +687,14 @@ export const Navbar: React.FC<NavbarProps> = ({
               fontWeight: 700,
               letterSpacing: '0.06em',
               textTransform: 'uppercase',
+              textDecoration: 'none',
               cursor: 'pointer',
               boxShadow: '0 4px 16px rgba(214, 82, 58, 0.4)',
             }}
           >
             <Play size={14} fill="#FFFFFF" />
             <span>Launch Visualizer</span>
-          </button>
+          </a>
         </div>
       )}
 
