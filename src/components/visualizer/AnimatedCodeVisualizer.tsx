@@ -219,6 +219,7 @@ export const AnimatedCodeVisualizer: React.FC<AnimatedCodeVisualizerProps> = ({
     code,
     input,
     setInput,
+    stdin,
     language,
     setLanguage,
     modeOverride,
@@ -314,6 +315,7 @@ export const AnimatedCodeVisualizer: React.FC<AnimatedCodeVisualizerProps> = ({
         const res = await adapter.trace({
           code,
           input: inputToUse,
+          stdin,
           mode: modeOverride,
           maxSteps: 5000,
           timeoutMs: 10000,
@@ -333,7 +335,7 @@ export const AnimatedCodeVisualizer: React.FC<AnimatedCodeVisualizerProps> = ({
         setPyodideLoading(false);
       }
     },
-    [code, editingInput, input, isRunning, language, modeOverride, onRunTrace, setError, setLanguage, setPyodideLoading, setResult, setRunning, setStatus, setInput],
+    [code, editingInput, input, stdin, isRunning, language, modeOverride, onRunTrace, setError, setLanguage, setPyodideLoading, setResult, setRunning, setStatus, setInput],
   );
 
   // Auto-populate input and execute if code exists but has no input or no steps

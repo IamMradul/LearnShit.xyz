@@ -44,7 +44,7 @@ function splitStdinLines(raw: string): string[] {
 }
 
 export function createIoShims(stdinText: string, onStdout: (s: string) => void): IoShims {
-  const raw = typeof stdinText === 'string' ? stdinText : '';
+  const raw = typeof stdinText === 'string' ? stdinText.replace(/\r\n/g, '\n') : '';
   const lines = splitStdinLines(raw);
   let promptIndex = 0;
 

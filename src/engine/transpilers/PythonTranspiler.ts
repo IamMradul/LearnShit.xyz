@@ -9,7 +9,7 @@
  * Executes in < 5ms without needing to download multi-megabyte Pyodide WebAssembly binaries.
  */
 
-import { stripCommentsPreservingLines } from '../ModeDetector';
+import { stripCommentsPreservingLines, splitTopLevelParams } from '../ModeDetector';
 
 export interface PythonTranspileResult {
   code: string;
@@ -382,13 +382,15 @@ export function transpilePythonToJs(pythonCode: string): PythonTranspileResult {
       continue;
     }
 
-    // 8. Multiple assignment / tuple swap: a, b = x, y or arr[j], arr[j+1] = arr[j+1], arr[j]
+    // 8. Multiple assignment / tuple swap: a, b = x, y or arr[j], arr[j+1] = arr[j+1], arr[j] or a, b = map(...)
     const multiAssignMatch = trimmed.match(/^([a-zA-Z0-9_[\].\s+*-]+)\s*,\s*([a-zA-Z0-9_[\].\s+*-]+)\s*=\s*(.+)$/);
     if (multiAssignMatch && !trimmed.startsWith('for')) {
       const v1 = multiAssignMatch[1].trim();
       const v2 = multiAssignMatch[2].trim();
       const rhs = multiAssignMatch[3].trim();
-      const parts = rhs.split(',').map((p) => transformPythonExpr(p.trim()));
+      const rawParts = splitTopLevelParams(rhs);
+      const isSingleIterable = rawParts.length === 1;
+      const parts = rawParts.map((p) => transformPythonExpr(p.trim()));
 
       const isSimpleVar1 = /^[a-zA-Z0-9_]+$/.test(v1);
       const isSimpleVar2 = /^[a-zA-Z0-9_]+$/.test(v2);
@@ -397,10 +399,12 @@ export function transpilePythonToJs(pythonCode: string): PythonTranspileResult {
       if (isSimpleVar1) declaredVars.add(v1);
       if (isSimpleVar2) declaredVars.add(v2);
 
+      const rhsJs = isSingleIterable ? parts[0] : `[${parts.join(', ')}]`;
+
       if (needsLet) {
-        jsLines.push(`${closePrefix}let [${v1}, ${v2}] = [${parts.join(', ')}];`);
+        jsLines.push(`${closePrefix}let [${v1}, ${v2}] = ${rhsJs};`);
       } else {
-        jsLines.push(`${closePrefix}[${v1}, ${v2}] = [${parts.join(', ')}];`);
+        jsLines.push(`${closePrefix}[${v1}, ${v2}] = ${rhsJs};`);
       }
       continue;
     }

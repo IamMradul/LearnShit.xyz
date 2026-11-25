@@ -140,7 +140,11 @@ const MAIN_PATTERNS: Record<SupportedLanguage, RegExp[]> = {
 };
 
 function hasJsCallableEntry(code: string): boolean {
-  if (/\bclass\s+Solution\b/.test(code)) return true;
+  const classMatches = [...code.matchAll(/\bclass\s+([A-Za-z_$]\w*)/g)];
+  if (classMatches.some((m) => !/^(?:ListNode|TreeNode|Node|GraphNode|TrieNode)$/i.test(m[1]))) {
+    return true;
+  }
+  if (/\b[A-Za-z_$]\w*\.prototype\.[A-Za-z_$]\w*\s*=/.test(code)) return true;
   if (/\bfunction\s+(?!main\b)[A-Za-z_$]\w*\s*\(/.test(code)) return true;
   if (
     /\b(?:export\s+)?(?:async\s+)?(?:var|let|const)\s+(?!main\b)[A-Za-z_$]\w*\s*=\s*(?:async\s+)?(?:function\b|\([^)]*\)\s*=>|[A-Za-z_$][\w]*\s*=>)/.test(
@@ -153,7 +157,10 @@ function hasJsCallableEntry(code: string): boolean {
 }
 
 function hasPythonCallableEntry(code: string): boolean {
-  if (/\bclass\s+Solution\b/.test(code)) return true;
+  const classMatches = [...code.matchAll(/\bclass\s+([A-Za-z_]\w*)/g)];
+  if (classMatches.some((m) => !/^(?:ListNode|TreeNode|Node|GraphNode|TrieNode)$/i.test(m[1]))) {
+    return true;
+  }
   return /^def\s+(?!main\b)[A-Za-z_]\w*\s*\(/m.test(code);
 }
 
@@ -189,9 +196,146 @@ export function effectiveStdin(request: {
   input: string;
   mode: 'function' | 'full-program' | 'auto';
 }): string {
-  if (typeof request.stdin === 'string' && request.stdin.length > 0) return request.stdin;
-  if (request.mode === 'full-program') return request.input || '';
+  if (typeof request.stdin === 'string') {
+    return request.stdin.replace(/\r\n/g, '\n');
+  }
   return '';
+}
+
+export interface DesignProblemInput {
+  ops: string[];
+  args: unknown[][];
+}
+
+export function parseDesignProblemInput(input: string): DesignProblemInput | null {
+  if (!input || !input.trim()) return null;
+  const trimmed = input.trim();
+
+  const parseRelaxed = (str: string): unknown => {
+    try {
+      return JSON.parse(str);
+    } catch {
+      try {
+        const fn = new Function('return (' + str + ');');
+        return fn();
+      } catch {
+        return null;
+      }
+    }
+  };
+
+  // 1. Single JSON array: [[ops], [args]]
+  const parsed = parseRelaxed(trimmed);
+  if (
+    Array.isArray(parsed) &&
+    parsed.length === 2 &&
+    Array.isArray(parsed[0]) &&
+    Array.isArray(parsed[1]) &&
+    parsed[0].length > 0 &&
+    typeof parsed[0][0] === 'string' &&
+    parsed[0].length === parsed[1].length
+  ) {
+    return {
+      ops: parsed[0] as string[],
+      args: parsed[1] as unknown[][],
+    };
+  }
+
+  // 2. Multi-line format: line 1 = ops, line 2 = args
+  const lines = trimmed
+    .replace(/\r\n/g, '\n')
+    .split('\n')
+    .map((l) => l.trim())
+    .filter(Boolean);
+  if (lines.length >= 2) {
+    const p0 = parseRelaxed(lines[0]);
+    const p1 = parseRelaxed(lines[1]);
+    if (
+      Array.isArray(p0) &&
+      Array.isArray(p1) &&
+      p0.length > 0 &&
+      typeof p0[0] === 'string' &&
+      p0.length === p1.length
+    ) {
+      return {
+        ops: p0 as string[],
+        args: p1 as unknown[][],
+      };
+    }
+  }
+
+  return null;
+}
+
+function buildPythonDesignDriver(code: string, design: DesignProblemInput): string {
+  const className = design.ops[0];
+  const ctorArgs = design.args[0] ?? [];
+  const remainingOps = design.ops.slice(1);
+  const remainingArgs = design.args.slice(1);
+
+  return `${code}
+
+# ── AlgoLens generated driver ──────────────────────────
+import json as _json
+
+_cls_name = ${JSON.stringify(className)}
+_cls = globals().get(_cls_name) or locals().get(_cls_name)
+if _cls is None:
+    for _k, _v in list(globals().items()):
+        if isinstance(_v, type) and _k.lower() == _cls_name.lower():
+            _cls = _v
+            break
+if _cls is None:
+    raise NameError(f"Class '{_cls_name}' not found in user code")
+
+_init_args = ${JSON.stringify(ctorArgs)}
+_obj = _cls(*_init_args)
+_results = [None]
+_ops = ${JSON.stringify(remainingOps)}
+_args = ${JSON.stringify(remainingArgs)}
+
+for _op, _a in zip(_ops, _args):
+    _fn = getattr(_obj, _op)
+    _ret = _fn(*_a)
+    _results.append(_ret)
+
+print(_json.dumps(_results))
+`;
+}
+
+function buildJSDesignDriver(code: string, design: DesignProblemInput): string {
+  const className = design.ops[0];
+  const ctorArgs = design.args[0] ?? [];
+  const remainingOps = design.ops.slice(1);
+  const remainingArgs = design.args.slice(1);
+
+  return `${code}
+
+// ── AlgoLens generated driver ──────────────────────────
+(function() {
+  const _clsName = ${JSON.stringify(className)};
+  let _cls;
+  try {
+    _cls = (typeof eval === 'function') ? eval(_clsName) : (globalThis as any)[_clsName];
+  } catch (_e) {
+    throw new ReferenceError("Class or constructor '" + _clsName + "' not found in user code");
+  }
+  const _initArgs = ${JSON.stringify(ctorArgs)};
+  const _obj = new _cls(..._initArgs);
+  const _results = [null];
+  const _ops = ${JSON.stringify(remainingOps)};
+  const _args = ${JSON.stringify(remainingArgs)};
+
+  for (let _i = 0; _i < _ops.length; _i++) {
+    const _op = _ops[_i];
+    const _a = _args[_i];
+    const _res = _obj[_op](..._a);
+    _results.push(_res === undefined ? null : _res);
+  }
+
+  console.log(JSON.stringify(_results));
+})();
+`;
 }
 
 /**
@@ -204,14 +348,37 @@ export function buildDriver(
   code: string,
   input: string,
   language: SupportedLanguage,
-  mode: 'function' | 'full-program' = 'function',
+  mode: 'function' | 'full-program' | 'auto' = 'function',
 ): string {
+  const cleanCode = stripCommentsPreservingLines(code);
+  const detected = detectMode(cleanCode, language);
+  const effectiveMode = (!mode || (mode as string) === 'auto') ? detected : mode;
+
+  // Design problem input detection (standard LeetCode [ops] and [args])
+  const designInput = parseDesignProblemInput(input);
+  if (designInput) {
+    if (language === 'python') return buildPythonDesignDriver(code, designInput);
+    if (language === 'javascript') return buildJSDesignDriver(code, designInput);
+  }
+
+  if (effectiveMode === 'full-program') {
+    if (language === 'python') return buildPythonFullProgramDriver(code);
+    if (language === 'javascript') return buildJSFullProgramDriver(code);
+    return code; // fallback — adapters for other langs handle this
+  }
+
   if (language === 'python') {
-    if (mode === 'full-program') return buildPythonFullProgramDriver(code);
+    // If no callable entry is present, treat as full program and ignore input
+    if (!hasPythonCallableEntry(cleanCode)) {
+      return buildPythonFullProgramDriver(code);
+    }
     return buildPythonDriver(code, input);
   }
   if (language === 'javascript') {
-    if (mode === 'full-program') return buildJSFullProgramDriver(code);
+    // If no callable entry is present, treat as full program and ignore input
+    if (!hasJsCallableEntry(cleanCode)) {
+      return buildJSFullProgramDriver(code);
+    }
     return buildJSDriver(code, input);
   }
   return code; // fallback — adapters for other langs handle this
@@ -450,6 +617,33 @@ export function getParsedArgumentsInfo(
   input: string,
   language: SupportedLanguage = 'python',
 ): ParsedArgumentsResult {
+  const designInput = parseDesignProblemInput(input);
+  if (designInput) {
+    const fnName = designInput.ops[0] || 'DesignClass';
+    const opsStr = JSON.stringify(designInput.ops);
+    const argsStr = JSON.stringify(designInput.args);
+    return {
+      functionName: fnName,
+      expectedCount: 2,
+      paramNames: ['operations', 'arguments'],
+      args: [
+        {
+          name: 'operations',
+          type: language === 'python' ? 'list' : 'Array',
+          value: designInput.ops,
+          formatted: opsStr.length > 50 ? opsStr.slice(0, 47) + '...' : opsStr,
+        },
+        {
+          name: 'arguments',
+          type: language === 'python' ? 'list' : 'Array',
+          value: designInput.args,
+          formatted: argsStr.length > 50 ? argsStr.slice(0, 47) + '...' : argsStr,
+        },
+      ],
+      mismatchError: null,
+    };
+  }
+
   const cleanCode = stripCommentsPreservingLines(code || '');
   let fnName = 'function';
   let paramNames: string[] = [];

@@ -992,7 +992,8 @@ export async function runTrace(
   }
   const cinStream = [...cinTokens];
 
-  const io = createIoShims(rawStdin || (request.mode === 'full-program' ? rawInput : ''), (s) => {
+  const effectiveStdinText = typeof request.stdin === 'string' ? rawStdin : (request.mode === 'full-program' ? rawInput : '');
+  const io = createIoShims(effectiveStdinText, (s) => {
     stdout += s;
   });
 
