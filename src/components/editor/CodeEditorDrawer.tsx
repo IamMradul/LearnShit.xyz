@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { X, Code2, Sliders, Play, AlertCircle, Loader2 } from 'lucide-react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { X, Code2, Sliders, Play, AlertCircle, Loader2, AlertTriangle } from 'lucide-react';
 import { useUIStore } from '../../store/uiStore';
 import { useEditorStore } from '../../store/editorStore';
 import { useTraceStore } from '../../store/traceStore';
@@ -36,6 +36,26 @@ export const CodeEditorDrawer: React.FC = () => {
   } = useTraceStore();
 
   const [activeTab, setActiveTab] = useState<'input' | 'console'>('input');
+
+  // ── Toast state ───────────────────────────────────────────────────────────
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastExiting, setToastExiting] = useState(false);
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const dismissToast = () => {
+    setToastExiting(true);
+    setTimeout(() => { setToastVisible(false); setToastExiting(false); }, 240);
+  };
+
+  useEffect(() => {
+    if (!inputHighlighted) return;
+    // Show toast whenever new code is pasted
+    setToastExiting(false);
+    setToastVisible(true);
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    toastTimerRef.current = setTimeout(dismissToast, 4000);
+    return () => { if (toastTimerRef.current) clearTimeout(toastTimerRef.current); };
+  }, [inputHighlighted]);
 
   const parsedInfo = useMemo(
     () => getParsedArgumentsInfo(code, input, language),
@@ -271,12 +291,14 @@ export const CodeEditorDrawer: React.FC = () => {
 
       {/* ── Bottom Input & Config Panel ────────────────────────────────────── */}
       <div
+        className={inputHighlighted ? 'input-panel-highlighted' : ''}
         style={{
           borderTop: '1px solid var(--border)',
           background: 'var(--bg-secondary)',
           display: 'flex',
           flexDirection: 'column',
           flexShrink: 0,
+          transition: 'background 0.3s ease, border-top-color 0.3s ease',
         }}
       >
         {/* Tab Header */}
@@ -345,16 +367,21 @@ export const CodeEditorDrawer: React.FC = () => {
                 <span
                   style={{
                     fontSize: 9.5,
-                    background: 'rgba(214, 82, 58, 0.25)',
+                    background: 'rgba(214, 82, 58, 0.22)',
                     border: '1px solid var(--accent)',
-                    color: 'var(--text-primary)',
-                    padding: '1px 6px',
+                    color: 'var(--accent)',
+                    padding: '2px 8px',
                     borderRadius: 4,
                     fontWeight: 700,
+                    letterSpacing: '0.03em',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 4,
                     animation: 'pulse 1.5s infinite ease-in-out',
                   }}
                 >
-                  ✨ New Code Added — Configure Input
+                  <AlertTriangle size={10} />
+                  New code pasted — verify your input below
                 </span>
               </div>
             )}
@@ -371,8 +398,12 @@ export const CodeEditorDrawer: React.FC = () => {
               style={{
                 width: '100%',
                 height: 64,
-                background: 'var(--bg-tertiary)',
-                border: '1px solid var(--border)',
+                background: inputHighlighted
+                  ? 'rgba(214, 82, 58, 0.06)'
+                  : 'var(--bg-tertiary)',
+                border: inputHighlighted
+                  ? '1px solid rgba(214, 82, 58, 0.65)'
+                  : '1px solid var(--border)',
                 borderRadius: 6,
                 color: 'var(--text-primary)',
                 fontFamily: "'JetBrains Mono', monospace",
@@ -380,6 +411,10 @@ export const CodeEditorDrawer: React.FC = () => {
                 padding: 8,
                 outline: 'none',
                 resize: 'none',
+                transition: 'background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease',
+                boxShadow: inputHighlighted
+                  ? '0 0 0 3px rgba(214, 82, 58, 0.18)'
+                  : 'none',
               }}
             />
           </div>
@@ -498,6 +533,99 @@ export const CodeEditorDrawer: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* ── Toast: "Check input & code" notification ──────────────────────── */}
+      {toastVisible && (
+        <div
+          className={toastExiting ? 'toast-exit' : 'toast-enter'}
+          onClick={dismissToast}
+          style={{
+            position: 'fixed',
+            bottom: 88,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            padding: '10px 18px',
+            background: 'var(--bg-elevated)',
+            border: '1px solid rgba(214, 82, 58, 0.55)',
+            borderLeft: '3px solid var(--accent)',
+            borderRadius: 10,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.28), 0 0 0 1px rgba(214,82,58,0.14)',
+            backdropFilter: 'blur(14px)',
+            WebkitBackdropFilter: 'blur(14px)',
+            cursor: 'pointer',
+            userSelect: 'none',
+            minWidth: 260,
+            maxWidth: 340,
+          }}
+        >
+          <div
+            style={{
+              width: 30,
+              height: 30,
+              borderRadius: 8,
+              background: 'rgba(214, 82, 58, 0.15)',
+              border: '1px solid rgba(214, 82, 58, 0.35)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}
+          >
+            <AlertTriangle size={14} style={{ color: 'var(--accent)' }} />
+          </div>
+          <div style={{ flex: 1 }}>
+            <div
+              style={{
+                fontFamily: "'Oswald', sans-serif",
+                fontSize: 12.5,
+                fontWeight: 700,
+                letterSpacing: '0.04em',
+                textTransform: 'uppercase',
+                color: 'var(--accent)',
+                lineHeight: 1.2,
+              }}
+            >
+              New Code Pasted
+            </div>
+            <div
+              style={{
+                fontFamily: "'Inter', sans-serif",
+                fontSize: 11.5,
+                color: 'var(--text-secondary)',
+                lineHeight: 1.4,
+                marginTop: 2,
+              }}
+            >
+              Check your <strong style={{ color: 'var(--text-primary)' }}>input arguments</strong> before visualizing
+            </div>
+          </div>
+          {/* Progress bar */}
+          <div
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: 2,
+              borderRadius: '0 0 10px 10px',
+              background: 'rgba(214, 82, 58, 0.25)',
+              overflow: 'hidden',
+            }}
+          >
+            <div
+              style={{
+                height: '100%',
+                background: 'var(--accent)',
+                animation: 'toastProgress 4s linear forwards',
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

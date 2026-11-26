@@ -319,7 +319,7 @@ html.light ::-webkit-scrollbar-thumb { background: rgba(16, 18, 22, 0.22); }
     border-color: var(--accent);
   }
   50% {
-    box-shadow: 0 0 0 4px rgba(214, 82, 58, 0.35), 0 0 16px rgba(214, 82, 58, 0.5);
+    box-shadow: 0 0 0 4px rgba(214, 82, 58, 0.35), 0 0 20px rgba(214, 82, 58, 0.55);
     border-color: #ff7b72;
   }
   100% {
@@ -331,6 +331,36 @@ html.light ::-webkit-scrollbar-thumb { background: rgba(16, 18, 22, 0.22); }
 .input-highlight-pulse {
   animation: inputPulseGlow 1.6s ease-in-out infinite;
   border-radius: 8px;
+}
+
+/* ─── Input section highlight panel glow ─────────────────── */
+@keyframes inputPanelGlow {
+  0%   { box-shadow: 0 -2px 0 0 rgba(214, 82, 58, 0.5) inset; }
+  50%  { box-shadow: 0 -2px 0 0 rgba(214, 82, 58, 1.0) inset, 0 0 24px rgba(214, 82, 58, 0.18); }
+  100% { box-shadow: 0 -2px 0 0 rgba(214, 82, 58, 0.5) inset; }
+}
+
+.input-panel-highlighted {
+  animation: inputPanelGlow 1.6s ease-in-out infinite;
+  border-top: 1px solid rgba(214, 82, 58, 0.7) !important;
+  background: rgba(214, 82, 58, 0.04) !important;
+}
+
+/* ─── Toast notification ──────────────────────────────────── */
+@keyframes toastSlideIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes toastSlideOut {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to   { opacity: 0; transform: translateY(8px) scale(0.96); }
+}
+.toast-enter { animation: toastSlideIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.toast-exit  { animation: toastSlideOut 0.22s ease-in forwards; }
+
+@keyframes toastProgress {
+  from { width: 100%; }
+  to   { width: 0%; }
 }
 
 .animate-fade-in { animation: fadeIn 0.2s ease forwards; }
