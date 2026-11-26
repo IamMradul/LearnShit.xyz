@@ -1,0 +1,201 @@
+{
+  "Algorithm/Data-Structures-and-Algorithms-in-Java-6th-Edition.pdf": {
+    "title": "Data Structures & Algorithms in Java",
+    "shortTitle": "DSA IN JAVA 6TH ED",
+    "author": "Goodrich, Tamassia & Goldwasser",
+    "editionBadge": "DSA JAVA",
+    "presetId": "bst-search",
+    "presetLabel": "BST Search",
+    "summary": "Object-oriented treatment of lists, trees, priority queues, hash maps, search trees, and graph algorithms in Java."
+  },
+  "Algorithm/Introduction to Algorithms.pdf": {
+    "title": "Introduction to Algorithms (CLRS)",
+    "shortTitle": "INTRODUCTION TO ALGORITHMS",
+    "author": "Cormen, Leiserson, Rivest & Stein",
+    "editionBadge": "CLRS",
+    "presetId": "quick-sort",
+    "presetLabel": "Quick Sort",
+    "summary": "Comprehensive mathematical reference on algorithm analysis, heaps, trees, graph algorithms, dynamic programming, and NP-completeness."
+  },
+  "Algorithm/Simply Logical- Intelligent Reasoning by Example.pdf": {
+    "title": "Simply Logical: Intelligent Reasoning",
+    "shortTitle": "SIMPLY LOGICAL",
+    "author": "Peter Flach",
+    "editionBadge": "LOGIC",
+    "presetId": "fibonacci-recursion",
+    "presetLabel": "Recursion Tree",
+    "summary": "Exploration of logic programming, search trees, deductive inference, and symbolic reasoning by example."
+  },
+  "Algorithm/SkienaTheAlgorithmDesignManual.pdf": {
+    "title": "The Algorithm Design Manual",
+    "shortTitle": "ALGORITHM DESIGN MANUAL",
+    "author": "Steven S. Skiena",
+    "editionBadge": "ADM",
+    "presetId": "graph-dfs-traversal",
+    "presetLabel": "Graph DFS Traversal",
+    "summary": "Practical guide to graph design techniques, combinatorics, heuristics, and algorithmic modeling in software engineering."
+  },
+  "Algorithm/The Art of Computer Programming [Donald_E._Knuth] (3).pdf": {
+    "title": "The Art of Computer Programming Vol. 3",
+    "shortTitle": "ART OF PROGRAMMING VOL 3",
+    "author": "Donald E. Knuth",
+    "editionBadge": "TAOCP",
+    "presetId": "insertion-sort",
+    "presetLabel": "Insertion Sort",
+    "summary": "Donald Knuth’s foundational volume on internal and external sorting, searching algorithms, and combinatorial analysis."
+  },
+  "Interview Specific/Competitive Programmer_s Handbook.pdf": {
+    "title": "Competitive Programmer's Handbook",
+    "shortTitle": "CP HANDBOOK",
+    "author": "Antti Laaksonen",
+    "editionBadge": "CSES",
+    "presetId": "binary-search",
+    "presetLabel": "Binary Search",
+    "summary": "Modern contest algorithms handbook covering complexity, sorting, range queries, trees, graph algorithms, and dynamic programming."
+  },
+  "Interview Specific/Cracking the coding interview 6th edition.pdf": {
+    "title": "Cracking the Coding Interview (6th Ed.)",
+    "shortTitle": "CRACKING THE INTERVIEW",
+    "author": "Gayle Laakmann McDowell",
+    "editionBadge": "CTCI 6",
+    "presetId": "two-sum",
+    "presetLabel": "Two Sum",
+    "summary": "189 curated technical interview problems covering arrays, linked lists, trees, graphs, bit manipulation, recursion, and system design."
+  },
+  "Interview Specific/Software Engineering at Google.pdf": {
+    "title": "Software Engineering at Google",
+    "shortTitle": "SWE AT GOOGLE",
+    "author": "Titus Winters, Tom Manshreck & Hyrum Wright",
+    "editionBadge": "GOOGLE",
+    "presetId": "two-sum",
+    "presetLabel": "Two Sum",
+    "summary": "Lessons learned from engineering over time: testing, code review, documentation, style guides, dependency management, and tooling at scale."
+  },
+  "System Design 💻/System Design Handbook - Aman Barnwal.pdf": {
+    "title": "System Design Handbook",
+    "shortTitle": "SYSTEM DESIGN",
+    "author": "Aman Barnwal",
+    "editionBadge": "SYS DES",
+    "presetId": "hash-table-frequency",
+    "presetLabel": "Hash Lookup",
+    "summary": "Concise architecture guide covering load balancing, consistent hashing, sharding, caching, message queues, and distributed scalability."
+  },
+  "Parallel computing/Distributed systems principles and paradigms [tanenbaum] (2).pdf": {
+    "title": "Distributed Systems: Principles & Paradigms",
+    "shortTitle": "DISTRIBUTED SYSTEMS",
+    "author": "Andrew S. Tanenbaum & Maarten van Steen",
+    "editionBadge": "TANENBAUM",
+    "presetId": "graph-bfs-traversal",
+    "presetLabel": "Graph BFS",
+    "summary": "Core distributed systems architecture covering communication, synchronization, logical clocks, replication, fault tolerance, and consistency models."
+  },
+  "Operating system/Operating system A concept-based approach [Dhamdhere] (1).pdf": {
+    "title": "Operating Systems: A Concept-Based Approach",
+    "shortTitle": "OPERATING SYSTEMS",
+    "author": "Dhananjay M. Dhamdhere",
+    "editionBadge": "OS",
+    "presetId": "linked-list-cycle",
+    "presetLabel": "Linked List Cycle",
+    "summary": "Fundamental coverage of OS kernels, process scheduling, deadlocks, virtual memory paging, concurrency, and filesystem management."
+  },
+  "Data communication and networking/Computer networking a top down aproach [kurose, ross] (6).pdf": {
+    "title": "Computer Networking: A Top-Down Approach",
+    "shortTitle": "COMPUTER NETWORKING",
+    "author": "James F. Kurose & Keith W. Ross",
+    "editionBadge": "KUROSE",
+    "presetId": "graph-bfs-traversal",
+    "presetLabel": "Graph BFS Traversal",
+    "summary": "Classic networking text introducing the Internet protocol stack from application layer HTTP/DNS down through TCP/UDP transport, IP routing, and link protocols."
+  },
+  "Database/Database Management Systems [Ramakrishnan] (3).pdf": {
+    "title": "Database Management Systems",
+    "shortTitle": "DBMS RAMAKRISHNAN",
+    "author": "Raghu Ramakrishnan & Johannes Gehrke",
+    "editionBadge": "DBMS",
+    "presetId": "hash-table-frequency",
+    "presetLabel": "Hash Indexing",
+    "summary": "Deep look at file storage, tree/hash indexes, relational query evaluation, ACID transactions, and database architecture."
+  },
+  "Database/Database System Concepts [KORTH] (6).PDF": {
+    "title": "Database System Concepts (6th Ed.)",
+    "shortTitle": "DATABASE CONCEPTS",
+    "author": "Silberschatz, Korth & Sudarshan",
+    "editionBadge": "KORTH",
+    "presetId": "hash-table-frequency",
+    "presetLabel": "Hash Indexing",
+    "summary": "Foundational textbook on relational algebra, SQL, B+ tree indexing, query optimization, transactions, concurrency control, and recovery."
+  },
+  "Sql/A.First.Course.in.Database.Systems,.J.D..Ullman,.J..Widom,3rd.ed,.Pearson,.CMP,.2008.294s_final.pdf": {
+    "title": "A First Course in Database Systems",
+    "shortTitle": "DATABASE SYSTEMS",
+    "author": "Jeffrey D. Ullman & Jennifer Widom",
+    "editionBadge": "ULLMAN",
+    "summary": "Relational data modeling, E/R diagrams, relational algebra, Datalog, SQL queries, views, constraints, and triggers."
+  },
+  "C-C++/Addison.Wesley.Effective.CPP.3rd.Edition.May.2005.pdf": {
+    "title": "Effective C++ (3rd Edition)",
+    "shortTitle": "EFFECTIVE C++",
+    "author": "Scott Meyers",
+    "editionBadge": "MEYERS",
+    "presetId": "two-sum-cpp",
+    "presetLabel": "Two Sum C++",
+    "summary": "55 specific ways to improve C++ programs and designs: resource management, inheritance, templates, and object lifetime."
+  },
+  "C-C++/c++programing_language_Bjarne_Stroustrup.pdf": {
+    "title": "The C++ Programming Language",
+    "shortTitle": "C++ STROUSTRUP",
+    "author": "Bjarne Stroustrup",
+    "editionBadge": "C++",
+    "presetId": "two-sum-cpp",
+    "presetLabel": "Two Sum C++",
+    "summary": "Comprehensive guide by C++’s creator spanning RAII, templates, move semantics, STL containers, and generic programming."
+  },
+  "C-C++/The C Programming Language.pdf": {
+    "title": "The C Programming Language (K&R)",
+    "shortTitle": "C PROGRAMMING",
+    "author": "Brian W. Kernighan & Dennis M. Ritchie",
+    "editionBadge": "K&R C",
+    "presetId": "two-sum-cpp",
+    "presetLabel": "C Pointer Lookup",
+    "summary": "The classic K&R reference on C syntax, pointers, arrays, dynamic memory, structs, and systems I/O."
+  },
+  "Math/Discrete Mathematics (7th Edition) Kenneth H. Rosen.pdf": {
+    "title": "Discrete Mathematics and Its Applications",
+    "shortTitle": "DISCRETE MATH ROSEN",
+    "author": "Kenneth H. Rosen",
+    "editionBadge": "ROSEN",
+    "presetId": "fibonacci-recursion",
+    "presetLabel": "Recursion Tree",
+    "summary": "Essential CS foundations in logic, proofs, induction, combinatorics, recurrence relations, graphs, and trees."
+  },
+  "Javascript/Eloquent_JavaScript.pdf": {
+    "title": "Eloquent JavaScript",
+    "shortTitle": "ELOQUENT JAVASCRIPT",
+    "author": "Marijn Haverbeke",
+    "editionBadge": "JS",
+    "presetId": "two-sum",
+    "presetLabel": "Two Sum JS",
+    "summary": "Modern introduction to JavaScript programming covering higher-order functions, closures, asynchronous control flow, and the browser DOM."
+  },
+  "Machine-Learning/Mathematics for Machine learning.pdf": {
+    "title": "Mathematics for Machine Learning",
+    "shortTitle": "MATH FOR ML",
+    "author": "Deisenroth, Faisal & Ong",
+    "editionBadge": "MML",
+    "summary": "Bridges linear algebra, analytic geometry, vector calculus, probability, and optimization directly to core ML models."
+  },
+  "Machine-Learning/Python Data Science Handbook.pdf": {
+    "title": "Python Data Science Handbook",
+    "shortTitle": "PYTHON DATA SCIENCE",
+    "author": "Jake VanderPlas",
+    "editionBadge": "PDSH",
+    "summary": "Essential tools for working with data in Python: NumPy vectorized arrays, Pandas DataFrames, Matplotlib, and Scikit-Learn."
+  },
+  "Bash-shell-git/Pro Git Everything.pdf": {
+    "title": "Pro Git",
+    "shortTitle": "PRO GIT",
+    "author": "Scott Chacon & Ben Straub",
+    "editionBadge": "GIT",
+    "summary": "Complete practical and internals guide to Git version control, branching models, rebasing, and distributed workflows."
+  }
+}

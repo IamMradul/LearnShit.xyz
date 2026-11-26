@@ -5,6 +5,7 @@ export type AppRoute =
   | 'visualizer'
   | 'resources'
   | 'dsa'
+  | 'books'
   | 'playgrounds'
   | 'about'
   | 'contact'
@@ -30,6 +31,9 @@ export function parseRoute(
 
   if (cleanPath === '/' || cleanPath === '') {
     return { route: 'home', pathname: cleanPath, search, tab, hash };
+  }
+  if (cleanPath === '/books' || cleanPath.startsWith('/books/')) {
+    return { route: 'books', pathname: cleanPath, search, tab, hash };
   }
   if (cleanPath === '/playgrounds' || cleanPath.startsWith('/playgrounds/')) {
     return { route: 'playgrounds', pathname: cleanPath, search, tab, hash };
