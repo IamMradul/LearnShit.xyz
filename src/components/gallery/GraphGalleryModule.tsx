@@ -213,8 +213,8 @@ def ${algo.toLowerCase()}_traversal(graph, start):
     <div
       className="gallery-card"
       style={{
-        background: '#101216',
-        border: '1px solid rgba(247, 245, 239, 0.1)',
+        background: 'var(--bg-secondary)',
+        border: '1px solid var(--border)',
         borderRadius: 12,
         overflow: 'hidden',
         display: 'flex',
@@ -228,8 +228,8 @@ def ${algo.toLowerCase()}_traversal(graph, start):
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: '16px 20px 14px',
-          borderBottom: '1px solid rgba(247, 245, 239, 0.08)',
-          background: 'rgba(20, 22, 27, 0.5)',
+          borderBottom: '1px solid var(--border)',
+          background: 'var(--border-subtle)',
         }}
       >
         <div>
@@ -252,7 +252,7 @@ def ${algo.toLowerCase()}_traversal(graph, start):
               style={{
                 fontFamily: "'Oswald', sans-serif",
                 fontSize: 18,
-                color: '#F7F5EF',
+                color: 'var(--text-primary)',
                 margin: 0,
                 textTransform: 'uppercase',
                 letterSpacing: '0.04em',
@@ -293,8 +293,8 @@ def ${algo.toLowerCase()}_traversal(graph, start):
       <div
         style={{
           height: 270,
-          background: '#0a0b0d',
-          backgroundImage: 'radial-gradient(rgba(247, 245, 239, 0.05) 1.5px, transparent 1.5px)',
+          background: 'var(--bg-primary)',
+          backgroundImage: 'radial-gradient(var(--border-subtle) 1.5px, transparent 1.5px)',
           backgroundSize: '20px 20px',
           position: 'relative',
           display: 'flex',
@@ -319,7 +319,7 @@ def ${algo.toLowerCase()}_traversal(graph, start):
                 y1={uNode.y}
                 x2={vNode.x}
                 y2={vNode.y}
-                stroke={isActiveEdge ? 'var(--accent)' : 'rgba(247, 245, 239, 0.15)'}
+                stroke={isActiveEdge ? 'var(--accent)' : 'var(--svg-edge)'}
                 strokeWidth={isActiveEdge ? 3 : 1.5}
                 strokeDasharray={isActiveEdge ? '4 2' : 'none'}
                 style={{
@@ -342,7 +342,7 @@ def ${algo.toLowerCase()}_traversal(graph, start):
               ? 'rgba(34, 197, 94, 0.2)'
               : isFrontier
               ? 'rgba(88, 166, 255, 0.2)'
-              : '#14161b';
+              : 'var(--bg-tertiary)';
 
             const strokeColor = isCurrent
               ? 'var(--accent)'
@@ -350,7 +350,7 @@ def ${algo.toLowerCase()}_traversal(graph, start):
               ? '#22c55e'
               : isFrontier
               ? '#58a6ff'
-              : 'rgba(247, 245, 239, 0.2)';
+              : 'var(--text-muted)';
 
             return (
               <g key={node.id} transform={`translate(${node.x},${node.y})`}>
@@ -376,7 +376,7 @@ def ${algo.toLowerCase()}_traversal(graph, start):
                   fontSize={12}
                   fontFamily="'JetBrains Mono', monospace"
                   fontWeight={700}
-                  fill={isCurrent ? 'var(--accent)' : isVisited ? '#22c55e' : isFrontier ? '#58a6ff' : '#F7F5EF'}
+                  fill={isCurrent ? 'var(--accent)' : isVisited ? '#22c55e' : isFrontier ? '#58a6ff' : 'var(--text-primary)'}
                 >
                   {node.id}
                 </text>
@@ -391,9 +391,9 @@ def ${algo.toLowerCase()}_traversal(graph, start):
             position: 'absolute',
             bottom: 12,
             right: 16,
-            background: 'rgba(16, 18, 22, 0.88)',
+            background: 'var(--surface-glass)',
             backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(247, 245, 239, 0.1)',
+            border: '1px solid var(--border)',
             borderRadius: 8,
             padding: '6px 12px',
             fontSize: 11,
@@ -404,14 +404,14 @@ def ${algo.toLowerCase()}_traversal(graph, start):
           }}
         >
           <div style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Layers size={11} style={{ color: '#58a6ff' }} />
+            <Layers size={11} style={{ color: '#2563eb' }} />
             <span>{algo === 'BFS' ? 'QUEUE (FIFO)' : 'CALL STACK (LIFO)'}:</span>
-            <b style={{ color: '#58a6ff' }}>[{currentStep.frontier.join(', ')}]</b>
+            <b style={{ color: '#2563eb' }}>[{currentStep.frontier.join(', ')}]</b>
           </div>
           <div style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Sparkles size={11} style={{ color: '#22c55e' }} />
+            <Sparkles size={11} style={{ color: '#16a34a' }} />
             <span>VISITED:</span>
-            <b style={{ color: '#22c55e' }}>{`{${currentStep.visited.join(', ')}}`}</b>
+            <b style={{ color: '#16a34a' }}>{`{${currentStep.visited.join(', ')}}`}</b>
           </div>
         </div>
       </div>
@@ -420,12 +420,12 @@ def ${algo.toLowerCase()}_traversal(graph, start):
       <div
         style={{
           padding: '8px 20px',
-          background: 'rgba(16, 18, 22, 0.8)',
-          borderTop: '1px solid rgba(247, 245, 239, 0.06)',
-          borderBottom: '1px solid rgba(247, 245, 239, 0.06)',
+          background: 'var(--surface-glass)',
+          borderTop: '1px solid var(--border-subtle)',
+          borderBottom: '1px solid var(--border-subtle)',
           fontSize: 12,
           fontFamily: "'JetBrains Mono', monospace",
-          color: '#F7F5EF',
+          color: 'var(--text-primary)',
           display: 'flex',
           alignItems: 'center',
           gap: 8,
@@ -450,7 +450,7 @@ def ${algo.toLowerCase()}_traversal(graph, start):
       <div
         style={{
           padding: '14px 20px',
-          background: '#101216',
+          background: 'var(--bg-secondary)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -460,16 +460,16 @@ def ${algo.toLowerCase()}_traversal(graph, start):
       >
         {/* Algo & Start Node selection */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ display: 'flex', borderRadius: 6, overflow: 'hidden', border: '1px solid rgba(247, 245, 239, 0.12)' }}>
+          <div style={{ display: 'flex', borderRadius: 6, overflow: 'hidden', border: '1px solid var(--border)' }}>
             {(['BFS', 'DFS'] as const).map((a) => (
               <button
                 key={a}
                 onClick={() => setAlgo(a)}
                 style={{
                   padding: '5px 12px',
-                  background: algo === a ? 'var(--accent)' : 'rgba(247, 245, 239, 0.04)',
+                  background: algo === a ? 'var(--accent)' : 'var(--border-subtle)',
                   border: 'none',
-                  color: '#F7F5EF',
+                  color: algo === a ? '#FFFFFF' : 'var(--text-primary)',
                   fontSize: 12,
                   fontFamily: "'Oswald', sans-serif",
                   letterSpacing: '0.04em',
@@ -488,10 +488,10 @@ def ${algo.toLowerCase()}_traversal(graph, start):
               value={startNode}
               onChange={(e) => setStartNode(e.target.value)}
               style={{
-                background: '#14161b',
-                border: '1px solid rgba(247, 245, 239, 0.12)',
+                background: 'var(--bg-tertiary)',
+                border: '1px solid var(--border)',
                 borderRadius: 4,
-                color: '#F7F5EF',
+                color: 'var(--text-primary)',
                 padding: '4px 8px',
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: 12,
@@ -517,10 +517,10 @@ def ${algo.toLowerCase()}_traversal(graph, start):
             disabled={stepIdx === 0}
             style={{
               padding: '6px',
-              background: 'rgba(247, 245, 239, 0.05)',
-              border: '1px solid rgba(247, 245, 239, 0.1)',
+              background: 'var(--border-subtle)',
+              border: '1px solid var(--border)',
               borderRadius: 6,
-              color: stepIdx === 0 ? 'var(--text-muted)' : '#F7F5EF',
+              color: stepIdx === 0 ? 'var(--text-muted)' : 'var(--text-primary)',
               cursor: stepIdx === 0 ? 'not-allowed' : 'pointer',
             }}
           >
@@ -536,14 +536,14 @@ def ${algo.toLowerCase()}_traversal(graph, start):
               background: 'var(--accent)',
               border: 'none',
               borderRadius: 6,
-              color: '#F7F5EF',
+              color: '#FFFFFF',
               fontSize: 12,
               fontWeight: 700,
               fontFamily: "'Oswald', sans-serif",
               cursor: 'pointer',
             }}
           >
-            {isPlaying ? <Pause size={12} fill="#F7F5EF" /> : <Play size={12} fill="#F7F5EF" />}
+            {isPlaying ? <Pause size={12} fill="#FFFFFF" /> : <Play size={12} fill="#FFFFFF" />}
             <span>{isPlaying ? 'PAUSE' : 'PLAY'}</span>
           </button>
           <button
@@ -554,10 +554,10 @@ def ${algo.toLowerCase()}_traversal(graph, start):
             disabled={stepIdx === steps.length - 1}
             style={{
               padding: '6px',
-              background: 'rgba(247, 245, 239, 0.05)',
-              border: '1px solid rgba(247, 245, 239, 0.1)',
+              background: 'var(--border-subtle)',
+              border: '1px solid var(--border)',
               borderRadius: 6,
-              color: stepIdx === steps.length - 1 ? 'var(--text-muted)' : '#F7F5EF',
+              color: stepIdx === steps.length - 1 ? 'var(--text-muted)' : 'var(--text-primary)',
               cursor: stepIdx === steps.length - 1 ? 'not-allowed' : 'pointer',
             }}
           >

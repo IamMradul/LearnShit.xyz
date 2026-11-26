@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import type { TraceStep } from '../../../engine/TraceTypes';
 import { useTraceStore } from '../../../store/traceStore';
+import { useUIStore } from '../../../store/uiStore';
 
 interface TreeNode {
   val: number | string;
@@ -128,6 +129,8 @@ export const TreeRenderer: React.FC<TreeRendererProps> = ({
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState<number>(600);
+  const theme = useUIStore((s) => s.theme);
+  const isLight = theme === 'light';
 
   // ResizeObserver to respond dynamically to resizable panels & drawer toggling
   useEffect(() => {
@@ -199,7 +202,7 @@ export const TreeRenderer: React.FC<TreeRendererProps> = ({
       .append('path')
       .attr('class', 'tree-link')
       .attr('fill', 'none')
-      .attr('stroke', 'rgba(247, 245, 239, 0.22)')
+      .attr('stroke', isLight ? 'rgba(16, 18, 22, 0.22)' : 'rgba(247, 245, 239, 0.22)')
       .attr('stroke-width', 1.5)
       .attr('d', (link) => {
         const s = link.source as d3.HierarchyPointNode<D3TreeNode>;
@@ -224,15 +227,19 @@ export const TreeRenderer: React.FC<TreeRendererProps> = ({
       .attr('r', r)
       .attr('fill', (d) => {
         const h = d.data.highlight;
-        if (!h) return '#141720';
-        if (h === 'current') return 'var(--accent)';
-        if (h === 'visited') return '#38A169';
-        if (h === 'compare') return '#E5A93C';
-        return '#9F7AEA';
+        if (!h) return isLight ? '#ECEAE3' : '#141720';
+        if (h === 'current') return '#D6523A';
+        if (h === 'visited') return isLight ? '#276749' : '#38A169';
+        if (h === 'compare') return isLight ? '#C78D24' : '#E5A93C';
+        return isLight ? '#6B46C1' : '#9F7AEA';
       })
-      .attr('stroke', (d) => (d.data.highlight ? '#F7F5EF' : 'rgba(247, 245, 239, 0.25)'))
+      .attr('stroke', (d) =>
+        d.data.highlight
+          ? isLight ? '#101216' : '#F7F5EF'
+          : isLight ? 'rgba(16, 18, 22, 0.26)' : 'rgba(247, 245, 239, 0.25)',
+      )
       .attr('stroke-width', (d) => (d.data.highlight ? 2.5 : 1.5))
-      .attr('box-shadow', '0 4px 12px rgba(0,0,0,0.5)');
+      .attr('filter', isLight ? 'drop-shadow(0 2px 6px rgba(16,18,22,0.12))' : 'drop-shadow(0 4px 12px rgba(0,0,0,0.5))');
 
     nodes
       .append('text')
@@ -240,7 +247,7 @@ export const TreeRenderer: React.FC<TreeRendererProps> = ({
       .attr('dominant-baseline', 'central')
       .attr('font-size', Math.max(9, Math.min(13, r - 3)))
       .attr('font-weight', '700')
-      .attr('fill', '#F7F5EF')
+      .attr('fill', (d) => (d.data.highlight ? '#FFFFFF' : isLight ? '#101216' : '#F7F5EF'))
       .attr('font-family', "'JetBrains Mono', monospace")
       .text((d) => String(d.data.val));
 
@@ -251,10 +258,10 @@ export const TreeRenderer: React.FC<TreeRendererProps> = ({
       .attr('y', r + 11)
       .attr('font-size', 9)
       .attr('font-weight', '600')
-      .attr('fill', 'var(--text-muted, #9B9A95)')
+      .attr('fill', isLight ? '#706F6A' : '#9B9A95')
       .attr('font-family', "'JetBrains Mono', monospace")
       .text((d) => `[${d.data.indexLabel}]`);
-  }, [step, propTreeData, varName, height, containerWidth]);
+  }, [step, propTreeData, varName, height, containerWidth, isLight]);
 
   return (
     <div

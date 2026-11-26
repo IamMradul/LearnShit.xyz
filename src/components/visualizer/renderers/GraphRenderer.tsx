@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import type { TraceStep } from '../../../engine/TraceTypes';
 import { useTraceStore } from '../../../store/traceStore';
+import { useUIStore } from '../../../store/uiStore';
 
 interface GraphNode {
   id: string;
@@ -225,6 +226,8 @@ export const GraphRenderer: React.FC<GraphRendererProps> = ({
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState<number>(600);
+  const theme = useUIStore((s) => s.theme);
+  const isLight = theme === 'light';
 
   useEffect(() => {
     const el = containerRef.current;
@@ -352,7 +355,7 @@ export const GraphRenderer: React.FC<GraphRendererProps> = ({
       .attr('orient', 'auto')
       .append('path')
       .attr('d', 'M 0 1 L 9 5 L 0 9 z')
-      .attr('fill', 'rgba(247, 245, 239, 0.45)');
+      .attr('fill', isLight ? 'rgba(16, 18, 22, 0.45)' : 'rgba(247, 245, 239, 0.45)');
 
     defs
       .append('marker')
@@ -365,7 +368,7 @@ export const GraphRenderer: React.FC<GraphRendererProps> = ({
       .attr('orient', 'auto')
       .append('path')
       .attr('d', 'M 0 1 L 9 5 L 0 9 z')
-      .attr('fill', 'var(--accent)');
+      .attr('fill', '#D6523A');
 
     // ── Render Edges ──────────────────────────────────────────────────────
     const edgesGroup = svg.append('g').attr('class', 'edges');
@@ -391,7 +394,7 @@ export const GraphRenderer: React.FC<GraphRendererProps> = ({
         .attr('y1', source.y)
         .attr('x2', target.x)
         .attr('y2', target.y)
-        .attr('stroke', isEdgeActive ? 'var(--accent)' : 'rgba(247, 245, 239, 0.22)')
+        .attr('stroke', isEdgeActive ? '#D6523A' : isLight ? 'rgba(16, 18, 22, 0.22)' : 'rgba(247, 245, 239, 0.22)')
         .attr('stroke-width', isEdgeActive ? 3 : 1.5)
         .attr('marker-end', edge.isDirected ? (isEdgeActive ? 'url(#graph-arrow-active)' : 'url(#graph-arrow)') : null);
 
@@ -411,8 +414,8 @@ export const GraphRenderer: React.FC<GraphRendererProps> = ({
           .attr('width', badgeW)
           .attr('height', 18)
           .attr('rx', 6)
-          .attr('fill', isEdgeActive ? 'rgba(214, 82, 58, 0.9)' : 'rgba(16, 18, 22, 0.92)')
-          .attr('stroke', isEdgeActive ? 'var(--accent)' : 'rgba(247, 245, 239, 0.25)')
+          .attr('fill', isEdgeActive ? 'rgba(214, 82, 58, 0.92)' : isLight ? '#ECEAE3' : 'rgba(16, 18, 22, 0.92)')
+          .attr('stroke', isEdgeActive ? '#D6523A' : isLight ? 'rgba(16, 18, 22, 0.22)' : 'rgba(247, 245, 239, 0.25)')
           .attr('stroke-width', 1);
 
         badge
@@ -423,7 +426,7 @@ export const GraphRenderer: React.FC<GraphRendererProps> = ({
           .attr('dominant-baseline', 'central')
           .attr('font-size', 10)
           .attr('font-weight', 700)
-          .attr('fill', '#F7F5EF')
+          .attr('fill', isEdgeActive ? '#FFFFFF' : isLight ? '#101216' : '#F7F5EF')
           .attr('font-family', "'JetBrains Mono', monospace")
           .text(labelStr);
       }
@@ -451,10 +454,28 @@ export const GraphRenderer: React.FC<GraphRendererProps> = ({
       // Main Vertex Circle
       g.append('circle')
         .attr('r', 19)
-        .attr('fill', isActive ? '#D6523A' : isVisited ? 'rgba(56, 161, 105, 0.25)' : isInQueue ? 'rgba(229, 169, 60, 0.2)' : '#141720')
-        .attr('stroke', isActive ? '#FF7657' : isVisited ? '#38A169' : isInQueue ? '#E5A93C' : 'rgba(247, 245, 239, 0.35)')
+        .attr(
+          'fill',
+          isActive
+            ? '#D6523A'
+            : isVisited
+            ? isLight ? 'rgba(39, 103, 73, 0.16)' : 'rgba(56, 161, 105, 0.25)'
+            : isInQueue
+            ? isLight ? 'rgba(199, 141, 36, 0.18)' : 'rgba(229, 169, 60, 0.2)'
+            : isLight ? '#ECEAE3' : '#141720',
+        )
+        .attr(
+          'stroke',
+          isActive
+            ? '#FF7657'
+            : isVisited
+            ? isLight ? '#276749' : '#38A169'
+            : isInQueue
+            ? isLight ? '#B7791F' : '#E5A93C'
+            : isLight ? 'rgba(16, 18, 22, 0.3)' : 'rgba(247, 245, 239, 0.35)',
+        )
         .attr('stroke-width', isActive ? 2.5 : 1.5)
-        .attr('filter', 'drop-shadow(0 4px 10px rgba(0,0,0,0.5))');
+        .attr('filter', isLight ? 'drop-shadow(0 2px 6px rgba(16,18,22,0.12))' : 'drop-shadow(0 4px 10px rgba(0,0,0,0.5))');
 
       // Vertex Label
       g.append('text')
@@ -464,7 +485,16 @@ export const GraphRenderer: React.FC<GraphRendererProps> = ({
         .attr('dominant-baseline', 'central')
         .attr('font-size', 12)
         .attr('font-weight', 700)
-        .attr('fill', '#F7F5EF')
+        .attr(
+          'fill',
+          isActive
+            ? '#FFFFFF'
+            : isVisited
+            ? isLight ? '#1E4E37' : '#F7F5EF'
+            : isInQueue
+            ? isLight ? '#744210' : '#F7F5EF'
+            : isLight ? '#101216' : '#F7F5EF',
+        )
         .attr('font-family', "'JetBrains Mono', monospace")
         .text(node.label);
 
@@ -501,12 +531,12 @@ export const GraphRenderer: React.FC<GraphRendererProps> = ({
           .attr('dominant-baseline', 'central')
           .attr('font-size', 8)
           .attr('font-weight', 700)
-          .attr('fill', '#38A169')
+          .attr('fill', isLight ? '#276749' : '#38A169')
           .attr('font-family', "'JetBrains Mono', monospace")
           .text('visited');
       }
     });
-  }, [step, varName, height, containerWidth]);
+  }, [step, varName, height, containerWidth, isLight]);
 
   return (
     <div

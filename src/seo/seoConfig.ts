@@ -107,6 +107,54 @@ export const SEO_PAGES: Record<string, PageSeoConfig> = {
     ],
   },
 
+  books: {
+    title: 'CS Library & Canonical Engineering Books | LearnShit',
+    description:
+      'Interactive 3D shelf of foundational Computer Science books: CLRS, TAOCP, CS:APP, DDIA, OSTEP, SICP, Dragon Book, and more with takeaways and companions.',
+    canonicalUrl: `${SITE_URL}/books`,
+    ogType: 'website',
+    ogImage: DEFAULT_OG_IMAGE,
+    keywords: [
+      'computer science books',
+      'algorithms textbook shelf',
+      'clrs book',
+      'ddia summary',
+      'cs student library',
+    ],
+    breadcrumbs: [
+      { name: 'Home', url: `${SITE_URL}/` },
+      { name: 'Books', url: `${SITE_URL}/books` },
+    ],
+    structuredData: [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'CollectionPage',
+        name: 'LearnShit CS Library & Engineering Books',
+        description:
+          'Curated interactive 3D shelf of foundational computer science and software engineering books.',
+        url: `${SITE_URL}/books`,
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'Home',
+            item: `${SITE_URL}/`,
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: 'Books',
+            item: `${SITE_URL}/books`,
+          },
+        ],
+      },
+    ],
+  },
+
   playgrounds: {
     title: 'Algorithm Playgrounds & Visualizations | LearnShit',
     description:

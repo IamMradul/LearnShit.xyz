@@ -9,9 +9,13 @@ import {
   ChevronRight,
   FileText,
   Cpu,
+  BookOpen,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import type { ResourceTab } from '../resources/ResourcesSection';
 import { navigate } from '../../utils/router';
+import { useUIStore } from '../../store/uiStore';
 
 /* ─── Crisp Inline GitHub SVG ────────────────────────────────────────────────── */
 function GithubIcon({ size = 16, color = 'currentColor' }: { size?: number; color?: string }) {
@@ -37,10 +41,12 @@ export interface NavbarProps {
   onOpenPlaygrounds?: () => void;
   onOpenResources?: (tab?: ResourceTab) => void;
   onOpenDsa?: () => void;
+  onOpenBooks?: () => void;
   onGoHome?: () => void;
   isResourcesView?: boolean;
   isVisualizerView?: boolean;
   isDsaView?: boolean;
+  isBooksView?: boolean;
   isPlaygroundsView?: boolean;
   currentResourceTab?: ResourceTab;
 }
@@ -50,16 +56,20 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenPlaygrounds,
   onOpenResources,
   onOpenDsa,
+  onOpenBooks,
   onGoHome,
   isResourcesView = false,
   isVisualizerView = false,
   isDsaView = false,
+  isBooksView = false,
   isPlaygroundsView = false,
   currentResourceTab = 'sheets',
 }) => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<'home' | 'ide' | 'gallery'>('home');
+  const { theme, toggleTheme } = useUIStore();
+  const isLight = theme === 'light';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -132,10 +142,24 @@ export const Navbar: React.FC<NavbarProps> = ({
     }
   };
 
+  const handleBooksClick = () => {
+    setMobileMenuOpen(false);
+    if (onOpenBooks) {
+      onOpenBooks();
+    } else {
+      navigate('/books');
+    }
+  };
+
   const isSheetsActive = isResourcesView && (currentResourceTab === 'sheets' || currentResourceTab === 'learnshit-sheet');
   const isDsaActive = isDsaView;
-  const isIdeActive = isVisualizerView || (!isResourcesView && !isDsaView && activeSection === 'ide');
-  const isGalleryActive = isPlaygroundsView || (!isResourcesView && !isDsaView && !isVisualizerView && activeSection === 'gallery');
+  const isBooksActive = isBooksView;
+  const isIdeActive =
+    isVisualizerView ||
+    (!isResourcesView && !isDsaView && !isBooksView && !isPlaygroundsView && activeSection === 'ide');
+  const isGalleryActive =
+    isPlaygroundsView ||
+    (!isResourcesView && !isDsaView && !isBooksView && !isVisualizerView && activeSection === 'gallery');
 
   return (
     <>
@@ -147,12 +171,30 @@ export const Navbar: React.FC<NavbarProps> = ({
           right: 0,
           height: 62,
           zIndex: 100,
-          background: scrolled ? 'rgba(8, 10, 13, 0.92)' : 'rgba(10, 11, 14, 0.78)',
+          background: isLight
+            ? scrolled
+              ? 'rgba(247, 245, 239, 0.94)'
+              : 'rgba(247, 245, 239, 0.84)'
+            : scrolled
+              ? 'rgba(8, 10, 13, 0.92)'
+              : 'rgba(10, 11, 14, 0.78)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
-          borderBottom: `1px solid ${scrolled ? 'rgba(247, 245, 239, 0.12)' : 'rgba(247, 245, 239, 0.07)'}`,
+          borderBottom: `1px solid ${
+            isLight
+              ? scrolled
+                ? 'rgba(16, 18, 22, 0.14)'
+                : 'rgba(16, 18, 22, 0.08)'
+              : scrolled
+                ? 'rgba(247, 245, 239, 0.12)'
+                : 'rgba(247, 245, 239, 0.07)'
+          }`,
           transition: 'background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease',
-          boxShadow: scrolled ? '0 4px 20px rgba(0, 0, 0, 0.45)' : 'none',
+          boxShadow: scrolled
+            ? isLight
+              ? '0 4px 20px rgba(0, 0, 0, 0.08)'
+              : '0 4px 20px rgba(0, 0, 0, 0.45)'
+            : 'none',
         }}
       >
         {/* Subtle accent highlight line */}
@@ -237,7 +279,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   fontSize: 19,
                   fontWeight: 700,
                   letterSpacing: '0.07em',
-                  color: '#F7F5EF',
+                  color: 'var(--text-primary)',
                   textTransform: 'uppercase',
                 }}
               >
@@ -271,7 +313,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 borderRadius: 8,
                 background: isIdeActive ? 'rgba(214, 82, 58, 0.14)' : 'transparent',
                 border: isIdeActive ? '1px solid rgba(214, 82, 58, 0.35)' : '1px solid transparent',
-                color: isIdeActive ? '#F7F5EF' : 'rgba(247, 245, 239, 0.75)',
+                color: isIdeActive ? 'var(--text-primary)' : 'var(--text-secondary)',
                 fontFamily: "'Inter', sans-serif",
                 fontSize: 13,
                 fontWeight: 600,
@@ -281,13 +323,13 @@ export const Navbar: React.FC<NavbarProps> = ({
               }}
               onMouseEnter={(e) => {
                 if (!isIdeActive) {
-                  e.currentTarget.style.color = '#F7F5EF';
-                  e.currentTarget.style.background = 'rgba(247, 245, 239, 0.05)';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.background = isLight ? 'rgba(16, 18, 22, 0.06)' : 'rgba(247, 245, 239, 0.05)';
                 }
               }}
               onMouseLeave={(e) => {
                 if (!isIdeActive) {
-                  e.currentTarget.style.color = 'rgba(247, 245, 239, 0.75)';
+                  e.currentTarget.style.color = 'var(--text-secondary)';
                   e.currentTarget.style.background = 'transparent';
                 }
               }}
@@ -311,7 +353,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 borderRadius: 8,
                 background: isGalleryActive ? 'rgba(214, 82, 58, 0.14)' : 'transparent',
                 border: isGalleryActive ? '1px solid rgba(214, 82, 58, 0.35)' : '1px solid transparent',
-                color: isGalleryActive ? '#F7F5EF' : 'rgba(247, 245, 239, 0.75)',
+                color: isGalleryActive ? 'var(--text-primary)' : 'var(--text-secondary)',
                 fontFamily: "'Inter', sans-serif",
                 fontSize: 13,
                 fontWeight: 600,
@@ -321,31 +363,19 @@ export const Navbar: React.FC<NavbarProps> = ({
               }}
               onMouseEnter={(e) => {
                 if (!isGalleryActive) {
-                  e.currentTarget.style.color = '#F7F5EF';
-                  e.currentTarget.style.background = 'rgba(247, 245, 239, 0.05)';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.background = isLight ? 'rgba(16, 18, 22, 0.06)' : 'rgba(247, 245, 239, 0.05)';
                 }
               }}
               onMouseLeave={(e) => {
                 if (!isGalleryActive) {
-                  e.currentTarget.style.color = 'rgba(247, 245, 239, 0.75)';
+                  e.currentTarget.style.color = 'var(--text-secondary)';
                   e.currentTarget.style.background = 'transparent';
                 }
               }}
             >
               <Layers size={15} style={{ color: isGalleryActive ? 'var(--accent, #D6523A)' : 'inherit' }} />
               <span>Playgrounds</span>
-              <span
-                style={{
-                  fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: 10,
-                  color: isGalleryActive ? '#F7F5EF' : 'rgba(247, 245, 239, 0.45)',
-                  background: isGalleryActive ? 'rgba(214, 82, 58, 0.25)' : 'rgba(247, 245, 239, 0.08)',
-                  padding: '1px 5px',
-                  borderRadius: 4,
-                }}
-              >
-                26
-              </span>
             </a>
 
             {/* DSA Guide (Data Structures & Algorithms Encyclopedia) */}
@@ -364,7 +394,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 borderRadius: 8,
                 background: isDsaActive ? 'rgba(214, 82, 58, 0.14)' : 'transparent',
                 border: isDsaActive ? '1px solid rgba(214, 82, 58, 0.35)' : '1px solid transparent',
-                color: isDsaActive ? '#F7F5EF' : 'rgba(247, 245, 239, 0.75)',
+                color: isDsaActive ? 'var(--text-primary)' : 'var(--text-secondary)',
                 fontFamily: "'Inter', sans-serif",
                 fontSize: 13,
                 fontWeight: 600,
@@ -374,34 +404,60 @@ export const Navbar: React.FC<NavbarProps> = ({
               }}
               onMouseEnter={(e) => {
                 if (!isDsaActive) {
-                  e.currentTarget.style.color = '#F7F5EF';
-                  e.currentTarget.style.background = 'rgba(247, 245, 239, 0.05)';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.background = isLight ? 'rgba(16, 18, 22, 0.06)' : 'rgba(247, 245, 239, 0.05)';
                 }
               }}
               onMouseLeave={(e) => {
                 if (!isDsaActive) {
-                  e.currentTarget.style.color = 'rgba(247, 245, 239, 0.75)';
+                  e.currentTarget.style.color = 'var(--text-secondary)';
                   e.currentTarget.style.background = 'transparent';
                 }
               }}
             >
               <Cpu size={15} style={{ color: isDsaActive ? 'var(--accent, #D6523A)' : 'inherit' }} />
               <span>DSA Guide</span>
-              <span
-                style={{
-                  fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: 9.5,
-                  color: isDsaActive ? '#FFFFFF' : 'rgba(247, 245, 239, 0.55)',
-                  background: isDsaActive ? 'rgba(214, 82, 58, 0.35)' : 'rgba(247, 245, 239, 0.08)',
-                  border: isDsaActive ? '1px solid rgba(214, 82, 58, 0.5)' : '1px solid rgba(247, 245, 239, 0.12)',
-                  padding: '1px 5px',
-                  borderRadius: 4,
-                  fontWeight: 600,
-                  textTransform: 'uppercase',
-                }}
-              >
-                INFO
-              </span>
+            </a>
+
+            {/* CS Books Library */}
+            <a
+              href="/books"
+              onClick={(e) => {
+                e.preventDefault();
+                handleBooksClick();
+              }}
+              id="navbar-books-btn"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 7,
+                padding: '6px 13px',
+                borderRadius: 8,
+                background: isBooksActive ? 'rgba(214, 82, 58, 0.14)' : 'transparent',
+                border: isBooksActive ? '1px solid rgba(214, 82, 58, 0.35)' : '1px solid transparent',
+                color: isBooksActive ? 'var(--text-primary)' : 'var(--text-secondary)',
+                fontFamily: "'Inter', sans-serif",
+                fontSize: 13,
+                fontWeight: 600,
+                cursor: 'pointer',
+                textDecoration: 'none',
+                transition: 'all 0.18s ease',
+              }}
+              onMouseEnter={(e) => {
+                if (!isBooksActive) {
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.background = isLight ? 'rgba(16, 18, 22, 0.06)' : 'rgba(247, 245, 239, 0.05)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isBooksActive) {
+                  e.currentTarget.style.color = 'var(--text-secondary)';
+                  e.currentTarget.style.background = 'transparent';
+                }
+              }}
+            >
+              <BookOpen size={15} style={{ color: isBooksActive ? 'var(--accent, #D6523A)' : 'inherit' }} />
+              <span>Books</span>
             </a>
 
             {/* Resources (Problem Sheets) */}
@@ -420,7 +476,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 borderRadius: 8,
                 background: isSheetsActive ? 'rgba(214, 82, 58, 0.14)' : 'transparent',
                 border: isSheetsActive ? '1px solid rgba(214, 82, 58, 0.35)' : '1px solid transparent',
-                color: isSheetsActive ? '#F7F5EF' : 'rgba(247, 245, 239, 0.75)',
+                color: isSheetsActive ? 'var(--text-primary)' : 'var(--text-secondary)',
                 fontFamily: "'Inter', sans-serif",
                 fontSize: 13,
                 fontWeight: 600,
@@ -430,34 +486,19 @@ export const Navbar: React.FC<NavbarProps> = ({
               }}
               onMouseEnter={(e) => {
                 if (!isSheetsActive) {
-                  e.currentTarget.style.color = '#F7F5EF';
-                  e.currentTarget.style.background = 'rgba(247, 245, 239, 0.05)';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.background = isLight ? 'rgba(16, 18, 22, 0.06)' : 'rgba(247, 245, 239, 0.05)';
                 }
               }}
               onMouseLeave={(e) => {
                 if (!isSheetsActive) {
-                  e.currentTarget.style.color = 'rgba(247, 245, 239, 0.75)';
+                  e.currentTarget.style.color = 'var(--text-secondary)';
                   e.currentTarget.style.background = 'transparent';
                 }
               }}
             >
               <FileText size={15} style={{ color: isSheetsActive ? 'var(--accent, #D6523A)' : 'inherit' }} />
               <span>Resources</span>
-              <span
-                style={{
-                  fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: 9.5,
-                  color: isSheetsActive ? '#FFFFFF' : 'rgba(247, 245, 239, 0.55)',
-                  background: isSheetsActive ? 'rgba(214, 82, 58, 0.35)' : 'rgba(247, 245, 239, 0.08)',
-                  border: isSheetsActive ? '1px solid rgba(214, 82, 58, 0.5)' : '1px solid rgba(247, 245, 239, 0.12)',
-                  padding: '1px 5px',
-                  borderRadius: 4,
-                  fontWeight: 600,
-                  textTransform: 'uppercase',
-                }}
-              >
-                Sheets
-              </span>
             </a>
           </nav>
 
@@ -466,10 +507,46 @@ export const Navbar: React.FC<NavbarProps> = ({
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: 12,
+              gap: 10,
             }}
             className="navbar-desktop-actions"
           >
+            {/* Theme Toggler */}
+            <button
+              type="button"
+              id="navbar-theme-toggle"
+              onClick={toggleTheme}
+              title={isLight ? 'Switch to dark theme' : 'Switch to light theme'}
+              aria-label={isLight ? 'Switch to dark theme' : 'Switch to light theme'}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 6,
+                padding: '7px 11px',
+                borderRadius: 8,
+                background: isLight ? 'rgba(16, 18, 22, 0.06)' : '#12141a',
+                border: `1px solid ${isLight ? 'rgba(16, 18, 22, 0.14)' : 'rgba(247, 245, 239, 0.12)'}`,
+                color: 'var(--text-primary)',
+                fontFamily: "'Inter', sans-serif",
+                fontSize: 12.5,
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.18s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = 'rgba(214, 82, 58, 0.45)';
+                e.currentTarget.style.background = isLight ? 'rgba(16, 18, 22, 0.1)' : '#181b22';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = isLight ? 'rgba(16, 18, 22, 0.14)' : 'rgba(247, 245, 239, 0.12)';
+                e.currentTarget.style.background = isLight ? 'rgba(16, 18, 22, 0.06)' : '#12141a';
+              }}
+            >
+              {isLight ? <Moon size={15} /> : <Sun size={15} />}
+              <span>{isLight ? 'Dark' : 'Light'}</span>
+            </button>
+
             {/* GitHub Repo Pill Button */}
             <a
               href="https://github.com/IamMradul/LearnShit.xyz"
@@ -482,9 +559,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                 gap: 7,
                 padding: '7px 13px',
                 borderRadius: 8,
-                background: '#12141a',
-                border: '1px solid rgba(247, 245, 239, 0.12)',
-                color: '#F7F5EF',
+                background: isLight ? 'rgba(16, 18, 22, 0.06)' : '#12141a',
+                border: `1px solid ${isLight ? 'rgba(16, 18, 22, 0.14)' : 'rgba(247, 245, 239, 0.12)'}`,
+                color: 'var(--text-primary)',
                 fontFamily: "'Inter', sans-serif",
                 fontSize: 12.5,
                 fontWeight: 600,
@@ -493,11 +570,11 @@ export const Navbar: React.FC<NavbarProps> = ({
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.borderColor = 'rgba(214, 82, 58, 0.45)';
-                e.currentTarget.style.background = '#181b22';
+                e.currentTarget.style.background = isLight ? 'rgba(16, 18, 22, 0.1)' : '#181b22';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(247, 245, 239, 0.12)';
-                e.currentTarget.style.background = '#12141a';
+                e.currentTarget.style.borderColor = isLight ? 'rgba(16, 18, 22, 0.14)' : 'rgba(247, 245, 239, 0.12)';
+                e.currentTarget.style.background = isLight ? 'rgba(16, 18, 22, 0.06)' : '#12141a';
               }}
             >
               <GithubIcon size={15} />
@@ -506,24 +583,45 @@ export const Navbar: React.FC<NavbarProps> = ({
             </a>
           </div>
 
-          {/* ── Mobile Hamburger Toggle ── */}
-          <button
-            type="button"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle navigation menu"
-            style={{
-              display: 'none',
-              background: '#12141a',
-              border: '1px solid rgba(247, 245, 239, 0.12)',
-              borderRadius: 7,
-              padding: 7,
-              color: '#F7F5EF',
-              cursor: 'pointer',
-            }}
-            className="navbar-mobile-toggle"
-          >
-            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
+          {/* ── Mobile Controls (Theme + Hamburger) ── */}
+          <div style={{ display: 'none', alignItems: 'center', gap: 8 }} className="navbar-mobile-toggle">
+            <button
+              type="button"
+              onClick={toggleTheme}
+              aria-label={isLight ? 'Switch to dark theme' : 'Switch to light theme'}
+              style={{
+                background: isLight ? 'rgba(16, 18, 22, 0.06)' : '#12141a',
+                border: `1px solid ${isLight ? 'rgba(16, 18, 22, 0.14)' : 'rgba(247, 245, 239, 0.12)'}`,
+                borderRadius: 7,
+                padding: 7,
+                color: 'var(--text-primary)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              {isLight ? <Moon size={18} /> : <Sun size={18} />}
+            </button>
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle navigation menu"
+              style={{
+                background: isLight ? 'rgba(16, 18, 22, 0.06)' : '#12141a',
+                border: `1px solid ${isLight ? 'rgba(16, 18, 22, 0.14)' : 'rgba(247, 245, 239, 0.12)'}`,
+                borderRadius: 7,
+                padding: 7,
+                color: 'var(--text-primary)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
         </div>
       </header>
 
@@ -535,15 +633,15 @@ export const Navbar: React.FC<NavbarProps> = ({
             top: 62,
             left: 0,
             right: 0,
-            background: 'rgba(9, 11, 14, 0.98)',
+            background: 'var(--surface-glass-strong)',
             backdropFilter: 'blur(20px)',
-            borderBottom: '1px solid rgba(247, 245, 239, 0.12)',
+            borderBottom: '1px solid var(--border)',
             padding: '20px 24px',
             zIndex: 99,
             display: 'flex',
             flexDirection: 'column',
             gap: 12,
-            boxShadow: '0 20px 40px rgba(0,0,0,0.8)',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
           }}
         >
           <a
@@ -558,9 +656,9 @@ export const Navbar: React.FC<NavbarProps> = ({
               justifyContent: 'space-between',
               padding: '12px 16px',
               borderRadius: 8,
-              background: '#12141a',
-              border: '1px solid rgba(247, 245, 239, 0.08)',
-              color: '#F7F5EF',
+              background: 'var(--bg-tertiary)',
+              border: '1px solid var(--border)',
+              color: 'var(--text-primary)',
               fontFamily: "'Inter', sans-serif",
               fontSize: 14,
               fontWeight: 600,
@@ -588,9 +686,9 @@ export const Navbar: React.FC<NavbarProps> = ({
               justifyContent: 'space-between',
               padding: '12px 16px',
               borderRadius: 8,
-              background: '#12141a',
-              border: '1px solid rgba(247, 245, 239, 0.08)',
-              color: '#F7F5EF',
+              background: 'var(--bg-tertiary)',
+              border: '1px solid var(--border)',
+              color: 'var(--text-primary)',
               fontFamily: "'Inter', sans-serif",
               fontSize: 14,
               fontWeight: 600,
@@ -618,9 +716,9 @@ export const Navbar: React.FC<NavbarProps> = ({
               justifyContent: 'space-between',
               padding: '12px 16px',
               borderRadius: 8,
-              background: isDsaActive ? 'rgba(214, 82, 58, 0.15)' : '#12141a',
-              border: isDsaActive ? '1px solid rgba(214, 82, 58, 0.4)' : '1px solid rgba(247, 245, 239, 0.08)',
-              color: '#F7F5EF',
+              background: isDsaActive ? 'rgba(214, 82, 58, 0.15)' : 'var(--bg-tertiary)',
+              border: isDsaActive ? '1px solid rgba(214, 82, 58, 0.4)' : '1px solid var(--border)',
+              color: 'var(--text-primary)',
               fontFamily: "'Inter', sans-serif",
               fontSize: 14,
               fontWeight: 600,
@@ -637,6 +735,36 @@ export const Navbar: React.FC<NavbarProps> = ({
           </a>
 
           <a
+            href="/books"
+            onClick={(e) => {
+              e.preventDefault();
+              handleBooksClick();
+            }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '12px 16px',
+              borderRadius: 8,
+              background: isBooksActive ? 'rgba(214, 82, 58, 0.15)' : 'var(--bg-tertiary)',
+              border: isBooksActive ? '1px solid rgba(214, 82, 58, 0.4)' : '1px solid var(--border)',
+              color: 'var(--text-primary)',
+              fontFamily: "'Inter', sans-serif",
+              fontSize: 14,
+              fontWeight: 600,
+              textDecoration: 'none',
+              cursor: 'pointer',
+              textAlign: 'left',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <BookOpen size={16} color="var(--accent, #D6523A)" />
+              <span>CS Books Library</span>
+            </div>
+            <ChevronRight size={14} style={{ opacity: 0.5 }} />
+          </a>
+
+          <a
             href="/resources?tab=sheets"
             onClick={(e) => {
               e.preventDefault();
@@ -648,9 +776,9 @@ export const Navbar: React.FC<NavbarProps> = ({
               justifyContent: 'space-between',
               padding: '12px 16px',
               borderRadius: 8,
-              background: isSheetsActive ? 'rgba(214, 82, 58, 0.15)' : '#12141a',
-              border: isSheetsActive ? '1px solid rgba(214, 82, 58, 0.4)' : '1px solid rgba(247, 245, 239, 0.08)',
-              color: '#F7F5EF',
+              background: isSheetsActive ? 'rgba(214, 82, 58, 0.15)' : 'var(--bg-tertiary)',
+              border: isSheetsActive ? '1px solid rgba(214, 82, 58, 0.4)' : '1px solid var(--border)',
+              color: 'var(--text-primary)',
               fontFamily: "'Inter', sans-serif",
               fontSize: 14,
               fontWeight: 600,

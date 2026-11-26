@@ -11,8 +11,8 @@ export const ContactPage: React.FC = () => {
         paddingTop: 80,
         paddingBottom: 80,
         minHeight: '100vh',
-        background: '#0a0b0c',
-        color: '#F7F5EF',
+        background: 'var(--bg-primary)',
+        color: 'var(--text-primary)',
       }}
     >
       <div
@@ -38,7 +38,7 @@ export const ContactPage: React.FC = () => {
               letterSpacing: '0.02em',
               lineHeight: 1.15,
               margin: '0 0 16px 0',
-              color: '#F7F5EF',
+              color: 'var(--text-primary)',
             }}
           >
             Contact &amp; Community Support
@@ -48,7 +48,7 @@ export const ContactPage: React.FC = () => {
               fontFamily: "'Inter', sans-serif",
               fontSize: '1.1rem',
               lineHeight: 1.6,
-              color: 'rgba(247, 245, 239, 0.75)',
+              color: 'var(--text-secondary)',
               margin: 0,
             }}
           >
@@ -61,10 +61,10 @@ export const ContactPage: React.FC = () => {
           {/* GitHub Issues */}
           <div
             style={{
-              background: '#12141a',
+              background: 'var(--bg-tertiary)',
               borderRadius: 12,
               padding: 24,
-              border: '1px solid rgba(247, 245, 239, 0.08)',
+              border: '1px solid var(--border)',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
@@ -91,7 +91,7 @@ export const ContactPage: React.FC = () => {
                   fontFamily: "'Oswald', sans-serif",
                   fontSize: '1.3rem',
                   fontWeight: 600,
-                  color: '#F7F5EF',
+                  color: 'var(--text-primary)',
                   margin: '0 0 8px 0',
                 }}
               >
@@ -102,7 +102,7 @@ export const ContactPage: React.FC = () => {
                   fontFamily: "'Inter', sans-serif",
                   fontSize: '0.9rem',
                   lineHeight: 1.6,
-                  color: 'rgba(247, 245, 239, 0.65)',
+                  color: 'var(--text-secondary)',
                   margin: 0,
                 }}
               >
@@ -133,10 +133,10 @@ export const ContactPage: React.FC = () => {
           {/* Direct Email */}
           <div
             style={{
-              background: '#12141a',
+              background: 'var(--bg-tertiary)',
               borderRadius: 12,
               padding: 24,
-              border: '1px solid rgba(247, 245, 239, 0.08)',
+              border: '1px solid var(--border)',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
@@ -163,7 +163,7 @@ export const ContactPage: React.FC = () => {
                   fontFamily: "'Oswald', sans-serif",
                   fontSize: '1.3rem',
                   fontWeight: 600,
-                  color: '#F7F5EF',
+                  color: 'var(--text-primary)',
                   margin: '0 0 8px 0',
                 }}
               >
@@ -174,7 +174,7 @@ export const ContactPage: React.FC = () => {
                   fontFamily: "'Inter', sans-serif",
                   fontSize: '0.9rem',
                   lineHeight: 1.6,
-                  color: 'rgba(247, 245, 239, 0.65)',
+                  color: 'var(--text-secondary)',
                   margin: 0,
                 }}
               >
@@ -207,7 +207,7 @@ export const ContactPage: React.FC = () => {
               fontFamily: "'Oswald', sans-serif",
               fontSize: '1.4rem',
               fontWeight: 600,
-              color: '#F7F5EF',
+              color: 'var(--text-primary)',
               marginBottom: 12,
             }}
           >

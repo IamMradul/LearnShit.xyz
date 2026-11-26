@@ -21,23 +21,23 @@ export const VisuAlgoCard: React.FC<VisuAlgoCardProps> = ({
       style={{
         display: 'flex',
         flexDirection: 'column',
-        background: '#111216',
+        background: 'var(--bg-secondary)',
         borderRadius: 14,
-        border: '1px solid rgba(247, 245, 239, 0.08)',
+        border: '1px solid var(--border)',
         overflow: 'hidden',
-        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.45)',
+        boxShadow: '0 6px 20px rgba(0, 0, 0, 0.14)',
         cursor: 'pointer',
         transition: 'transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s ease, border-color 0.22s ease',
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = 'translateY(-4px)';
-        e.currentTarget.style.boxShadow = `0 16px 36px rgba(0, 0, 0, 0.7), 0 0 20px ${theme}22`;
+        e.currentTarget.style.boxShadow = `0 12px 28px rgba(0, 0, 0, 0.22), 0 0 18px ${theme}22`;
         e.currentTarget.style.borderColor = 'rgba(214, 82, 58, 0.5)';
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.transform = 'translateY(0)';
-        e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.45)';
-        e.currentTarget.style.borderColor = 'rgba(247, 245, 239, 0.08)';
+        e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.14)';
+        e.currentTarget.style.borderColor = 'var(--border)';
       }}
     >
       {/* ── Visual Blueprint Canvas (Dark Industrial) ────────────────────────── */}
@@ -50,8 +50,8 @@ export const VisuAlgoCard: React.FC<VisuAlgoCardProps> = ({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: `radial-gradient(circle at 50% 50%, ${theme}20 0%, #090a0e 85%)`,
-          borderBottom: '1px solid rgba(247, 245, 239, 0.08)',
+          background: `radial-gradient(circle at 50% 50%, ${theme}18 0%, var(--bg-tertiary) 88%)`,
+          borderBottom: '1px solid var(--border)',
         }}
       >
         {/* Subtle background tech grid */}
@@ -61,7 +61,7 @@ export const VisuAlgoCard: React.FC<VisuAlgoCardProps> = ({
             inset: 0,
             opacity: 0.08,
             backgroundImage:
-              'radial-gradient(circle at 1px 1px, #F7F5EF 1px, transparent 0)',
+              'radial-gradient(circle at 1px 1px, var(--text-primary) 1px, transparent 0)',
             backgroundSize: '16px 16px',
             pointerEvents: 'none',
           }}
@@ -80,7 +80,7 @@ export const VisuAlgoCard: React.FC<VisuAlgoCardProps> = ({
             letterSpacing: '0.06em',
             padding: '2.5px 7px',
             borderRadius: 4,
-            background: 'rgba(10, 11, 15, 0.85)',
+            background: 'var(--surface-glass-strong)',
             backdropFilter: 'blur(8px)',
             color: theme,
             border: `1px solid ${theme}40`,
@@ -101,10 +101,10 @@ export const VisuAlgoCard: React.FC<VisuAlgoCardProps> = ({
             fontWeight: 600,
             padding: '2.5px 8px',
             borderRadius: 4,
-            background: 'rgba(10, 11, 15, 0.85)',
+            background: 'var(--surface-glass-strong)',
             backdropFilter: 'blur(8px)',
-            color: '#F7F5EF',
-            border: '1px solid rgba(247, 245, 239, 0.12)',
+            color: 'var(--text-primary)',
+            border: '1px solid var(--border)',
             zIndex: 2,
           }}
         >
@@ -126,7 +126,7 @@ export const VisuAlgoCard: React.FC<VisuAlgoCardProps> = ({
             fontSize: 17,
             fontWeight: 700,
             fontFamily: "'Oswald', sans-serif",
-            color: '#F7F5EF',
+            color: 'var(--text-primary)',
             letterSpacing: '0.03em',
             textTransform: 'uppercase',
             whiteSpace: 'nowrap',
@@ -161,11 +161,11 @@ export const VisuAlgoCard: React.FC<VisuAlgoCardProps> = ({
             style={{
               padding: '2px 6px',
               borderRadius: 4,
-              background: 'rgba(255, 255, 255, 0.04)',
-              border: '1px solid rgba(247, 245, 239, 0.08)',
+              background: 'var(--bg-tertiary)',
+              border: '1px solid var(--border)',
               fontSize: 10,
               fontFamily: "'JetBrains Mono', monospace",
-              color: 'rgba(247, 245, 239, 0.7)',
+              color: 'var(--text-secondary)',
               fontWeight: 600,
             }}
           >
@@ -177,11 +177,11 @@ export const VisuAlgoCard: React.FC<VisuAlgoCardProps> = ({
               style={{
                 padding: '2px 6px',
                 borderRadius: 4,
-                background: 'rgba(255, 255, 255, 0.03)',
-                border: '1px solid rgba(247, 245, 239, 0.06)',
+                background: 'var(--bg-tertiary)',
+                border: '1px solid var(--border-subtle)',
                 fontSize: 9.5,
                 fontFamily: "'JetBrains Mono', monospace",
-                color: 'var(--text-muted)',
+                color: 'var(--text-secondary)',
               }}
             >
               #{tag}
@@ -196,7 +196,7 @@ export const VisuAlgoCard: React.FC<VisuAlgoCardProps> = ({
             alignItems: 'center',
             gap: 7,
             paddingTop: 10,
-            borderTop: '1px solid rgba(247, 245, 239, 0.06)',
+            borderTop: '1px solid var(--border-subtle)',
           }}
         >
           {/* Primary Visualize CTA */}
@@ -216,7 +216,7 @@ export const VisuAlgoCard: React.FC<VisuAlgoCardProps> = ({
               borderRadius: 6,
               background: 'var(--accent)',
               border: 'none',
-              color: '#F7F5EF',
+              color: '#FFFFFF',
               fontSize: 12,
               fontFamily: "'Oswald', sans-serif",
               fontWeight: 700,
@@ -234,7 +234,7 @@ export const VisuAlgoCard: React.FC<VisuAlgoCardProps> = ({
               e.currentTarget.style.boxShadow = 'none';
             }}
           >
-            <Play size={11} fill="#F7F5EF" />
+            <Play size={11} fill="#FFFFFF" />
             <span>Visualize</span>
           </button>
 
@@ -252,9 +252,9 @@ export const VisuAlgoCard: React.FC<VisuAlgoCardProps> = ({
               gap: 4,
               padding: '8px 10px',
               borderRadius: 6,
-              background: 'rgba(255, 255, 255, 0.05)',
-              border: '1px solid rgba(247, 245, 239, 0.12)',
-              color: '#F7F5EF',
+              background: 'var(--bg-tertiary)',
+              border: '1px solid var(--border)',
+              color: 'var(--text-primary)',
               fontSize: 11,
               fontFamily: "'Oswald', sans-serif",
               fontWeight: 600,
@@ -264,12 +264,12 @@ export const VisuAlgoCard: React.FC<VisuAlgoCardProps> = ({
               transition: 'all 0.15s ease',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-              e.currentTarget.style.borderColor = 'rgba(247, 245, 239, 0.25)';
+              e.currentTarget.style.background = 'var(--bg-elevated)';
+              e.currentTarget.style.borderColor = 'var(--text-muted)';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-              e.currentTarget.style.borderColor = 'rgba(247, 245, 239, 0.12)';
+              e.currentTarget.style.background = 'var(--bg-tertiary)';
+              e.currentTarget.style.borderColor = 'var(--border)';
             }}
           >
             <GraduationCap size={13} />
@@ -290,19 +290,19 @@ export const VisuAlgoCard: React.FC<VisuAlgoCardProps> = ({
               alignItems: 'center',
               justifyContent: 'center',
               borderRadius: 6,
-              background: 'rgba(255, 255, 255, 0.05)',
-              border: '1px solid rgba(247, 245, 239, 0.12)',
-              color: '#9B9A95',
+              background: 'var(--bg-tertiary)',
+              border: '1px solid var(--border)',
+              color: 'var(--text-secondary)',
               cursor: 'pointer',
               transition: 'all 0.15s ease',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.color = '#F7F5EF';
-              e.currentTarget.style.borderColor = 'rgba(247, 245, 239, 0.25)';
+              e.currentTarget.style.color = 'var(--text-primary)';
+              e.currentTarget.style.borderColor = 'var(--text-muted)';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.color = '#9B9A95';
-              e.currentTarget.style.borderColor = 'rgba(247, 245, 239, 0.12)';
+              e.currentTarget.style.color = 'var(--text-secondary)';
+              e.currentTarget.style.borderColor = 'var(--border)';
             }}
           >
             <Code2 size={13} />

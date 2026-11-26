@@ -1,6 +1,7 @@
 import React from 'react';
 import type { TraceStep } from '../../../engine/TraceTypes';
 import { Binary, Check, X, Sparkles, Layers } from 'lucide-react';
+import { useUIStore } from '../../../store/uiStore';
 
 interface BitmaskRendererProps {
   step: TraceStep | null;
@@ -13,6 +14,12 @@ export const BitmaskRenderer: React.FC<BitmaskRendererProps> = ({
   varName,
   height = 340,
 }) => {
+  const theme = useUIStore((s) => s.theme);
+  const isLight = theme === 'light';
+  const accentGreen = isLight ? '#15803d' : '#2ed573';
+  const accentAmber = isLight ? '#b45309' : '#E5A93C';
+  const accentHex = isLight ? '#0369a1' : '#38bdf8';
+
   if (!step) return null;
 
   // Extract variables
@@ -67,11 +74,11 @@ export const BitmaskRenderer: React.FC<BitmaskRendererProps> = ({
         minHeight: height,
         margin: '0 auto',
         padding: '16px 20px',
-        background: 'rgba(16, 18, 22, 0.85)',
+        background: 'var(--surface-glass-strong)',
         backdropFilter: 'blur(16px)',
         borderRadius: 14,
-        border: '1px solid rgba(247, 245, 239, 0.08)',
-        boxShadow: '0 16px 36px rgba(0,0,0,0.5)',
+        border: '1px solid var(--border)',
+        boxShadow: isLight ? '0 10px 28px rgba(16, 18, 22, 0.08)' : '0 16px 36px rgba(0,0,0,0.5)',
         boxSizing: 'border-box',
       }}
     >
@@ -83,7 +90,7 @@ export const BitmaskRenderer: React.FC<BitmaskRendererProps> = ({
           justifyContent: 'space-between',
           flexWrap: 'wrap',
           gap: 10,
-          borderBottom: '1px solid rgba(247, 245, 239, 0.06)',
+          borderBottom: '1px solid var(--border-subtle)',
           paddingBottom: 12,
         }}
       >
@@ -109,7 +116,7 @@ export const BitmaskRenderer: React.FC<BitmaskRendererProps> = ({
                 fontSize: 14,
                 letterSpacing: '0.04em',
                 textTransform: 'uppercase',
-                color: '#F7F5EF',
+                color: 'var(--text-primary)',
                 fontWeight: 700,
               }}
             >
@@ -127,22 +134,22 @@ export const BitmaskRenderer: React.FC<BitmaskRendererProps> = ({
             display: 'flex',
             alignItems: 'center',
             gap: 10,
-            background: 'rgba(255, 255, 255, 0.03)',
+            background: 'var(--border-subtle)',
             padding: '6px 14px',
             borderRadius: 20,
-            border: '1px solid rgba(247, 245, 239, 0.08)',
+            border: '1px solid var(--border)',
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: 12,
           }}
         >
           <span style={{ color: 'var(--text-muted)' }}>mask:</span>
-          <span style={{ color: '#F7F5EF', fontWeight: 700 }}>{mask}</span>
-          <span style={{ color: 'rgba(247, 245, 239, 0.2)' }}>|</span>
+          <span style={{ color: 'var(--text-primary)', fontWeight: 700 }}>{mask}</span>
+          <span style={{ color: 'var(--border)' }}>|</span>
           <span style={{ color: 'var(--text-muted)' }}>bin:</span>
           <span style={{ color: 'var(--accent)', fontWeight: 700 }}>0b{binaryString}</span>
-          <span style={{ color: 'rgba(247, 245, 239, 0.2)' }}>|</span>
+          <span style={{ color: 'var(--border)' }}>|</span>
           <span style={{ color: 'var(--text-muted)' }}>hex:</span>
-          <span style={{ color: '#38bdf8', fontWeight: 600 }}>0x{mask.toString(16).toUpperCase()}</span>
+          <span style={{ color: accentHex, fontWeight: 600 }}>0x{mask.toString(16).toUpperCase()}</span>
         </div>
       </div>
 
@@ -181,17 +188,17 @@ export const BitmaskRenderer: React.FC<BitmaskRendererProps> = ({
                 padding: '12px 6px',
                 borderRadius: 10,
                 background: bit.isSet
-                  ? 'linear-gradient(180deg, rgba(214, 82, 58, 0.22) 0%, rgba(214, 82, 58, 0.06) 100%)'
-                  : 'rgba(255, 255, 255, 0.02)',
+                  ? 'linear-gradient(180deg, rgba(214, 82, 58, 0.2) 0%, rgba(214, 82, 58, 0.06) 100%)'
+                  : 'var(--border-subtle)',
                 border: bit.isTesting
-                  ? '2px solid #E5A93C'
+                  ? `2px solid ${accentAmber}`
                   : bit.isSet
                   ? '1.5px solid var(--accent)'
-                  : '1px solid rgba(247, 245, 239, 0.08)',
+                  : '1px solid var(--border)',
                 boxShadow: bit.isTesting
-                  ? '0 0 16px rgba(229, 169, 60, 0.4)'
+                  ? '0 0 14px rgba(229, 169, 60, 0.35)'
                   : bit.isSet
-                  ? '0 0 12px rgba(214, 82, 58, 0.25)'
+                  ? '0 0 10px rgba(214, 82, 58, 0.2)'
                   : 'none',
                 transition: 'all 0.18s ease',
                 position: 'relative',
@@ -234,7 +241,7 @@ export const BitmaskRenderer: React.FC<BitmaskRendererProps> = ({
                   fontSize: 26,
                   fontWeight: 800,
                   fontFamily: "'JetBrains Mono', monospace",
-                  color: bit.isSet ? '#F7F5EF' : '#475569',
+                  color: bit.isSet ? 'var(--text-primary)' : 'var(--text-muted)',
                   lineHeight: 1,
                   margin: '4px 0',
                 }}
@@ -247,7 +254,7 @@ export const BitmaskRenderer: React.FC<BitmaskRendererProps> = ({
                 style={{
                   fontSize: 10,
                   fontFamily: "'JetBrains Mono', monospace",
-                  color: bit.isSet ? 'var(--accent)' : 'rgba(247, 245, 239, 0.25)',
+                  color: bit.isSet ? 'var(--accent)' : 'var(--text-muted)',
                   fontWeight: 600,
                 }}
               >
@@ -264,8 +271,10 @@ export const BitmaskRenderer: React.FC<BitmaskRendererProps> = ({
                   fontSize: 10,
                   fontWeight: 700,
                   fontFamily: "'JetBrains Mono', monospace",
-                  color: bit.isSet ? '#2ed573' : 'var(--text-muted)',
-                  background: bit.isSet ? 'rgba(46, 213, 115, 0.12)' : 'rgba(255, 255, 255, 0.03)',
+                  color: bit.isSet ? accentGreen : 'var(--text-muted)',
+                  background: bit.isSet
+                    ? isLight ? 'rgba(21, 128, 61, 0.12)' : 'rgba(46, 213, 115, 0.12)'
+                    : 'var(--bg-tertiary)',
                   padding: '2px 6px',
                   borderRadius: 6,
                 }}
@@ -287,8 +296,8 @@ export const BitmaskRenderer: React.FC<BitmaskRendererProps> = ({
           flexWrap: 'wrap',
           gap: 12,
           padding: '10px 14px',
-          background: 'rgba(255, 255, 255, 0.025)',
-          border: '1px solid rgba(247, 245, 239, 0.08)',
+          background: 'var(--border-subtle)',
+          border: '1px solid var(--border)',
           borderRadius: 10,
         }}
       >
@@ -315,7 +324,7 @@ export const BitmaskRenderer: React.FC<BitmaskRendererProps> = ({
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: 13,
               fontWeight: 700,
-              color: '#F7F5EF',
+              color: 'var(--text-primary)',
             }}
           >
             {curr.length === 0 ? (
@@ -331,7 +340,7 @@ export const BitmaskRenderer: React.FC<BitmaskRendererProps> = ({
             style={{
               fontSize: 11,
               fontFamily: "'JetBrains Mono', monospace",
-              color: '#E5A93C',
+              color: accentAmber,
             }}
           >
             Operation:{' '}
@@ -358,10 +367,10 @@ export const BitmaskRenderer: React.FC<BitmaskRendererProps> = ({
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Layers size={12} color="#2ed573" />
+            <Layers size={12} color={accentGreen} />
             <span>Accumulated Power Set (subsets)</span>
           </div>
-          <span style={{ color: '#2ed573', fontWeight: 600 }}>
+          <span style={{ color: accentGreen, fontWeight: 600 }}>
             {subsets.length} / {totalSubsets} Generated
           </span>
         </div>
@@ -400,17 +409,19 @@ export const BitmaskRenderer: React.FC<BitmaskRendererProps> = ({
                     gap: 6,
                     padding: '4px 10px',
                     borderRadius: 8,
-                    background: isLatest ? 'rgba(46, 213, 115, 0.15)' : 'rgba(255, 255, 255, 0.03)',
+                    background: isLatest
+                      ? isLight ? 'rgba(21, 128, 61, 0.12)' : 'rgba(46, 213, 115, 0.15)'
+                      : 'var(--border-subtle)',
                     border: isLatest
-                      ? '1px solid rgba(46, 213, 115, 0.5)'
-                      : '1px solid rgba(247, 245, 239, 0.08)',
+                      ? isLight ? '1px solid rgba(21, 128, 61, 0.45)' : '1px solid rgba(46, 213, 115, 0.5)'
+                      : '1px solid var(--border)',
                     fontFamily: "'JetBrains Mono', monospace",
                     fontSize: 11,
                     transition: 'all 0.15s ease',
                   }}
                 >
                   <span style={{ color: 'var(--text-muted)', fontSize: 10 }}>#{idx}:</span>
-                  <span style={{ color: isLatest ? '#2ed573' : '#F7F5EF', fontWeight: 600 }}>
+                  <span style={{ color: isLatest ? accentGreen : 'var(--text-primary)', fontWeight: 600 }}>
                     {sub.length === 0 ? '∅' : `{ ${sub.join(', ')} }`}
                   </span>
                 </div>

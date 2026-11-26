@@ -6,6 +6,7 @@ import { ResourcesSection, type ResourceTab } from './components/resources/Resou
 import { HeroSection } from './components/landing/HeroSection';
 import { Footer } from './components/layout/Footer';
 import { DsaHub } from './components/dsa/DsaHub';
+import { BooksPage } from './components/books/BooksPage';
 import { PlaygroundsPage } from './components/pages/PlaygroundsPage';
 import { AboutPage } from './components/pages/AboutPage';
 import { ContactPage } from './components/pages/ContactPage';
@@ -61,9 +62,14 @@ export default function App() {
     navigate('/dsa');
   }, []);
 
+  const handleOpenBooks = useCallback(() => {
+    navigate('/books');
+  }, []);
+
   const isResourcesView = route === 'resources';
   const isVisualizerView = route === 'visualizer';
   const isDsaView = route === 'dsa';
+  const isBooksView = route === 'books';
   const isPlaygroundsView = route === 'playgrounds';
   const currentResourceTab: ResourceTab =
     tab === 'books' || tab === 'learnshit-sheet' ? tab : 'sheets';
@@ -74,7 +80,8 @@ export default function App() {
         display: 'flex',
         flexDirection: 'column',
         minHeight: '100vh',
-        background: '#0a0b0c',
+        background: 'var(--bg-primary)',
+        color: 'var(--text-primary)',
       }}
     >
       {/* ── Skip to Main Content Link for Accessibility ── */}
@@ -103,10 +110,12 @@ export default function App() {
         onOpenPlaygrounds={handleOpenPlaygrounds}
         onOpenResources={handleOpenResources}
         onOpenDsa={handleOpenDsa}
+        onOpenBooks={handleOpenBooks}
         onGoHome={handleGoHome}
         isResourcesView={isResourcesView}
         isVisualizerView={isVisualizerView}
         isDsaView={isDsaView}
+        isBooksView={isBooksView}
         isPlaygroundsView={isPlaygroundsView}
         currentResourceTab={currentResourceTab}
       />
@@ -125,6 +134,13 @@ export default function App() {
       {isDsaView && (
         <main id="main-content" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
           <DsaHub onBackToHome={handleGoHome} />
+          <Footer onOpenResources={handleOpenResources} onOpenDsa={handleOpenDsa} />
+        </main>
+      )}
+
+      {isBooksView && (
+        <main id="main-content" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+          <BooksPage />
           <Footer onOpenResources={handleOpenResources} onOpenDsa={handleOpenDsa} />
         </main>
       )}

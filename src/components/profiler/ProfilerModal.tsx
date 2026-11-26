@@ -139,14 +139,14 @@ export const ProfilerModal: React.FC<ProfilerModalProps> = ({ isOpen, onClose })
         style={{
           width: '100%',
           maxWidth: 680,
-          background: '#101216',
-          border: '1px solid rgba(247, 245, 239, 0.12)',
+          background: 'var(--bg-secondary)',
+          border: '1px solid var(--border)',
           borderRadius: 16,
           boxShadow: '0 24px 60px rgba(0,0,0,0.8)',
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
-          color: '#F7F5EF',
+          color: 'var(--text-primary)',
         }}
       >
         {/* Header */}
@@ -156,7 +156,7 @@ export const ProfilerModal: React.FC<ProfilerModalProps> = ({ isOpen, onClose })
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '16px 20px',
-            borderBottom: '1px solid rgba(247, 245, 239, 0.08)',
+            borderBottom: '1px solid var(--border)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -201,7 +201,7 @@ export const ProfilerModal: React.FC<ProfilerModalProps> = ({ isOpen, onClose })
         <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 18, maxHeight: '80vh', overflowY: 'auto' }}>
           {/* Key Metrics Row */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
-            <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 10, padding: '12px 14px', border: '1px solid rgba(247,245,239,0.06)' }}>
+            <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 10, padding: '12px 14px', border: '1px solid var(--border-subtle)' }}>
               <span style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Complexity</span>
               <div style={{ fontSize: 18, fontWeight: 700, color: '#D6523A', fontFamily: "'JetBrains Mono', monospace", marginTop: 2 }}>
                 {metrics.detectedComplexity}
@@ -209,15 +209,15 @@ export const ProfilerModal: React.FC<ProfilerModalProps> = ({ isOpen, onClose })
               <span style={{ fontSize: 10, color: '#2ed573' }}>Fit: {metrics.fitConfidence}</span>
             </div>
 
-            <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 10, padding: '12px 14px', border: '1px solid rgba(247,245,239,0.06)' }}>
+            <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 10, padding: '12px 14px', border: '1px solid var(--border-subtle)' }}>
               <span style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Exec Steps</span>
-              <div style={{ fontSize: 18, fontWeight: 700, color: '#F7F5EF', fontFamily: "'JetBrains Mono', monospace", marginTop: 2 }}>
+              <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', fontFamily: "'JetBrains Mono', monospace", marginTop: 2 }}>
                 {metrics.totalSteps}
               </div>
               <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>Frame {currentIndex + 1}</span>
             </div>
 
-            <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 10, padding: '12px 14px', border: '1px solid rgba(247,245,239,0.06)' }}>
+            <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 10, padding: '12px 14px', border: '1px solid var(--border-subtle)' }}>
               <span style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Peak Stack</span>
               <div style={{ fontSize: 18, fontWeight: 700, color: '#ffa502', fontFamily: "'JetBrains Mono', monospace", marginTop: 2 }}>
                 {metrics.maxStackDepth}
@@ -225,7 +225,7 @@ export const ProfilerModal: React.FC<ProfilerModalProps> = ({ isOpen, onClose })
               <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>Frames deep</span>
             </div>
 
-            <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 10, padding: '12px 14px', border: '1px solid rgba(247,245,239,0.06)' }}>
+            <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 10, padding: '12px 14px', border: '1px solid var(--border-subtle)' }}>
               <span style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Peak Memory</span>
               <div style={{ fontSize: 18, fontWeight: 700, color: '#2ed573', fontFamily: "'JetBrains Mono', monospace", marginTop: 2 }}>
                 ~{(metrics.peakMemoryBytes / 1024).toFixed(2)} KB
@@ -235,7 +235,7 @@ export const ProfilerModal: React.FC<ProfilerModalProps> = ({ isOpen, onClose })
           </div>
 
           {/* Memory Footprint Timeline Chart */}
-          <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: 12, padding: 16, border: '1px solid rgba(247,245,239,0.08)' }}>
+          <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: 12, padding: 16, border: '1px solid var(--border)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <TrendingUp size={14} color="#2ed573" />
@@ -255,9 +255,9 @@ export const ProfilerModal: React.FC<ProfilerModalProps> = ({ isOpen, onClose })
               </defs>
 
               {/* Gridlines */}
-              <line x1={padding} y1={padding} x2={svgWidth - padding} y2={padding} stroke="rgba(247,245,239,0.06)" strokeDasharray="3 3" />
-              <line x1={padding} y1={svgHeight / 2} x2={svgWidth - padding} y2={svgHeight / 2} stroke="rgba(247,245,239,0.06)" strokeDasharray="3 3" />
-              <line x1={padding} y1={svgHeight - padding} x2={svgWidth - padding} y2={svgHeight - padding} stroke="rgba(247,245,239,0.12)" />
+              <line x1={padding} y1={padding} x2={svgWidth - padding} y2={padding} stroke="var(--border-subtle)" strokeDasharray="3 3" />
+              <line x1={padding} y1={svgHeight / 2} x2={svgWidth - padding} y2={svgHeight / 2} stroke="var(--border-subtle)" strokeDasharray="3 3" />
+              <line x1={padding} y1={svgHeight - padding} x2={svgWidth - padding} y2={svgHeight - padding} stroke="var(--border)" />
 
               {/* Area fill */}
               {metrics.memoryTimeline.length > 1 && (
@@ -297,7 +297,7 @@ export const ProfilerModal: React.FC<ProfilerModalProps> = ({ isOpen, onClose })
             <span style={{ fontSize: 11, fontWeight: 700, color: '#D6523A', textTransform: 'uppercase' }}>
               Complexity Analysis
             </span>
-            <p style={{ margin: '4px 0 0', fontSize: 12, color: 'rgba(247, 245, 239, 0.85)', lineHeight: 1.5 }}>
+            <p style={{ margin: '4px 0 0', fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
               {metrics.complexityExplanation}
             </p>
           </div>
@@ -310,7 +310,7 @@ export const ProfilerModal: React.FC<ProfilerModalProps> = ({ isOpen, onClose })
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '14px 20px',
-            borderTop: '1px solid rgba(247, 245, 239, 0.08)',
+            borderTop: '1px solid var(--border)',
             background: 'rgba(0,0,0,0.2)',
           }}
         >
@@ -323,9 +323,9 @@ export const ProfilerModal: React.FC<ProfilerModalProps> = ({ isOpen, onClose })
                 gap: 6,
                 padding: '6px 12px',
                 background: 'rgba(255,255,255,0.06)',
-                border: '1px solid rgba(247,245,239,0.12)',
+                border: '1px solid var(--border)',
                 borderRadius: 8,
-                color: '#F7F5EF',
+                color: 'var(--text-primary)',
                 fontSize: 12,
                 cursor: 'pointer',
               }}
@@ -341,9 +341,9 @@ export const ProfilerModal: React.FC<ProfilerModalProps> = ({ isOpen, onClose })
                 gap: 6,
                 padding: '6px 12px',
                 background: copied ? 'rgba(46, 213, 115, 0.2)' : 'rgba(255,255,255,0.06)',
-                border: `1px solid ${copied ? '#2ed573' : 'rgba(247,245,239,0.12)'}`,
+                border: `1px solid ${copied ? '#2ed573' : 'var(--border)'}`,
                 borderRadius: 8,
-                color: copied ? '#2ed573' : '#F7F5EF',
+                color: copied ? '#2ed573' : 'var(--text-primary)',
                 fontSize: 12,
                 cursor: 'pointer',
               }}
@@ -360,7 +360,7 @@ export const ProfilerModal: React.FC<ProfilerModalProps> = ({ isOpen, onClose })
               background: '#D6523A',
               border: 'none',
               borderRadius: 8,
-              color: '#F7F5EF',
+              color: '#FFFFFF',
               fontSize: 12,
               fontWeight: 600,
               cursor: 'pointer',

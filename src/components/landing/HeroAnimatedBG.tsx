@@ -63,11 +63,25 @@ function makeRandom() {
   return arr;
 }
 
-const BAR_COLORS: Record<Bar['state'], string> = {
+const DARK_BAR_COLORS: Record<Bar['state'], string> = {
   default: 'rgba(247,245,239,0.13)',
   compare: 'rgba(214,82,58,0.75)',
   swap: 'rgba(214,82,58,1)',
   sorted: 'rgba(63,185,80,0.38)',
+};
+
+const LIGHT_BAR_COLORS: Record<Bar['state'], string> = {
+  default: 'rgba(16, 18, 22, 0.11)',
+  compare: 'rgba(214, 82, 58, 0.58)',
+  swap: 'rgba(214, 82, 58, 0.88)',
+  sorted: 'rgba(35, 122, 75, 0.30)',
+};
+
+const LIGHT_BAR_STROKES: Record<Bar['state'], string> = {
+  default: 'rgba(16, 18, 22, 0.15)',
+  compare: 'rgba(191, 68, 46, 0.72)',
+  swap: 'rgba(191, 68, 46, 0.95)',
+  sorted: 'rgba(35, 122, 75, 0.42)',
 };
 
 export function HeroAnimatedBG() {
@@ -104,29 +118,44 @@ export function HeroAnimatedBG() {
       const step = steps[stepIndex];
       if (!step) return;
 
+      const dpr = window.devicePixelRatio || 1;
       const barW = (w / BAR_COUNT) * 0.72;
       const gap = w / BAR_COUNT;
       const maxH = h * 0.68;
       const baseY = h * 0.92;
+
+      const isLight = document.documentElement.classList.contains('light');
+      const palette = isLight ? LIGHT_BAR_COLORS : DARK_BAR_COLORS;
+
+      if (isLight) {
+        ctx!.strokeStyle = 'rgba(16, 18, 22, 0.12)';
+        ctx!.lineWidth = Math.max(1, dpr);
+        ctx!.beginPath();
+        ctx!.moveTo(0, baseY);
+        ctx!.lineTo(w, baseY);
+        ctx!.stroke();
+      }
 
       step.bars.forEach((bar, i) => {
         const bh = bar.height * maxH;
         const x = i * gap + (gap - barW) / 2;
         const y = baseY - bh;
 
-        // Subtle glow for active bars
-        if (bar.state === 'compare' || bar.state === 'swap') {
+        if (!isLight && (bar.state === 'compare' || bar.state === 'swap')) {
           ctx!.shadowBlur = 18;
           ctx!.shadowColor = 'rgba(214,82,58,0.6)';
-        } else if (bar.state === 'sorted') {
+        } else if (!isLight && bar.state === 'sorted') {
           ctx!.shadowBlur = 6;
           ctx!.shadowColor = 'rgba(63,185,80,0.3)';
+        } else if (isLight && bar.state === 'swap') {
+          ctx!.shadowBlur = 10 * dpr;
+          ctx!.shadowColor = 'rgba(214,82,58,0.28)';
         } else {
           ctx!.shadowBlur = 0;
         }
 
-        ctx!.fillStyle = BAR_COLORS[bar.state];
-        const r = Math.min(3 * window.devicePixelRatio, barW / 4);
+        ctx!.fillStyle = palette[bar.state];
+        const r = Math.min(3 * dpr, barW / 4);
         ctx!.beginPath();
         ctx!.moveTo(x + r, y);
         ctx!.lineTo(x + barW - r, y);
@@ -137,6 +166,13 @@ export function HeroAnimatedBG() {
         ctx!.quadraticCurveTo(x, y, x + r, y);
         ctx!.closePath();
         ctx!.fill();
+
+        if (isLight) {
+          ctx!.shadowBlur = 0;
+          ctx!.strokeStyle = LIGHT_BAR_STROKES[bar.state];
+          ctx!.lineWidth = Math.max(1, dpr * 0.9);
+          ctx!.stroke();
+        }
       });
 
       ctx!.shadowBlur = 0;

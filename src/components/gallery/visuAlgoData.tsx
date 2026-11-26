@@ -38,10 +38,10 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
       <svg width="100%" height="100%" viewBox="0 0 240 140" style={{ background: 'transparent' }}>
         <g transform="translate(18, 42)">
           {[
-            { val: 2, c: '#F7F5EF' },
+            { val: 2, c: 'var(--text-primary)' },
             { val: 5, c: 'var(--accent)' },
-            { val: 1, c: '#F7F5EF' },
-            { val: '∅', c: '#9B9A95' },
+            { val: 1, c: 'var(--text-primary)' },
+            { val: '∅', c: 'var(--text-secondary)' },
           ].map((item, i) => (
             <g key={i} transform={`translate(${i * 51}, 0)`}>
               <rect
@@ -49,8 +49,8 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
                 y="0"
                 width="48"
                 height="34"
-                fill="#141720"
-                stroke={i === 1 ? 'var(--accent)' : 'rgba(247, 245, 239, 0.18)'}
+                fill="var(--bg-secondary)"
+                stroke={i === 1 ? 'var(--accent)' : 'var(--border)'}
                 strokeWidth={i === 1 ? '2' : '1.5'}
                 rx="4"
               />
@@ -69,7 +69,7 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
                 x="24"
                 y="52"
                 textAnchor="middle"
-                fill={i === 1 ? 'var(--accent)' : 'rgba(247, 245, 239, 0.45)'}
+                fill={i === 1 ? 'var(--accent)' : 'var(--text-secondary)'}
                 fontSize="11"
                 fontWeight="700"
                 fontFamily="'JetBrains Mono', monospace"
@@ -102,17 +102,17 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
         <g transform="translate(42, 22)">
           {[
             { h: 35, x: 0, c: '#38bdf8' },
-            { h: 22, x: 30, c: 'rgba(247, 245, 239, 0.25)' },
+            { h: 22, x: 30, c: 'var(--border)' },
             { h: 68, x: 60, c: 'var(--accent)' },
             { h: 95, x: 90, c: '#38A169' },
             { h: 50, x: 120, c: '#E5A93C' },
           ].map((bar, i) => (
             <g key={i}>
               <rect x={bar.x} y={100 - bar.h} width="22" height={bar.h} fill={bar.c} rx="3" />
-              <rect x={bar.x} y={100 - bar.h} width="22" height={bar.h} fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="1" rx="3" />
+              <rect x={bar.x} y={100 - bar.h} width="22" height={bar.h} fill="none" stroke="var(--svg-edge)" strokeWidth="1" rx="3" />
             </g>
           ))}
-          <line x1="-5" y1="102" x2="148" y2="102" stroke="rgba(247, 245, 239, 0.15)" strokeWidth="1.5" />
+          <line x1="-5" y1="102" x2="148" y2="102" stroke="var(--svg-edge)" strokeWidth="1.5" />
         </g>
       </svg>
     ),
@@ -135,13 +135,13 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
     renderThumbnail: () => (
       <svg width="100%" height="100%" viewBox="0 0 240 140" style={{ background: 'transparent' }}>
         <g transform="translate(48, 26)">
-          <text x="0" y="20" fill="#9B9A95" fontSize="13" fontWeight="600" fontFamily="'JetBrains Mono', monospace">
+          <text x="0" y="20" fill="var(--text-secondary)" fontSize="13" fontWeight="600" fontFamily="'JetBrains Mono', monospace">
             MASK:  1 0 1 1
           </text>
           <text x="0" y="44" fill="var(--accent)" fontSize="13" fontWeight="800" fontFamily="'JetBrains Mono', monospace">
             &amp; BIT:  0 0 1 0
           </text>
-          <line x1="-5" y1="56" x2="145" y2="56" stroke="rgba(247, 245, 239, 0.2)" strokeWidth="1.5" />
+          <line x1="-5" y1="56" x2="145" y2="56" stroke="var(--svg-edge)" strokeWidth="1.5" />
           <text x="0" y="78" fill="#84cc16" fontSize="15" fontWeight="800" fontFamily="'JetBrains Mono', monospace">
             RES:   0 0 1 0  ✓
           </text>
@@ -168,21 +168,21 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
       <svg width="100%" height="100%" viewBox="0 0 240 140" style={{ background: 'transparent' }}>
         <g transform="translate(24, 34)">
           {/* Node 1 Head */}
-          <rect x="0" y="0" width="34" height="26" fill="#141720" stroke="var(--accent)" strokeWidth="1.5" rx="4" />
-          <text x="17" y="17" fill="#F7F5EF" fontSize="11" fontWeight="800" textAnchor="middle" fontFamily="'JetBrains Mono', monospace">
+          <rect x="0" y="0" width="34" height="26" fill="var(--bg-secondary)" stroke="var(--accent)" strokeWidth="1.5" rx="4" />
+          <text x="17" y="17" fill="var(--text-primary)" fontSize="11" fontWeight="800" textAnchor="middle" fontFamily="'JetBrains Mono', monospace">
             H:1
           </text>
           {/* Arrow 1 */}
           <path d="M 34 13 L 64 13 L 64 43 L 74 43" fill="none" stroke="var(--accent)" strokeWidth="2" />
           {/* Node 2 */}
-          <rect x="74" y="30" width="34" height="26" fill="#141720" stroke="rgba(247, 245, 239, 0.3)" strokeWidth="1.5" rx="4" />
-          <text x="91" y="47" fill="#F7F5EF" fontSize="12" fontWeight="700" textAnchor="middle" fontFamily="'JetBrains Mono', monospace">
+          <rect x="74" y="30" width="34" height="26" fill="var(--bg-secondary)" stroke="var(--svg-edge)" strokeWidth="1.5" rx="4" />
+          <text x="91" y="47" fill="var(--text-primary)" fontSize="12" fontWeight="700" textAnchor="middle" fontFamily="'JetBrains Mono', monospace">
             2
           </text>
           {/* Arrow 2 */}
-          <path d="M 108 43 L 138 43 L 138 73 L 148 73" fill="none" stroke="rgba(247, 245, 239, 0.5)" strokeWidth="2" />
+          <path d="M 108 43 L 138 43 L 138 73 L 148 73" fill="none" stroke="var(--svg-edge)" strokeWidth="2" />
           {/* Node 3 Tail */}
-          <rect x="148" y="60" width="34" height="26" fill="#141720" stroke="#38A169" strokeWidth="1.5" rx="4" />
+          <rect x="148" y="60" width="34" height="26" fill="var(--bg-secondary)" stroke="#38A169" strokeWidth="1.5" rx="4" />
           <text x="165" y="77" fill="#38A169" fontSize="11" fontWeight="800" textAnchor="middle" fontFamily="'JetBrains Mono', monospace">
             T:3
           </text>
@@ -207,7 +207,7 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
     sampleInput: '[[35, 12, 89, 42, 60, 15, 77]]',
     renderThumbnail: () => (
       <svg width="100%" height="100%" viewBox="0 0 240 140" style={{ background: 'transparent' }}>
-        <g stroke="rgba(247, 245, 239, 0.3)" strokeWidth="1.5" fill="none">
+        <g stroke="var(--svg-edge)" strokeWidth="1.5" fill="none">
           <line x1="120" y1="28" x2="70" y2="60" />
           <line x1="120" y1="28" x2="170" y2="60" />
           <line x1="70" y1="60" x2="45" y2="95" />
@@ -216,14 +216,14 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
           <line x1="170" y1="60" x2="195" y2="95" />
         </g>
         <g>
-          <circle cx="120" cy="28" r="9" fill="var(--accent)" stroke="#F7F5EF" strokeWidth="1.5" />
-          <text x="120" y="32" fill="#F7F5EF" fontSize="9" fontWeight="800" textAnchor="middle" fontFamily="monospace">10</text>
-          <circle cx="70" cy="60" r="8" fill="#141720" stroke="#06b6d4" strokeWidth="1.5" />
-          <circle cx="170" cy="60" r="8" fill="#141720" stroke="#06b6d4" strokeWidth="1.5" />
-          <circle cx="45" cy="95" r="6" fill="#141720" stroke="rgba(247, 245, 239, 0.4)" strokeWidth="1" />
-          <circle cx="95" cy="95" r="6" fill="#141720" stroke="rgba(247, 245, 239, 0.4)" strokeWidth="1" />
-          <circle cx="145" cy="95" r="6" fill="#141720" stroke="rgba(247, 245, 239, 0.4)" strokeWidth="1" />
-          <circle cx="195" cy="95" r="6" fill="#141720" stroke="rgba(247, 245, 239, 0.4)" strokeWidth="1" />
+          <circle cx="120" cy="28" r="9" fill="var(--accent)" stroke="var(--text-primary)" strokeWidth="1.5" />
+          <text x="120" y="32" fill="#FFFFFF" fontSize="9" fontWeight="800" textAnchor="middle" fontFamily="monospace">10</text>
+          <circle cx="70" cy="60" r="8" fill="var(--bg-secondary)" stroke="#06b6d4" strokeWidth="1.5" />
+          <circle cx="170" cy="60" r="8" fill="var(--bg-secondary)" stroke="#06b6d4" strokeWidth="1.5" />
+          <circle cx="45" cy="95" r="6" fill="var(--bg-secondary)" stroke="var(--svg-node-stroke)" strokeWidth="1" />
+          <circle cx="95" cy="95" r="6" fill="var(--bg-secondary)" stroke="var(--svg-node-stroke)" strokeWidth="1" />
+          <circle cx="145" cy="95" r="6" fill="var(--bg-secondary)" stroke="var(--svg-node-stroke)" strokeWidth="1" />
+          <circle cx="195" cy="95" r="6" fill="var(--bg-secondary)" stroke="var(--svg-node-stroke)" strokeWidth="1" />
         </g>
       </svg>
     ),
@@ -248,11 +248,11 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
     renderThumbnail: () => (
       <svg width="100%" height="100%" viewBox="0 0 240 140" style={{ background: 'transparent' }}>
         <g transform="translate(32, 18)">
-          <circle cx="18" cy="46" r="8" fill="var(--accent)" stroke="#F7F5EF" strokeWidth="1.5" />
-          <text x="18" y="50" fill="#F7F5EF" fontSize="9" fontWeight="800" textAnchor="middle" fontFamily="monospace">K</text>
+          <circle cx="18" cy="46" r="8" fill="var(--accent)" stroke="var(--text-primary)" strokeWidth="1.5" />
+          <text x="18" y="50" fill="#FFFFFF" fontSize="9" fontWeight="800" textAnchor="middle" fontFamily="monospace">K</text>
           <path d="M 26 46 L 76 46" stroke="var(--accent)" strokeWidth="2" fill="none" strokeDasharray="3,3" />
           {/* Hash gate */}
-          <rect x="76" y="16" width="22" height="74" fill="#141720" stroke="rgba(247, 245, 239, 0.25)" rx="4" />
+          <rect x="76" y="16" width="22" height="74" fill="var(--bg-secondary)" stroke="var(--svg-edge)" rx="4" />
           <text x="87" y="57" fill="#f59e0b" fontSize="10" fontWeight="800" textAnchor="middle" fontFamily="monospace">h()</text>
           <path d="M 98 46 L 132 46 L 132 54 L 140 54" stroke="#38A169" strokeWidth="2" fill="none" />
           {/* Buckets */}
@@ -264,12 +264,12 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
                   y="0"
                   width="44"
                   height="14"
-                  fill={idx === 2 ? '#38A169' : '#141720'}
-                  stroke={idx === 2 ? '#38A169' : 'rgba(247, 245, 239, 0.15)'}
+                  fill={idx === 2 ? '#38A169' : 'var(--bg-secondary)'}
+                  stroke={idx === 2 ? '#38A169' : 'var(--border)'}
                   strokeWidth="1.5"
                   rx="2"
                 />
-                <text x="-6" y="11" fill="rgba(247, 245, 239, 0.4)" fontSize="9" fontWeight="700" textAnchor="end" fontFamily="monospace">
+                <text x="-6" y="11" fill="var(--text-secondary)" fontSize="9" fontWeight="700" textAnchor="end" fontFamily="monospace">
                   {idx}
                 </text>
               </g>
@@ -296,7 +296,7 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
     sampleInput: '[[50, 30, 70, 20, 40, 60, 80], 40]',
     renderThumbnail: () => (
       <svg width="100%" height="100%" viewBox="0 0 240 140" style={{ background: 'transparent' }}>
-        <g stroke="rgba(247, 245, 239, 0.3)" strokeWidth="1.5" fill="none">
+        <g stroke="var(--svg-edge)" strokeWidth="1.5" fill="none">
           <line x1="120" y1="28" x2="65" y2="58" />
           <line x1="120" y1="28" x2="160" y2="58" />
           <line x1="160" y1="58" x2="190" y2="88" />
@@ -304,15 +304,15 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
           <line x1="65" y1="58" x2="105" y2="98" />
         </g>
         <g>
-          <circle cx="120" cy="28" r="9" fill="#141720" stroke="#ec4899" strokeWidth="2" />
-          <text x="120" y="32" fill="#F7F5EF" fontSize="9" fontWeight="800" textAnchor="middle" fontFamily="monospace">50</text>
-          <circle cx="65" cy="58" r="8" fill="var(--accent)" stroke="#F7F5EF" strokeWidth="1.5" />
-          <text x="65" y="62" fill="#F7F5EF" fontSize="9" fontWeight="800" textAnchor="middle" fontFamily="monospace">30</text>
-          <circle cx="160" cy="58" r="8" fill="#141720" stroke="#ec4899" strokeWidth="1.5" />
-          <text x="160" y="62" fill="#F7F5EF" fontSize="9" fontWeight="800" textAnchor="middle" fontFamily="monospace">70</text>
-          <circle cx="40" cy="88" r="6" fill="#141720" stroke="rgba(247, 245, 239, 0.4)" strokeWidth="1" />
-          <circle cx="105" cy="98" r="7" fill="#38A169" stroke="#F7F5EF" strokeWidth="1.5" />
-          <circle cx="190" cy="88" r="6" fill="#141720" stroke="rgba(247, 245, 239, 0.4)" strokeWidth="1" />
+          <circle cx="120" cy="28" r="9" fill="var(--bg-secondary)" stroke="#ec4899" strokeWidth="2" />
+          <text x="120" y="32" fill="var(--text-primary)" fontSize="9" fontWeight="800" textAnchor="middle" fontFamily="monospace">50</text>
+          <circle cx="65" cy="58" r="8" fill="var(--accent)" stroke="var(--text-primary)" strokeWidth="1.5" />
+          <text x="65" y="62" fill="#FFFFFF" fontSize="9" fontWeight="800" textAnchor="middle" fontFamily="monospace">30</text>
+          <circle cx="160" cy="58" r="8" fill="var(--bg-secondary)" stroke="#ec4899" strokeWidth="1.5" />
+          <text x="160" y="62" fill="var(--text-primary)" fontSize="9" fontWeight="800" textAnchor="middle" fontFamily="monospace">70</text>
+          <circle cx="40" cy="88" r="6" fill="var(--bg-secondary)" stroke="var(--svg-node-stroke)" strokeWidth="1" />
+          <circle cx="105" cy="98" r="7" fill="#38A169" stroke="var(--text-primary)" strokeWidth="1.5" />
+          <circle cx="190" cy="88" r="6" fill="var(--bg-secondary)" stroke="var(--svg-node-stroke)" strokeWidth="1" />
         </g>
       </svg>
     ),
@@ -334,7 +334,7 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
     sampleInput: '[[[0, 1], [1, 2], [2, 0], [1, 3]]]',
     renderThumbnail: () => (
       <svg width="100%" height="100%" viewBox="0 0 240 140" style={{ background: 'transparent' }}>
-        <g stroke="rgba(247, 245, 239, 0.35)" strokeWidth="2" fill="none">
+        <g stroke="var(--svg-edge)" strokeWidth="2" fill="none">
           <line x1="60" y1="35" x2="135" y2="35" />
           <line x1="135" y1="35" x2="195" y2="35" />
           <line x1="195" y1="35" x2="195" y2="70" />
@@ -344,14 +344,14 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
           <line x1="60" y1="80" x2="110" y2="118" />
           <line x1="135" y1="80" x2="110" y2="118" stroke="var(--accent)" strokeWidth="2.5" />
         </g>
-        <g fill="#141720" stroke="var(--accent)" strokeWidth="2">
+        <g fill="var(--bg-secondary)" stroke="var(--accent)" strokeWidth="2">
           <circle cx="60" cy="35" r="6" />
           <circle cx="135" cy="35" r="6" />
           <circle cx="195" cy="35" r="5" />
           <circle cx="195" cy="70" r="5" />
-          <circle cx="60" cy="80" r="7" fill="var(--accent)" stroke="#F7F5EF" />
-          <circle cx="135" cy="80" r="7" fill="var(--accent)" stroke="#F7F5EF" />
-          <circle cx="110" cy="118" r="7" fill="#F7F5EF" stroke="var(--accent)" />
+          <circle cx="60" cy="80" r="7" fill="var(--accent)" stroke="var(--text-primary)" />
+          <circle cx="135" cy="80" r="7" fill="var(--accent)" stroke="var(--text-primary)" />
+          <circle cx="110" cy="118" r="7" fill="var(--text-primary)" stroke="var(--accent)" />
         </g>
       </svg>
     ),
@@ -373,19 +373,19 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
     sampleInput: '[6]',
     renderThumbnail: () => (
       <svg width="100%" height="100%" viewBox="0 0 240 140" style={{ background: 'transparent' }}>
-        <g stroke="rgba(247, 245, 239, 0.35)" strokeWidth="2" fill="none">
+        <g stroke="var(--svg-edge)" strokeWidth="2" fill="none">
           <line x1="85" y1="30" x2="55" y2="65" />
           <line x1="85" y1="30" x2="115" y2="65" />
           <line x1="55" y1="65" x2="40" y2="100" />
           <line x1="175" y1="30" x2="175" y2="70" />
         </g>
         <g>
-          <circle cx="85" cy="30" r="8" fill="#eab308" stroke="#F7F5EF" strokeWidth="1.5" />
-          <circle cx="55" cy="65" r="7" fill="#141720" stroke="#eab308" strokeWidth="1.5" />
-          <circle cx="115" cy="65" r="7" fill="#141720" stroke="#eab308" strokeWidth="1.5" />
-          <circle cx="40" cy="100" r="7" fill="#141720" stroke="rgba(247, 245, 239, 0.4)" strokeWidth="1.5" />
-          <circle cx="175" cy="30" r="8" fill="var(--accent)" stroke="#F7F5EF" strokeWidth="1.5" />
-          <circle cx="175" cy="70" r="7" fill="#141720" stroke="var(--accent)" strokeWidth="1.5" />
+          <circle cx="85" cy="30" r="8" fill="#eab308" stroke="var(--text-primary)" strokeWidth="1.5" />
+          <circle cx="55" cy="65" r="7" fill="var(--bg-secondary)" stroke="#eab308" strokeWidth="1.5" />
+          <circle cx="115" cy="65" r="7" fill="var(--bg-secondary)" stroke="#eab308" strokeWidth="1.5" />
+          <circle cx="40" cy="100" r="7" fill="var(--bg-secondary)" stroke="var(--svg-node-stroke)" strokeWidth="1.5" />
+          <circle cx="175" cy="30" r="8" fill="var(--accent)" stroke="var(--text-primary)" strokeWidth="1.5" />
+          <circle cx="175" cy="70" r="7" fill="var(--bg-secondary)" stroke="var(--accent)" strokeWidth="1.5" />
         </g>
       </svg>
     ),
@@ -407,20 +407,20 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
     sampleInput: '[8]',
     renderThumbnail: () => (
       <svg width="100%" height="100%" viewBox="0 0 240 140" style={{ background: 'transparent' }}>
-        <g stroke="rgba(247, 245, 239, 0.35)" strokeWidth="1.5" fill="none">
+        <g stroke="var(--svg-edge)" strokeWidth="1.5" fill="none">
           <line x1="30" y1="40" x2="195" y2="40" stroke="#f97316" strokeWidth="2" />
           <line x1="30" y1="65" x2="115" y2="65" stroke="var(--accent)" strokeWidth="2" />
           <line x1="125" y1="65" x2="175" y2="65" />
         </g>
-        <g fill="#141720">
-          <circle cx="195" cy="40" r="7" fill="#f97316" stroke="#F7F5EF" strokeWidth="1.5" />
-          <circle cx="115" cy="65" r="6" fill="var(--accent)" stroke="#F7F5EF" strokeWidth="1.5" />
-          <circle cx="175" cy="65" r="5" stroke="rgba(247, 245, 239, 0.4)" strokeWidth="1" />
-          <circle cx="50" cy="85" r="5" stroke="rgba(247, 245, 239, 0.4)" strokeWidth="1" />
-          <circle cx="85" cy="85" r="5" stroke="rgba(247, 245, 239, 0.4)" strokeWidth="1" />
-          <circle cx="150" cy="85" r="5" stroke="rgba(247, 245, 239, 0.4)" strokeWidth="1" />
+        <g fill="var(--bg-secondary)">
+          <circle cx="195" cy="40" r="7" fill="#f97316" stroke="var(--text-primary)" strokeWidth="1.5" />
+          <circle cx="115" cy="65" r="6" fill="var(--accent)" stroke="var(--text-primary)" strokeWidth="1.5" />
+          <circle cx="175" cy="65" r="5" stroke="var(--svg-node-stroke)" strokeWidth="1" />
+          <circle cx="50" cy="85" r="5" stroke="var(--svg-node-stroke)" strokeWidth="1" />
+          <circle cx="85" cy="85" r="5" stroke="var(--svg-node-stroke)" strokeWidth="1" />
+          <circle cx="150" cy="85" r="5" stroke="var(--svg-node-stroke)" strokeWidth="1" />
         </g>
-        <text x="120" y="120" fill="#9B9A95" fontSize="10" fontWeight="700" textAnchor="middle" letterSpacing="8" fontFamily="'JetBrains Mono', monospace">
+        <text x="120" y="120" fill="var(--text-secondary)" fontSize="10" fontWeight="700" textAnchor="middle" letterSpacing="8" fontFamily="'JetBrains Mono', monospace">
           1 2 3 4 5 6 7 8
         </text>
       </svg>
@@ -445,7 +445,7 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
     sampleInput: '[[1, 3, 5, 7]]',
     renderThumbnail: () => (
       <svg width="100%" height="100%" viewBox="0 0 240 140" style={{ background: 'transparent' }}>
-        <g stroke="rgba(247, 245, 239, 0.3)" strokeWidth="1.5" fill="none">
+        <g stroke="var(--svg-edge)" strokeWidth="1.5" fill="none">
           <line x1="120" y1="35" x2="65" y2="70" />
           <line x1="120" y1="35" x2="175" y2="70" />
           <line x1="65" y1="70" x2="40" y2="105" />
@@ -454,32 +454,32 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
           <line x1="175" y1="70" x2="200" y2="105" />
         </g>
         <g transform="translate(120, 32)">
-          <rect x="-26" y="-12" width="52" height="20" fill="#141720" stroke="var(--accent)" strokeWidth="1.5" rx="3" />
-          <text x="0" y="2" fill="#F7F5EF" fontSize="9" fontWeight="700" textAnchor="middle" fontFamily="monospace">[0,3]:16</text>
+          <rect x="-26" y="-12" width="52" height="20" fill="var(--bg-secondary)" stroke="var(--accent)" strokeWidth="1.5" rx="3" />
+          <text x="0" y="2" fill="var(--text-primary)" fontSize="9" fontWeight="700" textAnchor="middle" fontFamily="monospace">[0,3]:16</text>
         </g>
         <g transform="translate(65, 70)">
-          <rect x="-22" y="-10" width="44" height="18" fill="#141720" stroke="#f59e0b" strokeWidth="1.5" rx="3" />
+          <rect x="-22" y="-10" width="44" height="18" fill="var(--bg-secondary)" stroke="#f59e0b" strokeWidth="1.5" rx="3" />
           <text x="0" y="3" fill="#f59e0b" fontSize="8" fontWeight="700" textAnchor="middle" fontFamily="monospace">[0,1]:4</text>
         </g>
         <g transform="translate(175, 70)">
-          <rect x="-22" y="-10" width="44" height="18" fill="#141720" stroke="#f59e0b" strokeWidth="1.5" rx="3" />
+          <rect x="-22" y="-10" width="44" height="18" fill="var(--bg-secondary)" stroke="#f59e0b" strokeWidth="1.5" rx="3" />
           <text x="0" y="3" fill="#f59e0b" fontSize="8" fontWeight="700" textAnchor="middle" fontFamily="monospace">[2,3]:12</text>
         </g>
         <g transform="translate(40, 105)">
-          <rect x="-16" y="-9" width="32" height="16" fill="#141720" stroke="rgba(247, 245, 239, 0.25)" rx="2" />
-          <text x="0" y="3" fill="#9B9A95" fontSize="7" fontWeight="600" textAnchor="middle" fontFamily="monospace">1</text>
+          <rect x="-16" y="-9" width="32" height="16" fill="var(--bg-secondary)" stroke="var(--svg-edge)" rx="2" />
+          <text x="0" y="3" fill="var(--text-secondary)" fontSize="7" fontWeight="600" textAnchor="middle" fontFamily="monospace">1</text>
         </g>
         <g transform="translate(90, 105)">
-          <rect x="-16" y="-9" width="32" height="16" fill="#141720" stroke="rgba(247, 245, 239, 0.25)" rx="2" />
-          <text x="0" y="3" fill="#9B9A95" fontSize="7" fontWeight="600" textAnchor="middle" fontFamily="monospace">3</text>
+          <rect x="-16" y="-9" width="32" height="16" fill="var(--bg-secondary)" stroke="var(--svg-edge)" rx="2" />
+          <text x="0" y="3" fill="var(--text-secondary)" fontSize="7" fontWeight="600" textAnchor="middle" fontFamily="monospace">3</text>
         </g>
         <g transform="translate(150, 105)">
-          <rect x="-16" y="-9" width="32" height="16" fill="#141720" stroke="rgba(247, 245, 239, 0.25)" rx="2" />
-          <text x="0" y="3" fill="#9B9A95" fontSize="7" fontWeight="600" textAnchor="middle" fontFamily="monospace">5</text>
+          <rect x="-16" y="-9" width="32" height="16" fill="var(--bg-secondary)" stroke="var(--svg-edge)" rx="2" />
+          <text x="0" y="3" fill="var(--text-secondary)" fontSize="7" fontWeight="600" textAnchor="middle" fontFamily="monospace">5</text>
         </g>
         <g transform="translate(200, 105)">
-          <rect x="-16" y="-9" width="32" height="16" fill="#141720" stroke="rgba(247, 245, 239, 0.25)" rx="2" />
-          <text x="0" y="3" fill="#9B9A95" fontSize="7" fontWeight="600" textAnchor="middle" fontFamily="monospace">7</text>
+          <rect x="-16" y="-9" width="32" height="16" fill="var(--bg-secondary)" stroke="var(--svg-edge)" rx="2" />
+          <text x="0" y="3" fill="var(--text-secondary)" fontSize="7" fontWeight="600" textAnchor="middle" fontFamily="monospace">7</text>
         </g>
       </svg>
     ),
@@ -501,7 +501,7 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
     sampleInput: '[4]',
     renderThumbnail: () => (
       <svg width="100%" height="100%" viewBox="0 0 240 140" style={{ background: 'transparent' }}>
-        <g stroke="rgba(247, 245, 239, 0.3)" strokeWidth="1.5" fill="none">
+        <g stroke="var(--svg-edge)" strokeWidth="1.5" fill="none">
           <line x1="120" y1="32" x2="80" y2="68" />
           <line x1="120" y1="32" x2="160" y2="68" />
           <line x1="80" y1="68" x2="55" y2="102" />
@@ -509,16 +509,16 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
           <line x1="160" y1="68" x2="140" y2="102" />
           <line x1="160" y1="68" x2="180" y2="102" />
         </g>
-        <circle cx="120" cy="32" r="10" fill="var(--accent)" stroke="#F7F5EF" strokeWidth="1.5" />
-        <text x="120" y="36" fill="#F7F5EF" fontSize="9" fontWeight="800" textAnchor="middle" fontFamily="monospace">f(4)</text>
-        <circle cx="80" cy="68" r="9" fill="#141720" stroke="#22c55e" strokeWidth="1.5" />
+        <circle cx="120" cy="32" r="10" fill="var(--accent)" stroke="var(--text-primary)" strokeWidth="1.5" />
+        <text x="120" y="36" fill="#FFFFFF" fontSize="9" fontWeight="800" textAnchor="middle" fontFamily="monospace">f(4)</text>
+        <circle cx="80" cy="68" r="9" fill="var(--bg-secondary)" stroke="#22c55e" strokeWidth="1.5" />
         <text x="80" y="72" fill="#22c55e" fontSize="9" fontWeight="800" textAnchor="middle" fontFamily="monospace">f(3)</text>
-        <circle cx="160" cy="68" r="9" fill="#141720" stroke="#22c55e" strokeWidth="1.5" />
+        <circle cx="160" cy="68" r="9" fill="var(--bg-secondary)" stroke="#22c55e" strokeWidth="1.5" />
         <text x="160" y="72" fill="#22c55e" fontSize="9" fontWeight="800" textAnchor="middle" fontFamily="monospace">f(2)</text>
-        <circle cx="55" cy="102" r="7" fill="#141720" stroke="rgba(247, 245, 239, 0.3)" strokeWidth="1" />
-        <circle cx="105" cy="102" r="7" fill="#141720" stroke="rgba(247, 245, 239, 0.3)" strokeWidth="1" />
-        <circle cx="140" cy="102" r="7" fill="#141720" stroke="rgba(247, 245, 239, 0.3)" strokeWidth="1" />
-        <circle cx="180" cy="102" r="7" fill="#141720" stroke="rgba(247, 245, 239, 0.3)" strokeWidth="1" />
+        <circle cx="55" cy="102" r="7" fill="var(--bg-secondary)" stroke="var(--svg-edge)" strokeWidth="1" />
+        <circle cx="105" cy="102" r="7" fill="var(--bg-secondary)" stroke="var(--svg-edge)" strokeWidth="1" />
+        <circle cx="140" cy="102" r="7" fill="var(--bg-secondary)" stroke="var(--svg-edge)" strokeWidth="1" />
+        <circle cx="180" cy="102" r="7" fill="var(--bg-secondary)" stroke="var(--svg-edge)" strokeWidth="1" />
       </svg>
     ),
   },
@@ -539,7 +539,7 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
     sampleInput: '[[[1, 2], [0, 2, 3], [0, 1, 3], [1, 2]], 0]',
     renderThumbnail: () => (
       <svg width="100%" height="100%" viewBox="0 0 240 140" style={{ background: 'transparent' }}>
-        <g stroke="rgba(247, 245, 239, 0.3)" strokeWidth="2" fill="none">
+        <g stroke="var(--svg-edge)" strokeWidth="2" fill="none">
           <line x1="80" y1="40" x2="160" y2="40" stroke="#6366f1" strokeWidth="2.5" />
           <line x1="80" y1="40" x2="50" y2="90" stroke="var(--accent)" strokeWidth="2.5" />
           <line x1="160" y1="40" x2="190" y2="90" />
@@ -548,11 +548,11 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
           <line x1="80" y1="40" x2="120" y2="110" stroke="#6366f1" strokeWidth="2" />
         </g>
         <g>
-          <circle cx="80" cy="40" r="8" fill="var(--accent)" stroke="#F7F5EF" strokeWidth="2" />
-          <circle cx="160" cy="40" r="7" fill="#6366f1" stroke="#F7F5EF" strokeWidth="1.5" />
-          <circle cx="50" cy="90" r="7" fill="#38A169" stroke="#F7F5EF" strokeWidth="1.5" />
-          <circle cx="190" cy="90" r="7" fill="#141720" stroke="rgba(247, 245, 239, 0.4)" strokeWidth="1.5" />
-          <circle cx="120" cy="110" r="7" fill="#141720" stroke="rgba(247, 245, 239, 0.4)" strokeWidth="1.5" />
+          <circle cx="80" cy="40" r="8" fill="var(--accent)" stroke="var(--text-primary)" strokeWidth="2" />
+          <circle cx="160" cy="40" r="7" fill="#6366f1" stroke="var(--text-primary)" strokeWidth="1.5" />
+          <circle cx="50" cy="90" r="7" fill="#38A169" stroke="var(--text-primary)" strokeWidth="1.5" />
+          <circle cx="190" cy="90" r="7" fill="var(--bg-secondary)" stroke="var(--svg-node-stroke)" strokeWidth="1.5" />
+          <circle cx="120" cy="110" r="7" fill="var(--bg-secondary)" stroke="var(--svg-node-stroke)" strokeWidth="1.5" />
         </g>
       </svg>
     ),
@@ -574,7 +574,7 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
     sampleInput: '[4, [[0, 1, 1], [1, 2, 2], [2, 3, 3], [0, 3, 4], [0, 2, 5]]]',
     renderThumbnail: () => (
       <svg width="100%" height="100%" viewBox="0 0 240 140" style={{ background: 'transparent' }}>
-        <g stroke="rgba(247, 245, 239, 0.15)" strokeWidth="1.5" strokeDasharray="3,3" fill="none">
+        <g stroke="var(--svg-edge)" strokeWidth="1.5" strokeDasharray="3,3" fill="none">
           <line x1="60" y1="40" x2="180" y2="105" />
           <line x1="60" y1="40" x2="110" y2="115" />
         </g>
@@ -584,7 +584,7 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
           <line x1="180" y1="105" x2="130" y2="75" />
           <line x1="130" y1="75" x2="110" y2="115" />
         </g>
-        <g fill="#141720" stroke="#ea580c" strokeWidth="2">
+        <g fill="var(--bg-secondary)" stroke="#ea580c" strokeWidth="2">
           <circle cx="60" cy="40" r="7" fill="#ea580c" />
           <circle cx="190" cy="45" r="7" />
           <circle cx="180" cy="105" r="7" />
@@ -611,7 +611,7 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
     sampleInput: '[4, [[[1, 4], [2, 1]], [[3, 1]], [[1, 2], [3, 5]], []], 0]',
     renderThumbnail: () => (
       <svg width="100%" height="100%" viewBox="0 0 240 140" style={{ background: 'transparent' }}>
-        <g stroke="rgba(247, 245, 239, 0.15)" strokeWidth="1.5" strokeDasharray="3,3" fill="none">
+        <g stroke="var(--svg-edge)" strokeWidth="1.5" strokeDasharray="3,3" fill="none">
           <line x1="50" y1="50" x2="130" y2="90" />
           <line x1="130" y1="90" x2="190" y2="120" />
         </g>
@@ -620,8 +620,8 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
           <line x1="190" y1="40" x2="130" y2="90" />
           <line x1="130" y1="90" x2="160" y2="125" />
         </g>
-        <g fill="#141720" stroke="#10b981" strokeWidth="2">
-          <circle cx="50" cy="50" r="8" fill="var(--accent)" stroke="#F7F5EF" />
+        <g fill="var(--bg-secondary)" stroke="#10b981" strokeWidth="2">
+          <circle cx="50" cy="50" r="8" fill="var(--accent)" stroke="var(--text-primary)" />
           <circle cx="190" cy="40" r="7" />
           <circle cx="130" cy="90" r="7" />
           <circle cx="160" cy="125" r="7" />
@@ -648,7 +648,7 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
     sampleInput: '[[3, 2, 0, -4], 1]',
     renderThumbnail: () => (
       <svg width="100%" height="100%" viewBox="0 0 240 140" style={{ background: 'transparent' }}>
-        <g stroke="rgba(247, 245, 239, 0.35)" strokeWidth="2" fill="none">
+        <g stroke="var(--svg-edge)" strokeWidth="2" fill="none">
           <line x1="50" y1="100" x2="80" y2="65" />
           <line x1="80" y1="65" x2="115" y2="55" />
           <line x1="115" y1="55" x2="160" y2="35" stroke="#06b6d4" strokeWidth="2.5" />
@@ -657,13 +657,13 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
           <line x1="180" y1="95" x2="135" y2="95" stroke="#06b6d4" strokeWidth="2.5" />
           <line x1="135" y1="95" x2="115" y2="55" stroke="#06b6d4" strokeWidth="2.5" />
         </g>
-        <g fill="#141720" stroke="#06b6d4" strokeWidth="2">
-          <circle cx="50" cy="100" r="5" stroke="rgba(247, 245, 239, 0.4)" />
-          <circle cx="80" cy="65" r="5" stroke="rgba(247, 245, 239, 0.4)" />
-          <circle cx="115" cy="55" r="7" fill="var(--accent)" stroke="#F7F5EF" />
+        <g fill="var(--bg-secondary)" stroke="#06b6d4" strokeWidth="2">
+          <circle cx="50" cy="100" r="5" stroke="var(--svg-node-stroke)" />
+          <circle cx="80" cy="65" r="5" stroke="var(--svg-node-stroke)" />
+          <circle cx="115" cy="55" r="7" fill="var(--accent)" stroke="var(--text-primary)" />
           <circle cx="160" cy="35" r="6" />
           <circle cx="195" cy="55" r="6" />
-          <circle cx="180" cy="95" r="7" fill="#38A169" stroke="#F7F5EF" />
+          <circle cx="180" cy="95" r="7" fill="#38A169" stroke="var(--text-primary)" />
           <circle cx="135" cy="95" r="6" />
         </g>
       </svg>
@@ -686,20 +686,20 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
     sampleInput: '["bananas"]',
     renderThumbnail: () => (
       <svg width="100%" height="100%" viewBox="0 0 240 140" style={{ background: 'transparent' }}>
-        <g stroke="rgba(247, 245, 239, 0.3)" strokeWidth="1.5" fill="none">
+        <g stroke="var(--svg-edge)" strokeWidth="1.5" fill="none">
           <line x1="120" y1="35" x2="65" y2="70" />
           <line x1="120" y1="35" x2="175" y2="70" />
           <line x1="65" y1="70" x2="120" y2="105" />
           <line x1="175" y1="70" x2="160" y2="105" />
           <line x1="175" y1="70" x2="195" y2="105" />
         </g>
-        <g fill="#141720" stroke="#f43f5e" strokeWidth="2">
+        <g fill="var(--bg-secondary)" stroke="#f43f5e" strokeWidth="2">
           <circle cx="120" cy="35" r="7" fill="#f43f5e" />
           <circle cx="65" cy="70" r="6" />
           <circle cx="175" cy="70" r="6" />
-          <circle cx="120" cy="105" r="5" stroke="rgba(247, 245, 239, 0.4)" />
-          <circle cx="160" cy="105" r="5" stroke="rgba(247, 245, 239, 0.4)" />
-          <circle cx="195" cy="105" r="5" stroke="rgba(247, 245, 239, 0.4)" />
+          <circle cx="120" cy="105" r="5" stroke="var(--svg-node-stroke)" />
+          <circle cx="160" cy="105" r="5" stroke="var(--svg-node-stroke)" />
+          <circle cx="195" cy="105" r="5" stroke="var(--svg-node-stroke)" />
         </g>
         <text x="86" y="50" fill="#f43f5e" fontSize="9" fontWeight="800" fontFamily="monospace">S</text>
         <text x="154" y="50" fill="#f43f5e" fontSize="9" fontWeight="800" fontFamily="monospace">GA</text>
@@ -724,13 +724,13 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
     renderThumbnail: () => (
       <svg width="100%" height="100%" viewBox="0 0 240 140" style={{ background: 'transparent' }}>
         <g transform="translate(42, 18)">
-          <rect x="0" y="0" width="156" height="104" fill="#141720" stroke="rgba(247, 245, 239, 0.18)" rx="4" />
-          <line x1="0" y1="24" x2="156" y2="24" stroke="rgba(247, 245, 239, 0.15)" strokeWidth="1" />
-          <line x1="32" y1="0" x2="32" y2="104" stroke="rgba(247, 245, 239, 0.1)" strokeWidth="1" />
-          <line x1="72" y1="0" x2="72" y2="104" stroke="rgba(247, 245, 239, 0.1)" strokeWidth="1" />
-          <text x="16" y="16" fill="#9B9A95" fontSize="9" fontWeight="700" textAnchor="middle" fontFamily="monospace">i</text>
+          <rect x="0" y="0" width="156" height="104" fill="var(--bg-secondary)" stroke="var(--svg-edge)" rx="4" />
+          <line x1="0" y1="24" x2="156" y2="24" stroke="var(--svg-edge)" strokeWidth="1" />
+          <line x1="32" y1="0" x2="32" y2="104" stroke="var(--svg-edge-subtle)" strokeWidth="1" />
+          <line x1="72" y1="0" x2="72" y2="104" stroke="var(--svg-edge-subtle)" strokeWidth="1" />
+          <text x="16" y="16" fill="var(--text-secondary)" fontSize="9" fontWeight="700" textAnchor="middle" fontFamily="monospace">i</text>
           <text x="52" y="16" fill="#3b82f6" fontSize="9" fontWeight="800" textAnchor="middle" fontFamily="monospace">SA[i]</text>
-          <text x="114" y="16" fill="#F7F5EF" fontSize="9" fontWeight="700" textAnchor="middle" fontFamily="monospace">Suffix</text>
+          <text x="114" y="16" fill="var(--text-primary)" fontSize="9" fontWeight="700" textAnchor="middle" fontFamily="monospace">Suffix</text>
           {[
             ['0', '5', 'a'],
             ['1', '3', 'ana'],
@@ -738,9 +738,9 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
             ['3', '0', 'banana'],
           ].map((row, r) => (
             <g key={r} transform={`translate(0, ${42 + r * 18})`}>
-              <text x="16" y="0" fill="#9B9A95" fontSize="8" textAnchor="middle" fontFamily="monospace">{row[0]}</text>
+              <text x="16" y="0" fill="var(--text-secondary)" fontSize="8" textAnchor="middle" fontFamily="monospace">{row[0]}</text>
               <text x="52" y="0" fill="#3b82f6" fontSize="9" fontWeight="700" textAnchor="middle" fontFamily="monospace">{row[1]}</text>
-              <text x="114" y="0" fill={r === 2 ? 'var(--accent)' : '#F7F5EF'} fontSize="9" fontWeight="700" textAnchor="middle" fontFamily="monospace">{row[2]}</text>
+              <text x="114" y="0" fill={r === 2 ? 'var(--accent)' : 'var(--text-primary)'} fontSize="9" fontWeight="700" textAnchor="middle" fontFamily="monospace">{row[2]}</text>
             </g>
           ))}
         </g>
@@ -767,13 +767,13 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
         <g stroke="#facc15" strokeWidth="2" fill="rgba(250, 204, 21, 0.12)">
           <polygon points="50,45 120,30 190,60 160,110 90,115 105,75" />
         </g>
-        <g fill="#141720" stroke="#facc15" strokeWidth="2">
+        <g fill="var(--bg-secondary)" stroke="#facc15" strokeWidth="2">
           <circle cx="50" cy="45" r="5" />
           <circle cx="120" cy="30" r="5" fill="#facc15" />
           <circle cx="190" cy="60" r="5" />
           <circle cx="160" cy="110" r="5" />
           <circle cx="90" cy="115" r="5" />
-          <circle cx="105" cy="75" r="6" fill="var(--accent)" stroke="#F7F5EF" />
+          <circle cx="105" cy="75" r="6" fill="var(--accent)" stroke="var(--text-primary)" />
         </g>
       </svg>
     ),
@@ -798,15 +798,15 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
         <g stroke="#f97316" strokeWidth="2" fill="rgba(249, 115, 22, 0.12)">
           <polygon points="55,45 185,40 175,105 60,95" />
         </g>
-        <g fill="#141720" stroke="#f97316" strokeWidth="2">
+        <g fill="var(--bg-secondary)" stroke="#f97316" strokeWidth="2">
           <circle cx="55" cy="45" r="6" fill="#f97316" />
           <circle cx="185" cy="40" r="6" fill="#f97316" />
           <circle cx="175" cy="105" r="6" fill="#f97316" />
           <circle cx="60" cy="95" r="6" fill="#f97316" />
           {/* Interior points */}
-          <circle cx="120" cy="70" r="4" fill="rgba(247, 245, 239, 0.3)" stroke="none" />
-          <circle cx="100" cy="60" r="4" fill="rgba(247, 245, 239, 0.3)" stroke="none" />
-          <circle cx="145" cy="85" r="4" fill="rgba(247, 245, 239, 0.3)" stroke="none" />
+          <circle cx="120" cy="70" r="4" fill="var(--text-secondary)" stroke="none" />
+          <circle cx="100" cy="60" r="4" fill="var(--text-secondary)" stroke="none" />
+          <circle cx="145" cy="85" r="4" fill="var(--text-secondary)" stroke="none" />
         </g>
       </svg>
     ),
@@ -830,21 +830,21 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
     sampleInput: '[[[0, 16, 13, 0], [0, 0, 10, 12], [0, 4, 0, 14], [0, 0, 0, 0]], 0, 3]',
     renderThumbnail: () => (
       <svg width="100%" height="100%" viewBox="0 0 240 140" style={{ background: 'transparent' }}>
-        <g stroke="rgba(247, 245, 239, 0.35)" strokeWidth="2" fill="none">
+        <g stroke="var(--svg-edge)" strokeWidth="2" fill="none">
           <line x1="50" y1="70" x2="105" y2="35" stroke="#14b8a6" strokeWidth="2.5" />
           <line x1="105" y1="35" x2="190" y2="70" stroke="#14b8a6" strokeWidth="2.5" />
           <line x1="50" y1="70" x2="90" y2="105" />
           <line x1="90" y1="105" x2="150" y2="100" />
           <line x1="150" y1="100" x2="190" y2="70" />
         </g>
-        <g fill="#141720" stroke="#14b8a6" strokeWidth="2">
-          <circle cx="50" cy="70" r="8" fill="var(--accent)" stroke="#F7F5EF" />
-          <text x="50" y="73" fill="#F7F5EF" fontSize="8" fontWeight="800" textAnchor="middle">S</text>
+        <g fill="var(--bg-secondary)" stroke="#14b8a6" strokeWidth="2">
+          <circle cx="50" cy="70" r="8" fill="var(--accent)" stroke="var(--text-primary)" />
+          <text x="50" y="73" fill="#FFFFFF" fontSize="8" fontWeight="800" textAnchor="middle">S</text>
           <circle cx="105" cy="35" r="6" />
           <circle cx="90" cy="105" r="6" />
           <circle cx="150" cy="100" r="6" />
-          <circle cx="190" cy="70" r="8" fill="#38A169" stroke="#F7F5EF" />
-          <text x="190" y="73" fill="#F7F5EF" fontSize="8" fontWeight="800" textAnchor="middle">T</text>
+          <circle cx="190" cy="70" r="8" fill="#38A169" stroke="var(--text-primary)" />
+          <text x="190" y="73" fill="#FFFFFF" fontSize="8" fontWeight="800" textAnchor="middle">T</text>
         </g>
       </svg>
     ),
@@ -866,7 +866,7 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
     sampleInput: '[[[1, 2], [0, 3], [0], [1]]]',
     renderThumbnail: () => (
       <svg width="100%" height="100%" viewBox="0 0 240 140" style={{ background: 'transparent' }}>
-        <g stroke="rgba(247, 245, 239, 0.18)" strokeWidth="1.5" strokeDasharray="3,3" fill="none">
+        <g stroke="var(--svg-edge)" strokeWidth="1.5" strokeDasharray="3,3" fill="none">
           <line x1="70" y1="45" x2="170" y2="45" />
           <line x1="70" y1="95" x2="170" y2="95" />
         </g>
@@ -874,7 +874,7 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
           <line x1="70" y1="45" x2="170" y2="95" />
           <line x1="70" y1="95" x2="170" y2="45" />
         </g>
-        <g fill="#141720" stroke="#ef4444" strokeWidth="2">
+        <g fill="var(--bg-secondary)" stroke="#ef4444" strokeWidth="2">
           <circle cx="70" cy="45" r="7" fill="#ef4444" />
           <circle cx="70" cy="95" r="7" fill="#ef4444" />
           <circle cx="170" cy="45" r="7" fill="#ef4444" />
@@ -900,7 +900,7 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
     sampleInput: '[[[0, 1], [1, 2], [2, 3], [3, 4], [4, 0]]]',
     renderThumbnail: () => (
       <svg width="100%" height="100%" viewBox="0 0 240 140" style={{ background: 'transparent' }}>
-        <g stroke="rgba(247, 245, 239, 0.3)" strokeWidth="2" fill="none">
+        <g stroke="var(--svg-edge)" strokeWidth="2" fill="none">
           <line x1="70" y1="40" x2="135" y2="40" />
           <line x1="135" y1="40" x2="190" y2="40" />
           <line x1="70" y1="40" x2="70" y2="100" />
@@ -908,13 +908,13 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
           <line x1="70" y1="100" x2="190" y2="40" />
           <line x1="70" y1="100" x2="190" y2="100" />
         </g>
-        <g fill="#141720">
-          <circle cx="70" cy="40" r="8" fill="#84cc16" stroke="#F7F5EF" strokeWidth="1.5" />
-          <circle cx="135" cy="40" r="6" stroke="rgba(247, 245, 239, 0.4)" strokeWidth="1.5" />
-          <circle cx="190" cy="40" r="8" fill="#84cc16" stroke="#F7F5EF" strokeWidth="1.5" />
-          <circle cx="70" cy="100" r="8" fill="#84cc16" stroke="#F7F5EF" strokeWidth="1.5" />
-          <circle cx="135" cy="100" r="6" stroke="rgba(247, 245, 239, 0.4)" strokeWidth="1.5" />
-          <circle cx="190" cy="100" r="8" fill="#84cc16" stroke="#F7F5EF" strokeWidth="1.5" />
+        <g fill="var(--bg-secondary)">
+          <circle cx="70" cy="40" r="8" fill="#84cc16" stroke="var(--text-primary)" strokeWidth="1.5" />
+          <circle cx="135" cy="40" r="6" stroke="var(--svg-node-stroke)" strokeWidth="1.5" />
+          <circle cx="190" cy="40" r="8" fill="#84cc16" stroke="var(--text-primary)" strokeWidth="1.5" />
+          <circle cx="70" cy="100" r="8" fill="#84cc16" stroke="var(--text-primary)" strokeWidth="1.5" />
+          <circle cx="135" cy="100" r="6" stroke="var(--svg-node-stroke)" strokeWidth="1.5" />
+          <circle cx="190" cy="100" r="8" fill="#84cc16" stroke="var(--text-primary)" strokeWidth="1.5" />
         </g>
       </svg>
     ),
@@ -936,20 +936,20 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
     sampleInput: '[[0, 2, 4], [[0, 1, 2], [1, 2, 3], [2, 3, 1], [3, 4, 4]]]',
     renderThumbnail: () => (
       <svg width="100%" height="100%" viewBox="0 0 240 140" style={{ background: 'transparent' }}>
-        <g stroke="rgba(247, 245, 239, 0.2)" strokeWidth="1.5" fill="none">
+        <g stroke="var(--svg-edge)" strokeWidth="1.5" fill="none">
           <polygon points="120,30 180,65 160,115 80,115 60,65" />
-          <line x1="120" y1="30" x2="160" y2="115" stroke="rgba(247, 245, 239, 0.15)" />
+          <line x1="120" y1="30" x2="160" y2="115" stroke="var(--svg-edge)" />
         </g>
         <g stroke="#2563eb" strokeWidth="2.5" fill="none">
           <line x1="120" y1="30" x2="80" y2="115" />
           <line x1="180" y1="65" x2="80" y2="115" />
           <line x1="60" y1="65" x2="160" y2="115" />
         </g>
-        <g fill="#141720" stroke="#2563eb" strokeWidth="2">
-          <circle cx="120" cy="30" r="7" fill="var(--accent)" stroke="#F7F5EF" />
+        <g fill="var(--bg-secondary)" stroke="#2563eb" strokeWidth="2">
+          <circle cx="120" cy="30" r="7" fill="var(--accent)" stroke="var(--text-primary)" />
           <circle cx="180" cy="65" r="6" />
-          <circle cx="160" cy="115" r="7" fill="var(--accent)" stroke="#F7F5EF" />
-          <circle cx="80" cy="115" r="7" fill="var(--accent)" stroke="#F7F5EF" />
+          <circle cx="160" cy="115" r="7" fill="var(--accent)" stroke="var(--text-primary)" />
+          <circle cx="80" cy="115" r="7" fill="var(--accent)" stroke="var(--text-primary)" />
           <circle cx="60" cy="65" r="6" />
         </g>
       </svg>
@@ -972,7 +972,7 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
     sampleInput: '[[[0, 10, 15, 20], [10, 0, 35, 25], [15, 35, 0, 30], [20, 25, 30, 0]]]',
     renderThumbnail: () => (
       <svg width="100%" height="100%" viewBox="0 0 240 140" style={{ background: 'transparent' }}>
-        <g stroke="rgba(247, 245, 239, 0.15)" strokeWidth="1" strokeDasharray="3,3" fill="none">
+        <g stroke="var(--svg-edge)" strokeWidth="1" strokeDasharray="3,3" fill="none">
           <line x1="120" y1="35" x2="120" y2="75" />
           <line x1="55" y1="100" x2="120" y2="75" />
           <line x1="185" y1="100" x2="120" y2="75" />
@@ -980,11 +980,11 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
         <g stroke="#8b5cf6" strokeWidth="2.5" fill="rgba(139, 92, 246, 0.08)">
           <polygon points="120,35 185,100 55,100" />
         </g>
-        <g fill="#141720" stroke="#8b5cf6" strokeWidth="2">
-          <circle cx="120" cy="35" r="8" fill="var(--accent)" stroke="#F7F5EF" />
+        <g fill="var(--bg-secondary)" stroke="#8b5cf6" strokeWidth="2">
+          <circle cx="120" cy="35" r="8" fill="var(--accent)" stroke="var(--text-primary)" />
           <circle cx="185" cy="100" r="7" fill="#8b5cf6" />
           <circle cx="55" cy="100" r="7" fill="#8b5cf6" />
-          <circle cx="120" cy="75" r="5" stroke="rgba(247, 245, 239, 0.4)" />
+          <circle cx="120" cy="75" r="5" stroke="var(--svg-node-stroke)" />
         </g>
       </svg>
     ),
@@ -1010,32 +1010,32 @@ export const VISUALGO_ITEMS: VisuAlgoItem[] = [
       <svg width="100%" height="100%" viewBox="0 0 240 140" style={{ background: 'transparent' }}>
         {/* SAT */}
         <g transform="translate(120, 22)">
-          <rect x="-24" y="-10" width="48" height="20" fill="#141720" stroke="var(--accent)" strokeWidth="1.5" rx="3" />
+          <rect x="-24" y="-10" width="48" height="20" fill="var(--bg-secondary)" stroke="var(--accent)" strokeWidth="1.5" rx="3" />
           <text x="0" y="4" fill="var(--accent)" fontSize="9" fontWeight="800" textAnchor="middle" fontFamily="monospace">SAT</text>
         </g>
         {/* Arrow to 3-CNF-SAT */}
-        <line x1="120" y1="32" x2="120" y2="46" stroke="rgba(247, 245, 239, 0.4)" strokeWidth="1.5" />
+        <line x1="120" y1="32" x2="120" y2="46" stroke="var(--svg-node-stroke)" strokeWidth="1.5" />
         <g transform="translate(120, 56)">
-          <rect x="-35" y="-10" width="70" height="20" fill="#141720" stroke="#f97316" strokeWidth="1.5" rx="3" />
+          <rect x="-35" y="-10" width="70" height="20" fill="var(--bg-secondary)" stroke="#f97316" strokeWidth="1.5" rx="3" />
           <text x="0" y="4" fill="#f97316" fontSize="9" fontWeight="800" textAnchor="middle" fontFamily="monospace">3-CNF-SAT</text>
         </g>
         {/* Branching arrows */}
-        <line x1="100" y1="66" x2="65" y2="80" stroke="rgba(247, 245, 239, 0.4)" strokeWidth="1.5" />
-        <line x1="140" y1="66" x2="175" y2="80" stroke="rgba(247, 245, 239, 0.4)" strokeWidth="1.5" />
+        <line x1="100" y1="66" x2="65" y2="80" stroke="var(--svg-node-stroke)" strokeWidth="1.5" />
+        <line x1="140" y1="66" x2="175" y2="80" stroke="var(--svg-node-stroke)" strokeWidth="1.5" />
         {/* CLIQUE */}
         <g transform="translate(65, 90)">
-          <rect x="-26" y="-9" width="52" height="18" fill="#141720" stroke="rgba(247, 245, 239, 0.3)" rx="2" />
-          <text x="0" y="3" fill="#F7F5EF" fontSize="8" fontWeight="700" textAnchor="middle" fontFamily="monospace">CLIQUE</text>
+          <rect x="-26" y="-9" width="52" height="18" fill="var(--bg-secondary)" stroke="var(--svg-edge)" rx="2" />
+          <text x="0" y="3" fill="var(--text-primary)" fontSize="8" fontWeight="700" textAnchor="middle" fontFamily="monospace">CLIQUE</text>
         </g>
         {/* SUBSET-SUM */}
         <g transform="translate(175, 90)">
-          <rect x="-34" y="-9" width="68" height="18" fill="#141720" stroke="rgba(247, 245, 239, 0.3)" rx="2" />
-          <text x="0" y="3" fill="#F7F5EF" fontSize="8" fontWeight="700" textAnchor="middle" fontFamily="monospace">SUBSET-SUM</text>
+          <rect x="-34" y="-9" width="68" height="18" fill="var(--bg-secondary)" stroke="var(--svg-edge)" rx="2" />
+          <text x="0" y="3" fill="var(--text-primary)" fontSize="8" fontWeight="700" textAnchor="middle" fontFamily="monospace">SUBSET-SUM</text>
         </g>
         {/* Arrow to VERTEX COVER */}
-        <line x1="65" y1="99" x2="65" y2="112" stroke="rgba(247, 245, 239, 0.4)" strokeWidth="1.5" />
+        <line x1="65" y1="99" x2="65" y2="112" stroke="var(--svg-node-stroke)" strokeWidth="1.5" />
         <g transform="translate(65, 120)">
-          <rect x="-36" y="-8" width="72" height="16" fill="#141720" stroke="#84cc16" strokeWidth="1.5" rx="2" />
+          <rect x="-36" y="-8" width="72" height="16" fill="var(--bg-secondary)" stroke="#84cc16" strokeWidth="1.5" rx="2" />
           <text x="0" y="3" fill="#84cc16" fontSize="7" fontWeight="800" textAnchor="middle" fontFamily="monospace">VERTEX COVER</text>
         </g>
       </svg>

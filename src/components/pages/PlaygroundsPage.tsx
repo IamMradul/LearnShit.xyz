@@ -10,8 +10,8 @@ export const PlaygroundsPage: React.FC = () => {
       style={{
         paddingTop: 80,
         minHeight: '100vh',
-        background: '#0a0b0c',
-        color: '#F7F5EF',
+        background: 'var(--bg-primary)',
+        color: 'var(--text-primary)',
       }}
     >
       <div
@@ -57,7 +57,7 @@ export const PlaygroundsPage: React.FC = () => {
               letterSpacing: '0.02em',
               lineHeight: 1.15,
               margin: '0 0 12px 0',
-              color: '#F7F5EF',
+              color: 'var(--text-primary)',
             }}
           >
             Interactive Algorithm Playgrounds &amp; Visualizations
@@ -68,7 +68,7 @@ export const PlaygroundsPage: React.FC = () => {
               fontFamily: "'Inter', sans-serif",
               fontSize: '1.05rem',
               lineHeight: 1.6,
-              color: 'rgba(247, 245, 239, 0.75)',
+              color: 'var(--text-secondary)',
               maxWidth: 820,
               margin: 0,
             }}
@@ -95,9 +95,9 @@ export const PlaygroundsPage: React.FC = () => {
                 gap: 6,
                 padding: '8px 14px',
                 borderRadius: 8,
-                background: '#12141a',
-                border: '1px solid rgba(247, 245, 239, 0.12)',
-                color: '#F7F5EF',
+                background: 'var(--bg-tertiary)',
+                border: '1px solid var(--border)',
+                color: 'var(--text-primary)',
                 fontFamily: "'Inter', sans-serif",
                 fontSize: 13,
                 fontWeight: 600,
@@ -115,9 +115,9 @@ export const PlaygroundsPage: React.FC = () => {
                 gap: 6,
                 padding: '8px 14px',
                 borderRadius: 8,
-                background: '#12141a',
-                border: '1px solid rgba(247, 245, 239, 0.12)',
-                color: '#F7F5EF',
+                background: 'var(--bg-tertiary)',
+                border: '1px solid var(--border)',
+                color: 'var(--text-primary)',
                 fontFamily: "'Inter', sans-serif",
                 fontSize: 13,
                 fontWeight: 600,
@@ -135,9 +135,9 @@ export const PlaygroundsPage: React.FC = () => {
                 gap: 6,
                 padding: '8px 14px',
                 borderRadius: 8,
-                background: '#12141a',
-                border: '1px solid rgba(247, 245, 239, 0.12)',
-                color: '#F7F5EF',
+                background: 'var(--bg-tertiary)',
+                border: '1px solid var(--border)',
+                color: 'var(--text-primary)',
                 fontFamily: "'Inter', sans-serif",
                 fontSize: 13,
                 fontWeight: 600,

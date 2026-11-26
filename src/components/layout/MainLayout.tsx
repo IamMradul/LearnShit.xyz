@@ -11,11 +11,12 @@ export const MainLayout: React.FC = () => {
   return (
     <div
       style={{
-        height: '100vh',
+        height: '100%',
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
-        background: '#0a0b0d',
+        background: 'var(--bg-primary)',
+        color: 'var(--text-primary)',
         position: 'relative',
       }}
     >

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { VisuAlgoItem } from './visuAlgoData';
 import { getInteractiveSteps, type InteractiveStep } from './interactiveStepsData';
-import { Play, Pause, ChevronLeft, ChevronRight, RotateCcw, GraduationCap, Code2, Sparkles, Shuffle, Loader2 } from 'lucide-react';
+import { Play, Pause, ChevronLeft, ChevronRight, RotateCcw, GraduationCap, Code2, Shuffle, Loader2 } from 'lucide-react';
 
 interface InteractivePlaygroundCardProps {
   item: VisuAlgoItem;
@@ -16,9 +16,9 @@ export const InteractivePlaygroundCard: React.FC<InteractivePlaygroundCardProps>
   onOpenDetail,
   onQuickLoad,
 }) => {
-  const theme = item.themeColor || 'var(--accent)';
+  const accentColor = item.themeColor || 'var(--accent)';
   const [currentInput, setCurrentInput] = useState(item.sampleInput);
-  const steps: InteractiveStep[] = getInteractiveSteps(item.id, theme);
+  const steps: InteractiveStep[] = getInteractiveSteps(item.id, accentColor);
 
   const [stepIdx, setStepIdx] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -26,14 +26,13 @@ export const InteractivePlaygroundCard: React.FC<InteractivePlaygroundCardProps>
 
   const currentStep = steps[stepIdx] || steps[0];
 
-  // Auto-play timer
   useEffect(() => {
     if (isPlaying) {
       timerRef.current = setInterval(() => {
         setStepIdx((prev) => (prev + 1) % steps.length);
       }, 1600);
-    } else {
-      if (timerRef.current) clearInterval(timerRef.current);
+    } else if (timerRef.current) {
+      clearInterval(timerRef.current);
     }
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
@@ -94,122 +93,138 @@ export const InteractivePlaygroundCard: React.FC<InteractivePlaygroundCardProps>
   };
 
   return (
-    <div
+    <article
       style={{
         display: 'flex',
         flexDirection: 'column',
-        background: '#111216',
-        borderRadius: 14,
-        border: '1px solid rgba(247, 245, 239, 0.08)',
+        background: 'var(--bg-secondary)',
+        borderRadius: 16,
+        border: '1px solid var(--border)',
         overflow: 'hidden',
-        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.45)',
-        transition: 'border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease',
+        boxShadow: '0 4px 18px rgba(0, 0, 0, 0.08)',
+        transition: 'border-color 0.2s ease, transform 0.2s ease',
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.transform = 'translateY(-3px)';
+        e.currentTarget.style.transform = 'translateY(-2px)';
         e.currentTarget.style.borderColor = 'rgba(214, 82, 58, 0.45)';
-        e.currentTarget.style.boxShadow = `0 16px 36px rgba(0, 0, 0, 0.7), 0 0 20px ${theme}22`;
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.transform = 'translateY(0)';
-        e.currentTarget.style.borderColor = 'rgba(247, 245, 239, 0.08)';
-        e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.45)';
+        e.currentTarget.style.borderColor = 'var(--border)';
       }}
     >
-      {/* ── Top Blueprint Stage (Live Interactive Step Visualizer) ───────────── */}
+      {/* ── Architectural Blueprint Stage ──────────────────────────────────── */}
       <div
         style={{
           width: '100%',
-          height: 145,
+          height: 152,
           position: 'relative',
           overflow: 'hidden',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: `radial-gradient(circle at 50% 50%, ${theme}20 0%, #090a0e 85%)`,
-          borderBottom: '1px solid rgba(247, 245, 239, 0.08)',
+          background: 'var(--bg-primary)',
+          borderBottom: '1px solid var(--border-subtle)',
         }}
       >
-        {/* Subtle grid pattern */}
+        {/* Subtle fine dot paper backdrop */}
         <div
           style={{
             position: 'absolute',
             inset: 0,
-            opacity: 0.07,
-            backgroundImage:
-              'radial-gradient(circle at 1px 1px, #F7F5EF 1px, transparent 0)',
-            backgroundSize: '16px 16px',
+            opacity: 0.45,
+            backgroundImage: 'radial-gradient(var(--grid-dot) 1px, transparent 1px)',
+            backgroundSize: '18px 18px',
             pointerEvents: 'none',
           }}
         />
 
-        {/* Category Pill Tag */}
+        {/* Quiet domain label */}
         <span
           style={{
             position: 'absolute',
-            top: 10,
-            left: 12,
+            top: 11,
+            left: 14,
             fontSize: 9.5,
-            fontFamily: "'JetBrains Mono', monospace",
-            fontWeight: 700,
+            fontFamily: "'Inter Tight', sans-serif",
+            fontWeight: 600,
             textTransform: 'uppercase',
-            letterSpacing: '0.06em',
-            padding: '2.5px 7px',
-            borderRadius: 4,
-            background: 'rgba(10, 11, 15, 0.85)',
-            backdropFilter: 'blur(8px)',
-            color: theme,
-            border: `1px solid ${theme}40`,
+            letterSpacing: '0.1em',
+            color: accentColor,
             zIndex: 2,
           }}
         >
           {item.category}
         </span>
 
-        {/* Complexity Chip */}
+        {/* Complexity metric */}
         <span
           style={{
             position: 'absolute',
-            top: 10,
-            right: 12,
-            fontSize: 10,
+            top: 11,
+            right: 14,
+            fontSize: 10.5,
             fontFamily: "'JetBrains Mono', monospace",
             fontWeight: 600,
-            padding: '2.5px 8px',
-            borderRadius: 4,
-            background: 'rgba(10, 11, 15, 0.85)',
-            backdropFilter: 'blur(8px)',
-            color: '#F7F5EF',
-            border: '1px solid rgba(247, 245, 239, 0.12)',
+            color: 'var(--text-muted)',
             zIndex: 2,
           }}
         >
           {item.complexity}
         </span>
 
-        {/* SVG Step Visual */}
         <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           {currentStep ? currentStep.render() : item.renderThumbnail()}
         </div>
       </div>
 
-      {/* ── Sample Input & Randomize Strip ─────────────────────────────────── */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '6px 14px',
-          background: 'rgba(14, 16, 22, 0.95)',
-          borderBottom: '1px solid rgba(247, 245, 239, 0.06)',
-          fontSize: 10.5,
-          fontFamily: "'JetBrains Mono', monospace",
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, flex: 1, marginRight: 8 }}>
-          <span style={{ color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: 9.5, letterSpacing: '0.04em', flexShrink: 0 }}>
-            Input:
-          </span>
+      {/* ── Card Body: Clean Editorial Layout ──────────────────────────────── */}
+      <div style={{ padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 12, flex: 1 }}>
+        <div>
+          <h3
+            style={{
+              margin: 0,
+              fontSize: 17,
+              fontWeight: 600,
+              fontFamily: "'Newsreader', Georgia, serif",
+              color: 'var(--text-primary)',
+              letterSpacing: '-0.01em',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+          >
+            {item.title}
+          </h3>
+          <p
+            style={{
+              margin: '4px 0 0',
+              fontSize: 12.5,
+              lineHeight: 1.48,
+              color: 'var(--text-secondary)',
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+              minHeight: 37,
+            }}
+          >
+            {stepIdx > 0 || isPlaying ? currentStep.description : item.description}
+          </p>
+        </div>
+
+        {/* Unified Input + Frame Stepper Control Strip */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '7px 10px',
+            background: 'var(--bg-primary)',
+            border: '1px solid var(--border-subtle)',
+            borderRadius: 10,
+          }}
+        >
           <input
             type="text"
             value={currentInput}
@@ -217,113 +232,69 @@ export const InteractivePlaygroundCard: React.FC<InteractivePlaygroundCardProps>
             onClick={(e) => e.stopPropagation()}
             onKeyDown={(e) => {
               e.stopPropagation();
-              if (e.key === 'Enter') {
-                onQuickLoad(item, currentInput);
-              }
+              if (e.key === 'Enter') onQuickLoad(item, currentInput);
             }}
-            placeholder="Edit input JSON..."
-            title="Edit input parameters (Press Enter or click Visualize to run)"
+            placeholder="Input..."
+            aria-label={`Input for ${item.title}`}
             style={{
-              color: '#F7F5EF',
-              background: 'rgba(20, 23, 30, 0.95)',
-              padding: '3px 8px',
-              borderRadius: 4,
-              border: '1px solid rgba(247, 245, 239, 0.18)',
-              fontSize: 10.5,
+              flex: 1,
+              minWidth: 0,
+              color: 'var(--text-primary)',
+              background: 'transparent',
+              border: 'none',
+              fontSize: 11,
               fontFamily: "'JetBrains Mono', monospace",
               outline: 'none',
-              width: '100%',
-              maxWidth: 185,
-              transition: 'border-color 0.15s, box-shadow 0.15s',
-            }}
-            onFocus={(e) => {
-              e.currentTarget.style.borderColor = 'var(--accent)';
-              e.currentTarget.style.boxShadow = '0 0 8px rgba(214, 82, 58, 0.35)';
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.borderColor = 'rgba(247, 245, 239, 0.18)';
-              e.currentTarget.style.boxShadow = 'none';
             }}
           />
-        </div>
 
-        {/* Randomize Input Button */}
-        <button
-          onClick={handleRandomizeInput}
-          title="Randomize algorithm input"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 4,
-            padding: '3px 8px',
-            background: 'rgba(214, 82, 58, 0.12)',
-            border: '1px solid rgba(214, 82, 58, 0.28)',
-            borderRadius: 4,
-            color: 'var(--accent)',
-            fontSize: 10,
-            cursor: 'pointer',
-            fontFamily: "'JetBrains Mono', monospace",
-            fontWeight: 600,
-            transition: 'all 0.15s ease',
-            flexShrink: 0,
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'rgba(214, 82, 58, 0.22)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'rgba(214, 82, 58, 0.12)';
-          }}
-        >
-          <Shuffle size={11} />
-          <span>Randomize</span>
-        </button>
-      </div>
-
-      {/* ── Interactive Player Control Strip ─────────────────────────────────── */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '7px 14px',
-          background: 'rgba(20, 23, 30, 0.7)',
-          borderBottom: '1px solid rgba(247, 245, 239, 0.06)',
-          fontSize: 11,
-          fontFamily: "'JetBrains Mono', monospace",
-        }}
-      >
-        {/* Step Indicator */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span
-            style={{
-              width: 7,
-              height: 7,
-              borderRadius: '50%',
-              background: isPlaying ? '#38A169' : theme,
-              boxShadow: isPlaying ? '0 0 8px #38A169' : 'none',
-            }}
-          />
-          <span style={{ color: '#F7F5EF', fontWeight: 700 }}>
-            STEP {stepIdx + 1}/{steps.length}:
-          </span>
-          <span style={{ color: 'var(--text-secondary)', maxWidth: 140, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            {currentStep.title}
-          </span>
-        </div>
-
-        {/* Step Controls */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
           <button
-            onClick={handlePrev}
-            title="Previous step"
+            type="button"
+            onClick={handleRandomizeInput}
+            title="Randomize input"
             style={{
               width: 24,
               height: 24,
-              borderRadius: 4,
-              background: 'rgba(255, 255, 255, 0.06)',
-              border: '1px solid rgba(247, 245, 239, 0.1)',
-              color: '#F7F5EF',
-              display: 'flex',
+              borderRadius: 6,
+              background: 'transparent',
+              border: '1px solid var(--border-subtle)',
+              color: 'var(--text-secondary)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              flexShrink: 0,
+            }}
+          >
+            <Shuffle size={11} />
+          </button>
+
+          <div style={{ width: 1, height: 14, background: 'var(--border)' }} />
+
+          <span
+            style={{
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: 10,
+              color: 'var(--text-muted)',
+              padding: '0 2px',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {stepIdx + 1}/{steps.length}
+          </span>
+
+          <button
+            type="button"
+            onClick={handlePrev}
+            title="Previous frame"
+            style={{
+              width: 22,
+              height: 22,
+              borderRadius: 6,
+              background: 'transparent',
+              border: 'none',
+              color: 'var(--text-secondary)',
+              display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
@@ -333,36 +304,37 @@ export const InteractivePlaygroundCard: React.FC<InteractivePlaygroundCardProps>
           </button>
 
           <button
+            type="button"
             onClick={handleTogglePlay}
-            title={isPlaying ? 'Pause animation' : 'Play interactive animation'}
-            style={{
-              width: 26,
-              height: 24,
-              borderRadius: 4,
-              background: isPlaying ? '#38A169' : 'var(--accent)',
-              border: 'none',
-              color: '#F7F5EF',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              transition: 'background 0.15s',
-            }}
-          >
-            {isPlaying ? <Pause size={11} fill="#F7F5EF" /> : <Play size={11} fill="#F7F5EF" />}
-          </button>
-
-          <button
-            onClick={handleNext}
-            title="Next step"
+            title={isPlaying ? 'Pause preview' : 'Play preview'}
             style={{
               width: 24,
               height: 24,
-              borderRadius: 4,
-              background: 'rgba(255, 255, 255, 0.06)',
-              border: '1px solid rgba(247, 245, 239, 0.1)',
-              color: '#F7F5EF',
-              display: 'flex',
+              borderRadius: '50%',
+              background: isPlaying ? '#276749' : 'var(--accent)',
+              border: 'none',
+              color: '#FFFFFF',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+            }}
+          >
+            {isPlaying ? <Pause size={10} fill="#FFFFFF" /> : <Play size={10} fill="#FFFFFF" />}
+          </button>
+
+          <button
+            type="button"
+            onClick={handleNext}
+            title="Next frame"
+            style={{
+              width: 22,
+              height: 22,
+              borderRadius: 6,
+              background: 'transparent',
+              border: 'none',
+              color: 'var(--text-secondary)',
+              display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
@@ -371,161 +343,61 @@ export const InteractivePlaygroundCard: React.FC<InteractivePlaygroundCardProps>
             <ChevronRight size={13} />
           </button>
 
-          <button
-            onClick={handleReset}
-            title="Reset step to beginning"
-            style={{
-              width: 24,
-              height: 24,
-              borderRadius: 4,
-              background: 'rgba(255, 255, 255, 0.04)',
-              border: '1px solid rgba(247, 245, 239, 0.08)',
-              color: '#9B9A95',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-            }}
-          >
-            <RotateCcw size={11} />
-          </button>
-        </div>
-      </div>
-
-      {/* ── Active Step Explanation Banner ─────────────────────────────────── */}
-      <div
-        style={{
-          padding: '8px 14px',
-          background: 'rgba(10, 11, 15, 0.5)',
-          borderBottom: '1px solid rgba(247, 245, 239, 0.06)',
-          fontSize: 11.5,
-          lineHeight: 1.4,
-          fontFamily: "'Inter', sans-serif",
-          color: '#d4d2cc',
-          minHeight: 38,
-          display: 'flex',
-          alignItems: 'center',
-        }}
-      >
-        {currentStep.description}
-      </div>
-
-      {/* ── Card Content Body ────────────────────────────────────────────────── */}
-      <div style={{ padding: '14px 16px 14px', display: 'flex', flexDirection: 'column', gap: 10, flex: 1 }}>
-        {/* Title */}
-        <h4
-          style={{
-            margin: 0,
-            fontSize: 17,
-            fontWeight: 700,
-            fontFamily: "'Oswald', sans-serif",
-            color: '#F7F5EF',
-            letterSpacing: '0.03em',
-            textTransform: 'uppercase',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-          }}
-        >
-          {item.title}
-        </h4>
-
-        {/* Clamped description */}
-        <p
-          style={{
-            margin: 0,
-            fontSize: 12,
-            lineHeight: 1.45,
-            color: 'var(--text-secondary)',
-            fontFamily: "'Inter', sans-serif",
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-            minHeight: 35,
-          }}
-        >
-          {item.description}
-        </p>
-
-        {/* Tags Row */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginTop: 'auto' }}>
-          <span
-            style={{
-              padding: '2px 6px',
-              borderRadius: 4,
-              background: 'rgba(255, 255, 255, 0.04)',
-              border: '1px solid rgba(247, 245, 239, 0.08)',
-              fontSize: 10,
-              fontFamily: "'JetBrains Mono', monospace",
-              color: 'rgba(247, 245, 239, 0.7)',
-              fontWeight: 600,
-            }}
-          >
-            S: {item.spaceComplexity}
-          </span>
-          {item.tags.slice(0, 3).map((tag, idx) => (
-            <span
-              key={idx}
+          {stepIdx > 0 && (
+            <button
+              type="button"
+              onClick={handleReset}
+              title="Reset preview"
               style={{
-                padding: '2px 6px',
-                borderRadius: 4,
-                background: 'rgba(255, 255, 255, 0.03)',
-                border: '1px solid rgba(247, 245, 239, 0.06)',
-                fontSize: 9.5,
-                fontFamily: "'JetBrains Mono', monospace",
+                width: 22,
+                height: 22,
+                borderRadius: 6,
+                background: 'transparent',
+                border: 'none',
                 color: 'var(--text-muted)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
               }}
             >
-              #{tag}
-            </span>
-          ))}
+              <RotateCcw size={10} />
+            </button>
+          )}
         </div>
 
-        {/* Action Button Bar */}
+        {/* Clean Action Row */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 7,
-            paddingTop: 10,
-            borderTop: '1px solid rgba(247, 245, 239, 0.06)',
+            gap: 8,
+            marginTop: 'auto',
+            paddingTop: 4,
           }}
         >
-          {/* Primary Visualize CTA */}
           <button
+            type="button"
             onClick={() => onQuickLoad(item, currentInput)}
             disabled={isLoading}
-            title={`Visualize ${item.title} in main stage`}
             style={{
               flex: 1,
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: 6,
-              padding: '8px 12px',
-              borderRadius: 6,
+              padding: '8px 14px',
+              borderRadius: 999,
               background: 'var(--accent)',
               border: 'none',
-              color: '#F7F5EF',
-              fontSize: 12,
-              fontFamily: "'Oswald', sans-serif",
-              fontWeight: 700,
-              letterSpacing: '0.04em',
+              color: '#FFFFFF',
+              fontSize: 11.5,
+              fontFamily: "'Inter Tight', sans-serif",
+              fontWeight: 600,
+              letterSpacing: '0.06em',
               textTransform: 'uppercase',
               cursor: isLoading ? 'wait' : 'pointer',
               opacity: isLoading ? 0.75 : 1,
-              transition: 'all 0.15s ease',
-            }}
-            onMouseEnter={(e) => {
-              if (!isLoading) {
-                e.currentTarget.style.background = 'var(--accent-hover)';
-                e.currentTarget.style.boxShadow = '0 0 14px rgba(214, 82, 58, 0.45)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'var(--accent)';
-              e.currentTarget.style.boxShadow = 'none';
             }}
           >
             {isLoading ? (
@@ -535,77 +407,56 @@ export const InteractivePlaygroundCard: React.FC<InteractivePlaygroundCardProps>
               </>
             ) : (
               <>
-                <Play size={11} fill="#F7F5EF" />
+                <Play size={10} fill="#FFFFFF" />
                 <span>Visualize</span>
               </>
             )}
           </button>
 
-          {/* Training Quiz CTA */}
           <button
+            type="button"
             onClick={() => onOpenDetail(item, 'training')}
             title={`Practice ${item.title} checkpoint quiz`}
             style={{
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              gap: 4,
-              padding: '8px 10px',
-              borderRadius: 6,
-              background: 'rgba(255, 255, 255, 0.05)',
-              border: '1px solid rgba(247, 245, 239, 0.12)',
-              color: '#F7F5EF',
-              fontSize: 11,
-              fontFamily: "'Oswald', sans-serif",
+              gap: 5,
+              padding: '8px 12px',
+              borderRadius: 999,
+              background: 'transparent',
+              border: '1px solid var(--border)',
+              color: 'var(--text-secondary)',
+              fontSize: 11.5,
+              fontFamily: "'Inter Tight', sans-serif",
               fontWeight: 600,
-              letterSpacing: '0.03em',
-              textTransform: 'uppercase',
               cursor: 'pointer',
-              transition: 'all 0.15s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-              e.currentTarget.style.borderColor = 'rgba(247, 245, 239, 0.25)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-              e.currentTarget.style.borderColor = 'rgba(247, 245, 239, 0.12)';
             }}
           >
             <GraduationCap size={13} />
-            <span>Training</span>
+            <span>Quiz</span>
           </button>
 
-          {/* Quick Code & Details button */}
           <button
+            type="button"
             onClick={() => onOpenDetail(item, 'overview')}
-            title="Inspect source code & complexity breakdown"
+            title="Inspect code & complexity"
             style={{
-              width: 33,
-              height: 33,
-              display: 'flex',
+              width: 34,
+              height: 34,
+              display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              borderRadius: 6,
-              background: 'rgba(255, 255, 255, 0.05)',
-              border: '1px solid rgba(247, 245, 239, 0.12)',
-              color: '#9B9A95',
+              borderRadius: '50%',
+              background: 'transparent',
+              border: '1px solid var(--border)',
+              color: 'var(--text-secondary)',
               cursor: 'pointer',
-              transition: 'all 0.15s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = '#F7F5EF';
-              e.currentTarget.style.borderColor = 'rgba(247, 245, 239, 0.25)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = '#9B9A95';
-              e.currentTarget.style.borderColor = 'rgba(247, 245, 239, 0.12)';
             }}
           >
             <Code2 size={13} />
           </button>
         </div>
       </div>
-    </div>
+    </article>
   );
 };

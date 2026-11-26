@@ -10,8 +10,8 @@ export const PrivacyPage: React.FC = () => {
         paddingTop: 80,
         paddingBottom: 80,
         minHeight: '100vh',
-        background: '#0a0b0c',
-        color: '#F7F5EF',
+        background: 'var(--bg-primary)',
+        color: 'var(--text-primary)',
       }}
     >
       <div
@@ -38,7 +38,7 @@ export const PrivacyPage: React.FC = () => {
                 letterSpacing: '0.02em',
                 lineHeight: 1.15,
                 margin: '0 0 16px 0',
-                color: '#F7F5EF',
+                color: 'var(--text-primary)',
               }}
             >
               Privacy Policy &amp; Client-Side Security
@@ -48,7 +48,7 @@ export const PrivacyPage: React.FC = () => {
                 fontFamily: "'Inter', sans-serif",
                 fontSize: '1.05rem',
                 lineHeight: 1.6,
-                color: 'rgba(247, 245, 239, 0.75)',
+                color: 'var(--text-secondary)',
                 margin: 0,
               }}
             >
@@ -63,7 +63,7 @@ export const PrivacyPage: React.FC = () => {
                 fontFamily: "'Oswald', sans-serif",
                 fontSize: '1.5rem',
                 fontWeight: 600,
-                color: '#F7F5EF',
+                color: 'var(--text-primary)',
                 borderBottom: '1px solid rgba(247, 245, 239, 0.1)',
                 paddingBottom: 8,
                 marginBottom: 16,
@@ -76,7 +76,7 @@ export const PrivacyPage: React.FC = () => {
                 fontFamily: "'Inter', sans-serif",
                 fontSize: '0.95rem',
                 lineHeight: 1.7,
-                color: 'rgba(247, 245, 239, 0.75)',
+                color: 'var(--text-secondary)',
                 marginBottom: 12,
               }}
             >
@@ -89,7 +89,7 @@ export const PrivacyPage: React.FC = () => {
                 fontFamily: "'Inter', sans-serif",
                 fontSize: '0.95rem',
                 lineHeight: 1.7,
-                color: 'rgba(247, 245, 239, 0.75)',
+                color: 'var(--text-secondary)',
               }}
             >
               You can verify this in your browser's Developer Tools Network tab: zero POST requests are dispatched during code execution.
@@ -102,7 +102,7 @@ export const PrivacyPage: React.FC = () => {
                 fontFamily: "'Oswald', sans-serif",
                 fontSize: '1.5rem',
                 fontWeight: 600,
-                color: '#F7F5EF',
+                color: 'var(--text-primary)',
                 borderBottom: '1px solid rgba(247, 245, 239, 0.1)',
                 paddingBottom: 8,
                 marginBottom: 16,
@@ -115,7 +115,7 @@ export const PrivacyPage: React.FC = () => {
                 fontFamily: "'Inter', sans-serif",
                 fontSize: '0.95rem',
                 lineHeight: 1.7,
-                color: 'rgba(247, 245, 239, 0.75)',
+                color: 'var(--text-secondary)',
                 marginBottom: 12,
               }}
             >
@@ -127,7 +127,7 @@ export const PrivacyPage: React.FC = () => {
                 fontFamily: "'Inter', sans-serif",
                 fontSize: '0.95rem',
                 lineHeight: 1.8,
-                color: 'rgba(247, 245, 239, 0.75)',
+                color: 'var(--text-secondary)',
                 paddingLeft: 24,
               }}
             >
@@ -143,7 +143,7 @@ export const PrivacyPage: React.FC = () => {
                 fontFamily: "'Oswald', sans-serif",
                 fontSize: '1.5rem',
                 fontWeight: 600,
-                color: '#F7F5EF',
+                color: 'var(--text-primary)',
                 borderBottom: '1px solid rgba(247, 245, 239, 0.1)',
                 paddingBottom: 8,
                 marginBottom: 16,
@@ -156,7 +156,7 @@ export const PrivacyPage: React.FC = () => {
                 fontFamily: "'Inter', sans-serif",
                 fontSize: '0.95rem',
                 lineHeight: 1.7,
-                color: 'rgba(247, 245, 239, 0.75)',
+                color: 'var(--text-secondary)',
               }}
             >
               LearnShit uses standard browser <code style={{ color: '#D6523A' }}>localStorage</code> exclusively to preserve your
@@ -171,7 +171,7 @@ export const PrivacyPage: React.FC = () => {
                 fontFamily: "'Oswald', sans-serif",
                 fontSize: '1.5rem',
                 fontWeight: 600,
-                color: '#F7F5EF',
+                color: 'var(--text-primary)',
                 borderBottom: '1px solid rgba(247, 245, 239, 0.1)',
                 paddingBottom: 8,
                 marginBottom: 16,
@@ -184,7 +184,7 @@ export const PrivacyPage: React.FC = () => {
                 fontFamily: "'Inter', sans-serif",
                 fontSize: '0.95rem',
                 lineHeight: 1.7,
-                color: 'rgba(247, 245, 239, 0.75)',
+                color: 'var(--text-secondary)',
               }}
             >
               If you have any questions or security disclosures regarding this policy, please open a discussion on our GitHub repository

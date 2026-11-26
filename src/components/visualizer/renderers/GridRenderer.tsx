@@ -1,5 +1,6 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef } from 'react';
 import type { TraceStep } from '../../../engine/TraceTypes';
+import { useUIStore } from '../../../store/uiStore';
 
 interface GridRendererProps {
   step: TraceStep | null;
@@ -15,6 +16,8 @@ export const GridRenderer: React.FC<GridRendererProps> = ({
   height = 320,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const theme = useUIStore((s) => s.theme);
+  const isLight = theme === 'light';
 
   // Extract 2D array from step
   let matrix: (number | string)[][] = propGridData ?? [];
@@ -79,11 +82,11 @@ export const GridRenderer: React.FC<GridRendererProps> = ({
           display: 'inline-grid',
           gridTemplateColumns: `repeat(${cols}, ${cellSize}px)`,
           gap: 6,
-          background: 'rgba(16, 18, 22, 0.75)',
+          background: 'var(--surface-glass)',
           padding: 14,
           borderRadius: 10,
-          border: '1px solid rgba(247, 245, 239, 0.08)',
-          boxShadow: '0 12px 30px rgba(0,0,0,0.5)',
+          border: '1px solid var(--border)',
+          boxShadow: isLight ? '0 8px 24px rgba(16, 18, 22, 0.08)' : '0 12px 30px rgba(0,0,0,0.5)',
         }}
       >
         {matrix.map((row, r) =>
@@ -91,6 +94,7 @@ export const GridRenderer: React.FC<GridRendererProps> = ({
             const isRowMatch = activeRow !== null && r === activeRow;
             const isColMatch = activeCol !== null && c === activeCol;
             const isExactMatch = isRowMatch && isColMatch;
+            const lineAccent = isLight ? '#2563eb' : '#58a6ff';
 
             return (
               <div
@@ -104,18 +108,18 @@ export const GridRenderer: React.FC<GridRendererProps> = ({
                   alignItems: 'center',
                   justifyContent: 'center',
                   background: isExactMatch
-                    ? 'rgba(214, 82, 58, 0.28)'
+                    ? 'rgba(214, 82, 58, 0.24)'
                     : isRowMatch || isColMatch
-                    ? 'rgba(88, 166, 255, 0.12)'
-                    : 'rgba(247, 245, 239, 0.04)',
+                    ? isLight ? 'rgba(37, 99, 235, 0.12)' : 'rgba(88, 166, 255, 0.12)'
+                    : 'var(--border-subtle)',
                   border: `1.5px solid ${
                     isExactMatch
                       ? 'var(--accent)'
                       : isRowMatch || isColMatch
-                      ? '#58a6ff'
-                      : 'rgba(247, 245, 239, 0.08)'
+                      ? lineAccent
+                      : 'var(--border)'
                   }`,
-                  color: isExactMatch ? 'var(--accent)' : '#F7F5EF',
+                  color: isExactMatch ? 'var(--accent)' : 'var(--text-primary)',
                   fontFamily: "'JetBrains Mono', monospace",
                   fontSize: Math.max(11, cellSize * 0.32),
                   fontWeight: isExactMatch ? 700 : 500,
@@ -132,7 +136,7 @@ export const GridRenderer: React.FC<GridRendererProps> = ({
                       bottom: 2,
                       right: 4,
                       fontSize: 8,
-                      opacity: 0.35,
+                      opacity: 0.45,
                       fontFamily: "'JetBrains Mono', monospace",
                     }}
                   >
@@ -156,8 +160,8 @@ export const GridRenderer: React.FC<GridRendererProps> = ({
             color: 'var(--text-secondary)',
           }}
         >
-          {activeRow !== null && <span>row (i): <b style={{ color: '#58a6ff' }}>{activeRow}</b></span>}
-          {activeCol !== null && <span>col (j): <b style={{ color: '#58a6ff' }}>{activeCol}</b></span>}
+          {activeRow !== null && <span>row (i): <b style={{ color: isLight ? '#2563eb' : '#58a6ff' }}>{activeRow}</b></span>}
+          {activeCol !== null && <span>col (j): <b style={{ color: isLight ? '#2563eb' : '#58a6ff' }}>{activeCol}</b></span>}
         </div>
       )}
     </div>

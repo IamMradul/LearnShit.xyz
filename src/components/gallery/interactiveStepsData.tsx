@@ -18,9 +18,9 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
               <g transform="translate(18, 38)">
                 {[2, 5, 1, 9].map((val, i) => (
                   <g key={i} transform={`translate(${i * 52}, 0)`}>
-                    <rect x="0" y="0" width="48" height="34" fill="#141720" stroke="rgba(247,245,239,0.2)" strokeWidth="1.5" rx="4" />
-                    <text x="24" y="22" textAnchor="middle" fill="#F7F5EF" fontSize="15" fontWeight="700" fontFamily="monospace">{val}</text>
-                    <text x="24" y="50" textAnchor="middle" fill="#9B9A95" fontSize="10" fontFamily="monospace">[{i}]</text>
+                    <rect x="0" y="0" width="48" height="34" fill="var(--bg-secondary)" stroke="var(--svg-edge)" strokeWidth="1.5" rx="4" />
+                    <text x="24" y="22" textAnchor="middle" fill="var(--text-primary)" fontSize="15" fontWeight="700" fontFamily="monospace">{val}</text>
+                    <text x="24" y="50" textAnchor="middle" fill="var(--text-secondary)" fontSize="10" fontFamily="monospace">[{i}]</text>
                   </g>
                 ))}
               </g>
@@ -35,9 +35,9 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
               <g transform="translate(18, 38)">
                 {[2, 5, 1, 9].map((val, i) => (
                   <g key={i} transform={`translate(${i * 52}, 0)`}>
-                    <rect x="0" y="0" width="48" height="34" fill={i === 1 ? 'rgba(214,82,58,0.2)' : '#141720'} stroke={i === 1 ? 'var(--accent)' : 'rgba(247,245,239,0.2)'} strokeWidth={i === 1 ? 2.5 : 1.5} rx="4" />
-                    <text x="24" y="22" textAnchor="middle" fill={i === 1 ? 'var(--accent)' : '#F7F5EF'} fontSize="15" fontWeight="800" fontFamily="monospace">{val}</text>
-                    <text x="24" y="50" textAnchor="middle" fill={i === 1 ? 'var(--accent)' : '#9B9A95'} fontSize="11" fontWeight="700" fontFamily="monospace">[{i}]</text>
+                    <rect x="0" y="0" width="48" height="34" fill={i === 1 ? 'rgba(214,82,58,0.2)' : 'var(--bg-secondary)'} stroke={i === 1 ? 'var(--accent)' : 'var(--svg-edge)'} strokeWidth={i === 1 ? 2.5 : 1.5} rx="4" />
+                    <text x="24" y="22" textAnchor="middle" fill={i === 1 ? 'var(--accent)' : 'var(--text-primary)'} fontSize="15" fontWeight="800" fontFamily="monospace">{val}</text>
+                    <text x="24" y="50" textAnchor="middle" fill={i === 1 ? 'var(--accent)' : 'var(--text-secondary)'} fontSize="11" fontWeight="700" fontFamily="monospace">[{i}]</text>
                   </g>
                 ))}
               </g>
@@ -52,9 +52,9 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
               <g transform="translate(8, 38)">
                 {[2, 5, 1, 9, 42].map((val, i) => (
                   <g key={i} transform={`translate(${i * 45}, 0)`}>
-                    <rect x="0" y="0" width="41" height="34" fill={i === 4 ? 'rgba(56,161,105,0.25)' : '#141720'} stroke={i === 4 ? '#38A169' : 'rgba(247,245,239,0.2)'} strokeWidth={i === 4 ? 2 : 1.5} rx="4" />
-                    <text x="20" y="22" textAnchor="middle" fill={i === 4 ? '#38A169' : '#F7F5EF'} fontSize="14" fontWeight="800" fontFamily="monospace">{val}</text>
-                    <text x="20" y="50" textAnchor="middle" fill={i === 4 ? '#38A169' : '#9B9A95'} fontSize="10" fontFamily="monospace">[{i}]</text>
+                    <rect x="0" y="0" width="41" height="34" fill={i === 4 ? 'rgba(56,161,105,0.25)' : 'var(--bg-secondary)'} stroke={i === 4 ? '#38A169' : 'var(--svg-edge)'} strokeWidth={i === 4 ? 2 : 1.5} rx="4" />
+                    <text x="20" y="22" textAnchor="middle" fill={i === 4 ? '#38A169' : 'var(--text-primary)'} fontSize="14" fontWeight="800" fontFamily="monospace">{val}</text>
+                    <text x="20" y="50" textAnchor="middle" fill={i === 4 ? '#38A169' : 'var(--text-secondary)'} fontSize="10" fontFamily="monospace">[{i}]</text>
                   </g>
                 ))}
               </g>
@@ -69,9 +69,9 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
               <g transform="translate(8, 38)">
                 {[2, 5, 99, 9, 42].map((val, i) => (
                   <g key={i} transform={`translate(${i * 45}, 0)`}>
-                    <rect x="0" y="0" width="41" height="34" fill={i === 2 ? 'rgba(229,169,60,0.25)' : '#141720'} stroke={i === 2 ? '#E5A93C' : 'rgba(247,245,239,0.2)'} strokeWidth={i === 2 ? 2.5 : 1.5} rx="4" />
-                    <text x="20" y="22" textAnchor="middle" fill={i === 2 ? '#E5A93C' : '#F7F5EF'} fontSize="14" fontWeight="800" fontFamily="monospace">{val}</text>
-                    <text x="20" y="50" textAnchor="middle" fill={i === 2 ? '#E5A93C' : '#9B9A95'} fontSize="10" fontFamily="monospace">[{i}]</text>
+                    <rect x="0" y="0" width="41" height="34" fill={i === 2 ? 'rgba(229,169,60,0.25)' : 'var(--bg-secondary)'} stroke={i === 2 ? '#E5A93C' : 'var(--svg-edge)'} strokeWidth={i === 2 ? 2.5 : 1.5} rx="4" />
+                    <text x="20" y="22" textAnchor="middle" fill={i === 2 ? '#E5A93C' : 'var(--text-primary)'} fontSize="14" fontWeight="800" fontFamily="monospace">{val}</text>
+                    <text x="20" y="50" textAnchor="middle" fill={i === 2 ? '#E5A93C' : 'var(--text-secondary)'} fontSize="10" fontFamily="monospace">[{i}]</text>
                   </g>
                 ))}
               </g>
@@ -91,10 +91,10 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
                 {[35, 22, 68, 95, 50].map((h, i) => (
                   <g key={i} transform={`translate(${i * 32}, 0)`}>
                     <rect x="0" y={95 - h * 0.9} width="22" height={h * 0.9} fill="#38bdf8" rx="3" />
-                    <text x="11" y={90 - h * 0.9} textAnchor="middle" fill="#F7F5EF" fontSize="9" fontFamily="monospace">{h}</text>
+                    <text x="11" y={90 - h * 0.9} textAnchor="middle" fill="var(--text-primary)" fontSize="9" fontFamily="monospace">{h}</text>
                   </g>
                 ))}
-                <line x1="-5" y1="97" x2="160" y2="97" stroke="rgba(247,245,239,0.2)" strokeWidth="1.5" />
+                <line x1="-5" y1="97" x2="160" y2="97" stroke="var(--svg-edge)" strokeWidth="1.5" />
               </g>
             </svg>
           ),
@@ -108,10 +108,10 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
                 {[35, 22, 68, 95, 50].map((h, i) => (
                   <g key={i} transform={`translate(${i * 32}, 0)`}>
                     <rect x="0" y={95 - h * 0.9} width="22" height={h * 0.9} fill={i < 2 ? '#E5A93C' : '#38bdf8'} rx="3" />
-                    <text x="11" y={90 - h * 0.9} textAnchor="middle" fill="#F7F5EF" fontSize="9" fontFamily="monospace">{h}</text>
+                    <text x="11" y={90 - h * 0.9} textAnchor="middle" fill="var(--text-primary)" fontSize="9" fontFamily="monospace">{h}</text>
                   </g>
                 ))}
-                <line x1="-5" y1="97" x2="160" y2="97" stroke="rgba(247,245,239,0.2)" strokeWidth="1.5" />
+                <line x1="-5" y1="97" x2="160" y2="97" stroke="var(--svg-edge)" strokeWidth="1.5" />
               </g>
             </svg>
           ),
@@ -125,10 +125,10 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
                 {[22, 35, 68, 95, 50].map((h, i) => (
                   <g key={i} transform={`translate(${i * 32}, 0)`}>
                     <rect x="0" y={95 - h * 0.9} width="22" height={h * 0.9} fill={i < 2 ? 'var(--accent)' : '#38bdf8'} rx="3" />
-                    <text x="11" y={90 - h * 0.9} textAnchor="middle" fill="#F7F5EF" fontSize="9" fontFamily="monospace">{h}</text>
+                    <text x="11" y={90 - h * 0.9} textAnchor="middle" fill="var(--text-primary)" fontSize="9" fontFamily="monospace">{h}</text>
                   </g>
                 ))}
-                <line x1="-5" y1="97" x2="160" y2="97" stroke="rgba(247,245,239,0.2)" strokeWidth="1.5" />
+                <line x1="-5" y1="97" x2="160" y2="97" stroke="var(--svg-edge)" strokeWidth="1.5" />
               </g>
             </svg>
           ),
@@ -142,10 +142,10 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
                 {[22, 35, 68, 50, 95].map((h, i) => (
                   <g key={i} transform={`translate(${i * 32}, 0)`}>
                     <rect x="0" y={95 - h * 0.9} width="22" height={h * 0.9} fill={i === 4 ? '#38A169' : '#38bdf8'} rx="3" />
-                    <text x="11" y={90 - h * 0.9} textAnchor="middle" fill="#F7F5EF" fontSize="9" fontFamily="monospace">{h}</text>
+                    <text x="11" y={90 - h * 0.9} textAnchor="middle" fill="var(--text-primary)" fontSize="9" fontFamily="monospace">{h}</text>
                   </g>
                 ))}
-                <line x1="-5" y1="97" x2="160" y2="97" stroke="rgba(247,245,239,0.2)" strokeWidth="1.5" />
+                <line x1="-5" y1="97" x2="160" y2="97" stroke="var(--svg-edge)" strokeWidth="1.5" />
               </g>
             </svg>
           ),
@@ -159,10 +159,10 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
                 {[22, 35, 50, 68, 95].map((h, i) => (
                   <g key={i} transform={`translate(${i * 32}, 0)`}>
                     <rect x="0" y={95 - h * 0.9} width="22" height={h * 0.9} fill="#38A169" rx="3" />
-                    <text x="11" y={90 - h * 0.9} textAnchor="middle" fill="#F7F5EF" fontSize="9" fontFamily="monospace">{h}</text>
+                    <text x="11" y={90 - h * 0.9} textAnchor="middle" fill="#FFFFFF" fontSize="9" fontFamily="monospace">{h}</text>
                   </g>
                 ))}
-                <line x1="-5" y1="97" x2="160" y2="97" stroke="rgba(247,245,239,0.2)" strokeWidth="1.5" />
+                <line x1="-5" y1="97" x2="160" y2="97" stroke="var(--svg-edge)" strokeWidth="1.5" />
               </g>
             </svg>
           ),
@@ -177,9 +177,9 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
               <g transform="translate(45, 30)">
-                <text x="0" y="20" fill="#9B9A95" fontSize="13" fontFamily="monospace">MASK :  1  0  1  1</text>
-                <text x="0" y="44" fill="#9B9A95" fontSize="11" fontFamily="monospace">INDEX:  3  2  1  0</text>
-                <rect x="-6" y="-2" width="150" height="60" fill="none" stroke="rgba(247,245,239,0.15)" rx="4" />
+                <text x="0" y="20" fill="var(--text-secondary)" fontSize="13" fontFamily="monospace">MASK :  1  0  1  1</text>
+                <text x="0" y="44" fill="var(--text-secondary)" fontSize="11" fontFamily="monospace">INDEX:  3  2  1  0</text>
+                <rect x="-6" y="-2" width="150" height="60" fill="none" stroke="var(--svg-edge)" rx="4" />
               </g>
             </svg>
           ),
@@ -190,9 +190,9 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
               <g transform="translate(45, 20)">
-                <text x="0" y="20" fill="#9B9A95" fontSize="13" fontFamily="monospace">MASK :  1 0 1 1</text>
+                <text x="0" y="20" fill="var(--text-secondary)" fontSize="13" fontFamily="monospace">MASK :  1 0 1 1</text>
                 <text x="0" y="44" fill="var(--accent)" fontSize="13" fontWeight="800" fontFamily="monospace">&amp; BIT:  0 0 1 0</text>
-                <line x1="-5" y1="54" x2="140" y2="54" stroke="rgba(247,245,239,0.2)" strokeWidth="1.5" />
+                <line x1="-5" y1="54" x2="140" y2="54" stroke="var(--svg-edge)" strokeWidth="1.5" />
                 <text x="0" y="74" fill="#84cc16" fontSize="14" fontWeight="800" fontFamily="monospace">RES  :  0 0 1 0 (TRUE)</text>
               </g>
             </svg>
@@ -204,9 +204,9 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
               <g transform="translate(45, 20)">
-                <text x="0" y="20" fill="#9B9A95" fontSize="13" fontFamily="monospace">MASK :  1 0 1 1</text>
+                <text x="0" y="20" fill="var(--text-secondary)" fontSize="13" fontFamily="monospace">MASK :  1 0 1 1</text>
                 <text x="0" y="44" fill="#38bdf8" fontSize="13" fontWeight="800" fontFamily="monospace">| SET:  0 1 0 0</text>
-                <line x1="-5" y1="54" x2="140" y2="54" stroke="rgba(247,245,239,0.2)" strokeWidth="1.5" />
+                <line x1="-5" y1="54" x2="140" y2="54" stroke="var(--svg-edge)" strokeWidth="1.5" />
                 <text x="0" y="74" fill="#38bdf8" fontSize="14" fontWeight="800" fontFamily="monospace">NEW  :  1 1 1 1 (15)</text>
               </g>
             </svg>
@@ -222,13 +222,13 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
               <g transform="translate(24, 30)">
-                <rect x="0" y="0" width="36" height="26" fill="#141720" stroke="var(--accent)" strokeWidth="1.5" rx="4" />
-                <text x="18" y="17" fill="#F7F5EF" fontSize="11" fontWeight="800" textAnchor="middle" fontFamily="monospace">H:1</text>
+                <rect x="0" y="0" width="36" height="26" fill="var(--bg-secondary)" stroke="var(--accent)" strokeWidth="1.5" rx="4" />
+                <text x="18" y="17" fill="var(--text-primary)" fontSize="11" fontWeight="800" textAnchor="middle" fontFamily="monospace">H:1</text>
                 <path d="M 36 13 L 66 13 L 66 43 L 76 43" fill="none" stroke="var(--accent)" strokeWidth="2" />
-                <rect x="76" y="30" width="36" height="26" fill="#141720" stroke="rgba(247,245,239,0.3)" strokeWidth="1.5" rx="4" />
-                <text x="94" y="47" fill="#F7F5EF" fontSize="12" fontWeight="700" textAnchor="middle" fontFamily="monospace">2</text>
-                <path d="M 112 43 L 142 43 L 142 73 L 152 73" fill="none" stroke="rgba(247,245,239,0.5)" strokeWidth="2" />
-                <rect x="152" y="60" width="36" height="26" fill="#141720" stroke="#38A169" strokeWidth="1.5" rx="4" />
+                <rect x="76" y="30" width="36" height="26" fill="var(--bg-secondary)" stroke="var(--svg-edge)" strokeWidth="1.5" rx="4" />
+                <text x="94" y="47" fill="var(--text-primary)" fontSize="12" fontWeight="700" textAnchor="middle" fontFamily="monospace">2</text>
+                <path d="M 112 43 L 142 43 L 142 73 L 152 73" fill="none" stroke="var(--svg-edge)" strokeWidth="2" />
+                <rect x="152" y="60" width="36" height="26" fill="var(--bg-secondary)" stroke="#38A169" strokeWidth="1.5" rx="4" />
                 <text x="170" y="77" fill="#38A169" fontSize="11" fontWeight="800" textAnchor="middle" fontFamily="monospace">T:3</text>
               </g>
             </svg>
@@ -240,13 +240,13 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
               <g transform="translate(24, 30)">
-                <rect x="0" y="0" width="36" height="26" fill="#141720" stroke="rgba(247,245,239,0.3)" strokeWidth="1.5" rx="4" />
-                <text x="18" y="17" fill="#9B9A95" fontSize="11" textAnchor="middle" fontFamily="monospace">1</text>
-                <path d="M 36 13 L 66 13 L 66 43 L 76 43" fill="none" stroke="rgba(247,245,239,0.3)" strokeWidth="2" />
+                <rect x="0" y="0" width="36" height="26" fill="var(--bg-secondary)" stroke="var(--svg-edge)" strokeWidth="1.5" rx="4" />
+                <text x="18" y="17" fill="var(--text-secondary)" fontSize="11" textAnchor="middle" fontFamily="monospace">1</text>
+                <path d="M 36 13 L 66 13 L 66 43 L 76 43" fill="none" stroke="var(--svg-edge)" strokeWidth="2" />
                 <rect x="76" y="30" width="36" height="26" fill="rgba(214,82,58,0.2)" stroke="var(--accent)" strokeWidth="2" rx="4" />
                 <text x="94" y="47" fill="var(--accent)" fontSize="12" fontWeight="800" textAnchor="middle" fontFamily="monospace">2*</text>
-                <path d="M 112 43 L 142 43 L 142 73 L 152 73" fill="none" stroke="rgba(247,245,239,0.5)" strokeWidth="2" />
-                <rect x="152" y="60" width="36" height="26" fill="#141720" stroke="#38A169" strokeWidth="1.5" rx="4" />
+                <path d="M 112 43 L 142 43 L 142 73 L 152 73" fill="none" stroke="var(--svg-edge)" strokeWidth="2" />
+                <rect x="152" y="60" width="36" height="26" fill="var(--bg-secondary)" stroke="#38A169" strokeWidth="1.5" rx="4" />
                 <text x="170" y="77" fill="#38A169" fontSize="11" fontWeight="800" textAnchor="middle" fontFamily="monospace">T:3</text>
               </g>
             </svg>
@@ -258,13 +258,13 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
               <g transform="translate(24, 30)">
-                <rect x="0" y="0" width="36" height="26" fill="#141720" stroke="#38A169" strokeWidth="1.5" rx="4" />
+                <rect x="0" y="0" width="36" height="26" fill="var(--bg-secondary)" stroke="#38A169" strokeWidth="1.5" rx="4" />
                 <text x="18" y="17" fill="#38A169" fontSize="11" fontWeight="800" textAnchor="middle" fontFamily="monospace">T:1</text>
                 <path d="M 76 43 L 66 43 L 66 13 L 36 13" fill="none" stroke="#38A169" strokeWidth="2" />
-                <rect x="76" y="30" width="36" height="26" fill="#141720" stroke="rgba(247,245,239,0.3)" strokeWidth="1.5" rx="4" />
-                <text x="94" y="47" fill="#F7F5EF" fontSize="12" fontWeight="700" textAnchor="middle" fontFamily="monospace">2</text>
+                <rect x="76" y="30" width="36" height="26" fill="var(--bg-secondary)" stroke="var(--svg-edge)" strokeWidth="1.5" rx="4" />
+                <text x="94" y="47" fill="var(--text-primary)" fontSize="12" fontWeight="700" textAnchor="middle" fontFamily="monospace">2</text>
                 <path d="M 152 73 L 142 73 L 142 43 L 112 43" fill="none" stroke="#38A169" strokeWidth="2" />
-                <rect x="152" y="60" width="36" height="26" fill="#141720" stroke="var(--accent)" strokeWidth="2" rx="4" />
+                <rect x="152" y="60" width="36" height="26" fill="var(--bg-secondary)" stroke="var(--accent)" strokeWidth="2" rx="4" />
                 <text x="170" y="77" fill="var(--accent)" fontSize="11" fontWeight="800" textAnchor="middle" fontFamily="monospace">H:3</text>
               </g>
             </svg>
@@ -279,17 +279,17 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           description: 'Parent 90 >= children (60, 75). Complete binary tree satisfies heap property.',
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
-              <g stroke="rgba(247,245,239,0.3)" strokeWidth="1.5" fill="none">
+              <g stroke="var(--svg-edge)" strokeWidth="1.5" fill="none">
                 <line x1="120" y1="25" x2="70" y2="55" />
                 <line x1="120" y1="25" x2="170" y2="55" />
                 <line x1="70" y1="55" x2="45" y2="88" />
                 <line x1="70" y1="55" x2="95" y2="88" />
               </g>
-              <circle cx="120" cy="25" r="9" fill="var(--accent)" stroke="#F7F5EF" strokeWidth="1.5" />
-              <text x="120" y="29" fill="#F7F5EF" fontSize="9" fontWeight="800" textAnchor="middle" fontFamily="monospace">90</text>
-              <circle cx="70" cy="55" r="8" fill="#141720" stroke="#06b6d4" strokeWidth="1.5" />
+              <circle cx="120" cy="25" r="9" fill="var(--accent)" stroke="var(--text-primary)" strokeWidth="1.5" />
+              <text x="120" y="29" fill="#FFFFFF" fontSize="9" fontWeight="800" textAnchor="middle" fontFamily="monospace">90</text>
+              <circle cx="70" cy="55" r="8" fill="var(--bg-secondary)" stroke="#06b6d4" strokeWidth="1.5" />
               <text x="70" y="59" fill="#06b6d4" fontSize="9" fontWeight="700" textAnchor="middle" fontFamily="monospace">60</text>
-              <circle cx="170" cy="55" r="8" fill="#141720" stroke="#06b6d4" strokeWidth="1.5" />
+              <circle cx="170" cy="55" r="8" fill="var(--bg-secondary)" stroke="#06b6d4" strokeWidth="1.5" />
               <text x="170" y="59" fill="#06b6d4" fontSize="9" fontWeight="700" textAnchor="middle" fontFamily="monospace">75</text>
             </svg>
           ),
@@ -299,15 +299,15 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           description: 'New key 95 inserted at leaf and bubbled up past 60 and 90 to become new root.',
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
-              <g stroke="rgba(247,245,239,0.3)" strokeWidth="1.5" fill="none">
+              <g stroke="var(--svg-edge)" strokeWidth="1.5" fill="none">
                 <line x1="120" y1="25" x2="70" y2="55" stroke="#38A169" strokeWidth="2" />
                 <line x1="120" y1="25" x2="170" y2="55" />
               </g>
-              <circle cx="120" cy="25" r="10" fill="#38A169" stroke="#F7F5EF" strokeWidth="2" />
-              <text x="120" y="29" fill="#F7F5EF" fontSize="9" fontWeight="900" textAnchor="middle" fontFamily="monospace">95</text>
-              <circle cx="70" cy="55" r="8" fill="#141720" stroke="var(--accent)" strokeWidth="1.5" />
+              <circle cx="120" cy="25" r="10" fill="#38A169" stroke="var(--text-primary)" strokeWidth="2" />
+              <text x="120" y="29" fill="#FFFFFF" fontSize="9" fontWeight="900" textAnchor="middle" fontFamily="monospace">95</text>
+              <circle cx="70" cy="55" r="8" fill="var(--bg-secondary)" stroke="var(--accent)" strokeWidth="1.5" />
               <text x="70" y="59" fill="var(--accent)" fontSize="9" fontWeight="700" textAnchor="middle" fontFamily="monospace">90</text>
-              <circle cx="170" cy="55" r="8" fill="#141720" stroke="#06b6d4" strokeWidth="1.5" />
+              <circle cx="170" cy="55" r="8" fill="var(--bg-secondary)" stroke="#06b6d4" strokeWidth="1.5" />
               <text x="170" y="59" fill="#06b6d4" fontSize="9" fontWeight="700" textAnchor="middle" fontFamily="monospace">75</text>
             </svg>
           ),
@@ -322,18 +322,18 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
               <g transform="translate(32, 16)">
-                <circle cx="18" cy="46" r="8" fill="var(--accent)" stroke="#F7F5EF" strokeWidth="1.5" />
-                <text x="18" y="50" fill="#F7F5EF" fontSize="9" fontWeight="800" textAnchor="middle" fontFamily="monospace">12</text>
+                <circle cx="18" cy="46" r="8" fill="var(--accent)" stroke="var(--text-primary)" strokeWidth="1.5" />
+                <text x="18" y="50" fill="#FFFFFF" fontSize="9" fontWeight="800" textAnchor="middle" fontFamily="monospace">12</text>
                 <path d="M 26 46 L 76 46" stroke="var(--accent)" strokeWidth="2" fill="none" />
-                <rect x="76" y="16" width="22" height="74" fill="#141720" stroke="rgba(247,245,239,0.25)" rx="4" />
+                <rect x="76" y="16" width="22" height="74" fill="var(--bg-secondary)" stroke="var(--svg-edge)" rx="4" />
                 <text x="87" y="57" fill="#f59e0b" fontSize="10" fontWeight="800" textAnchor="middle" fontFamily="monospace">%5</text>
                 <path d="M 98 46 L 140 46" stroke="#38A169" strokeWidth="2" fill="none" />
                 <g transform="translate(142, 8)">
                   {[0, 1, 2, 3, 4].map((idx) => (
                     <g key={idx} transform={`translate(0, ${idx * 17})`}>
-                      <rect x="0" y="0" width="44" height="14" fill={idx === 2 ? '#38A169' : '#141720'} stroke={idx === 2 ? '#38A169' : 'rgba(247,245,239,0.15)'} strokeWidth="1.5" rx="2" />
-                      <text x="22" y="11" fill="#F7F5EF" fontSize="8" fontWeight="700" textAnchor="middle" fontFamily="monospace">{idx === 2 ? '12' : ''}</text>
-                      <text x="-6" y="11" fill="rgba(247,245,239,0.4)" fontSize="9" textAnchor="end" fontFamily="monospace">{idx}</text>
+                      <rect x="0" y="0" width="44" height="14" fill={idx === 2 ? '#38A169' : 'var(--bg-secondary)'} stroke={idx === 2 ? '#38A169' : 'var(--svg-edge)'} strokeWidth="1.5" rx="2" />
+                      <text x="22" y="11" fill="var(--text-primary)" fontSize="8" fontWeight="700" textAnchor="middle" fontFamily="monospace">{idx === 2 ? '12' : ''}</text>
+                      <text x="-6" y="11" fill="var(--text-secondary)" fontSize="9" textAnchor="end" fontFamily="monospace">{idx}</text>
                     </g>
                   ))}
                 </g>
@@ -347,16 +347,16 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
               <g transform="translate(32, 16)">
-                <circle cx="18" cy="46" r="8" fill="#E5A93C" stroke="#F7F5EF" strokeWidth="1.5" />
-                <text x="18" y="50" fill="#F7F5EF" fontSize="9" fontWeight="800" textAnchor="middle" fontFamily="monospace">22</text>
+                <circle cx="18" cy="46" r="8" fill="#E5A93C" stroke="var(--text-primary)" strokeWidth="1.5" />
+                <text x="18" y="50" fill="var(--text-primary)" fontSize="9" fontWeight="800" textAnchor="middle" fontFamily="monospace">22</text>
                 <path d="M 26 46 L 76 46" stroke="#E5A93C" strokeWidth="2" fill="none" />
-                <rect x="76" y="16" width="22" height="74" fill="#141720" stroke="rgba(247,245,239,0.25)" rx="4" />
+                <rect x="76" y="16" width="22" height="74" fill="var(--bg-secondary)" stroke="var(--svg-edge)" rx="4" />
                 <g transform="translate(142, 8)">
                   {[0, 1, 2, 3, 4].map((idx) => (
                     <g key={idx} transform={`translate(0, ${idx * 17})`}>
-                      <rect x="0" y="0" width="44" height="14" fill={idx === 2 ? 'rgba(214,82,58,0.3)' : idx === 3 ? '#E5A93C' : '#141720'} stroke={idx === 3 ? '#E5A93C' : 'rgba(247,245,239,0.15)'} strokeWidth="1.5" rx="2" />
-                      <text x="22" y="11" fill="#F7F5EF" fontSize="8" fontWeight="700" textAnchor="middle" fontFamily="monospace">{idx === 2 ? '12' : idx === 3 ? '22' : ''}</text>
-                      <text x="-6" y="11" fill="rgba(247,245,239,0.4)" fontSize="9" textAnchor="end" fontFamily="monospace">{idx}</text>
+                      <rect x="0" y="0" width="44" height="14" fill={idx === 2 ? 'rgba(214,82,58,0.3)' : idx === 3 ? '#E5A93C' : 'var(--bg-secondary)'} stroke={idx === 3 ? '#E5A93C' : 'var(--svg-edge)'} strokeWidth="1.5" rx="2" />
+                      <text x="22" y="11" fill="var(--text-primary)" fontSize="8" fontWeight="700" textAnchor="middle" fontFamily="monospace">{idx === 2 ? '12' : idx === 3 ? '22' : ''}</text>
+                      <text x="-6" y="11" fill="var(--text-secondary)" fontSize="9" textAnchor="end" fontFamily="monospace">{idx}</text>
                     </g>
                   ))}
                 </g>
@@ -373,18 +373,18 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           description: 'Search for target 40: compare with root 50. Since 40 < 50, branch left.',
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
-              <g stroke="rgba(247,245,239,0.3)" strokeWidth="1.5" fill="none">
+              <g stroke="var(--svg-edge)" strokeWidth="1.5" fill="none">
                 <line x1="120" y1="28" x2="65" y2="58" stroke="var(--accent)" strokeWidth="2.5" />
                 <line x1="120" y1="28" x2="160" y2="58" />
                 <line x1="65" y1="58" x2="40" y2="88" />
                 <line x1="65" y1="58" x2="105" y2="88" />
               </g>
-              <circle cx="120" cy="28" r="9" fill="var(--accent)" stroke="#F7F5EF" strokeWidth="2" />
-              <text x="120" y="32" fill="#F7F5EF" fontSize="9" fontWeight="800" textAnchor="middle" fontFamily="monospace">50</text>
-              <circle cx="65" cy="58" r="8" fill="#141720" stroke="#ec4899" strokeWidth="1.5" />
-              <text x="65" y="62" fill="#F7F5EF" fontSize="9" fontWeight="800" textAnchor="middle" fontFamily="monospace">30</text>
-              <circle cx="160" cy="58" r="8" fill="#141720" stroke="#ec4899" strokeWidth="1.5" />
-              <text x="160" y="62" fill="#F7F5EF" fontSize="9" fontWeight="800" textAnchor="middle" fontFamily="monospace">70</text>
+              <circle cx="120" cy="28" r="9" fill="var(--accent)" stroke="var(--text-primary)" strokeWidth="2" />
+              <text x="120" y="32" fill="#FFFFFF" fontSize="9" fontWeight="800" textAnchor="middle" fontFamily="monospace">50</text>
+              <circle cx="65" cy="58" r="8" fill="var(--bg-secondary)" stroke="#ec4899" strokeWidth="1.5" />
+              <text x="65" y="62" fill="var(--text-primary)" fontSize="9" fontWeight="800" textAnchor="middle" fontFamily="monospace">30</text>
+              <circle cx="160" cy="58" r="8" fill="var(--bg-secondary)" stroke="#ec4899" strokeWidth="1.5" />
+              <text x="160" y="62" fill="var(--text-primary)" fontSize="9" fontWeight="800" textAnchor="middle" fontFamily="monospace">70</text>
             </svg>
           ),
         },
@@ -393,17 +393,17 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           description: 'Compare 40 with 30: 40 > 30, branch right. Found node 40 in O(log n) time!',
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
-              <g stroke="rgba(247,245,239,0.3)" strokeWidth="1.5" fill="none">
+              <g stroke="var(--svg-edge)" strokeWidth="1.5" fill="none">
                 <line x1="120" y1="28" x2="65" y2="58" stroke="var(--accent)" strokeWidth="2" />
                 <line x1="120" y1="28" x2="160" y2="58" />
                 <line x1="65" y1="58" x2="105" y2="88" stroke="#38A169" strokeWidth="2.5" />
               </g>
-              <circle cx="120" cy="28" r="9" fill="#141720" stroke="rgba(247,245,239,0.4)" strokeWidth="1.5" />
-              <text x="120" y="32" fill="#9B9A95" fontSize="9" textAnchor="middle" fontFamily="monospace">50</text>
-              <circle cx="65" cy="58" r="8" fill="#141720" stroke="rgba(247,245,239,0.4)" strokeWidth="1.5" />
-              <text x="65" y="62" fill="#9B9A95" fontSize="9" textAnchor="middle" fontFamily="monospace">30</text>
-              <circle cx="105" cy="88" r="9" fill="#38A169" stroke="#F7F5EF" strokeWidth="2" />
-              <text x="105" y="92" fill="#F7F5EF" fontSize="9" fontWeight="800" textAnchor="middle" fontFamily="monospace">40</text>
+              <circle cx="120" cy="28" r="9" fill="var(--bg-secondary)" stroke="var(--svg-node-stroke)" strokeWidth="1.5" />
+              <text x="120" y="32" fill="var(--text-secondary)" fontSize="9" textAnchor="middle" fontFamily="monospace">50</text>
+              <circle cx="65" cy="58" r="8" fill="var(--bg-secondary)" stroke="var(--svg-node-stroke)" strokeWidth="1.5" />
+              <text x="65" y="62" fill="var(--text-secondary)" fontSize="9" textAnchor="middle" fontFamily="monospace">30</text>
+              <circle cx="105" cy="88" r="9" fill="#38A169" stroke="var(--text-primary)" strokeWidth="2" />
+              <text x="105" y="92" fill="#FFFFFF" fontSize="9" fontWeight="800" textAnchor="middle" fontFamily="monospace">40</text>
             </svg>
           ),
         },
@@ -416,17 +416,17 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           description: 'Queue = [0]. Mark start vertex 0 as visited (highlighted).',
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
-              <g stroke="rgba(247,245,239,0.3)" strokeWidth="2" fill="none">
+              <g stroke="var(--svg-edge)" strokeWidth="2" fill="none">
                 <line x1="80" y1="35" x2="160" y2="35" />
                 <line x1="80" y1="35" x2="50" y2="85" />
                 <line x1="160" y1="35" x2="190" y2="85" />
                 <line x1="50" y1="85" x2="120" y2="105" />
               </g>
-              <circle cx="80" cy="35" r="9" fill="var(--accent)" stroke="#F7F5EF" strokeWidth="2" />
-              <circle cx="160" cy="35" r="7" fill="#141720" stroke="rgba(247,245,239,0.4)" strokeWidth="1.5" />
-              <circle cx="50" cy="85" r="7" fill="#141720" stroke="rgba(247,245,239,0.4)" strokeWidth="1.5" />
-              <circle cx="190" cy="85" r="7" fill="#141720" stroke="rgba(247,245,239,0.4)" strokeWidth="1.5" />
-              <circle cx="120" cy="105" r="7" fill="#141720" stroke="rgba(247,245,239,0.4)" strokeWidth="1.5" />
+              <circle cx="80" cy="35" r="9" fill="var(--accent)" stroke="var(--text-primary)" strokeWidth="2" />
+              <circle cx="160" cy="35" r="7" fill="var(--bg-secondary)" stroke="var(--svg-node-stroke)" strokeWidth="1.5" />
+              <circle cx="50" cy="85" r="7" fill="var(--bg-secondary)" stroke="var(--svg-node-stroke)" strokeWidth="1.5" />
+              <circle cx="190" cy="85" r="7" fill="var(--bg-secondary)" stroke="var(--svg-node-stroke)" strokeWidth="1.5" />
+              <circle cx="120" cy="105" r="7" fill="var(--bg-secondary)" stroke="var(--svg-node-stroke)" strokeWidth="1.5" />
             </svg>
           ),
         },
@@ -435,17 +435,17 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           description: 'Dequeue 0. Enqueue adjacent vertices 1 and 2 at depth level 1.',
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
-              <g stroke="rgba(247,245,239,0.3)" strokeWidth="2" fill="none">
+              <g stroke="var(--svg-edge)" strokeWidth="2" fill="none">
                 <line x1="80" y1="35" x2="160" y2="35" stroke="#6366f1" strokeWidth="2.5" />
                 <line x1="80" y1="35" x2="50" y2="85" stroke="#6366f1" strokeWidth="2.5" />
                 <line x1="160" y1="35" x2="190" y2="85" />
                 <line x1="50" y1="85" x2="120" y2="105" />
               </g>
-              <circle cx="80" cy="35" r="8" fill="#141720" stroke="#38A169" strokeWidth="2" />
-              <circle cx="160" cy="35" r="8" fill="#6366f1" stroke="#F7F5EF" strokeWidth="2" />
-              <circle cx="50" cy="85" r="8" fill="#6366f1" stroke="#F7F5EF" strokeWidth="2" />
-              <circle cx="190" cy="85" r="7" fill="#141720" stroke="rgba(247,245,239,0.4)" strokeWidth="1.5" />
-              <circle cx="120" cy="105" r="7" fill="#141720" stroke="rgba(247,245,239,0.4)" strokeWidth="1.5" />
+              <circle cx="80" cy="35" r="8" fill="var(--bg-secondary)" stroke="#38A169" strokeWidth="2" />
+              <circle cx="160" cy="35" r="8" fill="#6366f1" stroke="var(--text-primary)" strokeWidth="2" />
+              <circle cx="50" cy="85" r="8" fill="#6366f1" stroke="var(--text-primary)" strokeWidth="2" />
+              <circle cx="190" cy="85" r="7" fill="var(--bg-secondary)" stroke="var(--svg-node-stroke)" strokeWidth="1.5" />
+              <circle cx="120" cy="105" r="7" fill="var(--bg-secondary)" stroke="var(--svg-node-stroke)" strokeWidth="1.5" />
             </svg>
           ),
         },
@@ -460,11 +460,11 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
                 <line x1="160" y1="35" x2="190" y2="85" />
                 <line x1="50" y1="85" x2="120" y2="105" />
               </g>
-              <circle cx="80" cy="35" r="8" fill="#38A169" stroke="#F7F5EF" strokeWidth="1.5" />
-              <circle cx="160" cy="35" r="8" fill="#38A169" stroke="#F7F5EF" strokeWidth="1.5" />
-              <circle cx="50" cy="85" r="8" fill="#38A169" stroke="#F7F5EF" strokeWidth="1.5" />
-              <circle cx="190" cy="85" r="8" fill="#38A169" stroke="#F7F5EF" strokeWidth="1.5" />
-              <circle cx="120" cy="105" r="8" fill="#38A169" stroke="#F7F5EF" strokeWidth="1.5" />
+              <circle cx="80" cy="35" r="8" fill="#38A169" stroke="var(--text-primary)" strokeWidth="1.5" />
+              <circle cx="160" cy="35" r="8" fill="#38A169" stroke="var(--text-primary)" strokeWidth="1.5" />
+              <circle cx="50" cy="85" r="8" fill="#38A169" stroke="var(--text-primary)" strokeWidth="1.5" />
+              <circle cx="190" cy="85" r="8" fill="#38A169" stroke="var(--text-primary)" strokeWidth="1.5" />
+              <circle cx="120" cy="105" r="8" fill="#38A169" stroke="var(--text-primary)" strokeWidth="1.5" />
             </svg>
           ),
         },
@@ -477,16 +477,16 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           description: 'Edges: (A,B:1), (B,C:2), (C,D:3), (A,D:4). Kruskal greedy loop begins.',
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
-              <g stroke="rgba(247,245,239,0.2)" strokeWidth="1.5" strokeDasharray="3,3" fill="none">
+              <g stroke="var(--svg-edge)" strokeWidth="1.5" strokeDasharray="3,3" fill="none">
                 <line x1="60" y1="35" x2="180" y2="35" />
                 <line x1="180" y1="35" x2="180" y2="95" />
                 <line x1="180" y1="95" x2="60" y2="95" />
                 <line x1="60" y1="95" x2="60" y2="35" />
               </g>
-              <circle cx="60" cy="35" r="7" fill="#141720" stroke="#ea580c" strokeWidth="1.5" />
-              <circle cx="180" cy="35" r="7" fill="#141720" stroke="#ea580c" strokeWidth="1.5" />
-              <circle cx="180" cy="95" r="7" fill="#141720" stroke="#ea580c" strokeWidth="1.5" />
-              <circle cx="60" cy="95" r="7" fill="#141720" stroke="#ea580c" strokeWidth="1.5" />
+              <circle cx="60" cy="35" r="7" fill="var(--bg-secondary)" stroke="#ea580c" strokeWidth="1.5" />
+              <circle cx="180" cy="35" r="7" fill="var(--bg-secondary)" stroke="#ea580c" strokeWidth="1.5" />
+              <circle cx="180" cy="95" r="7" fill="var(--bg-secondary)" stroke="#ea580c" strokeWidth="1.5" />
+              <circle cx="60" cy="95" r="7" fill="var(--bg-secondary)" stroke="#ea580c" strokeWidth="1.5" />
             </svg>
           ),
         },
@@ -495,16 +495,16 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           description: 'Edge (A, B) with weight 1 added to MST. Sets {A} and {B} merged.',
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
-              <g stroke="rgba(247,245,239,0.2)" strokeWidth="1.5" strokeDasharray="3,3" fill="none">
+              <g stroke="var(--svg-edge)" strokeWidth="1.5" strokeDasharray="3,3" fill="none">
                 <line x1="180" y1="35" x2="180" y2="95" />
                 <line x1="180" y1="95" x2="60" y2="95" />
                 <line x1="60" y1="95" x2="60" y2="35" />
               </g>
               <line x1="60" y1="35" x2="180" y2="35" stroke="#ea580c" strokeWidth="3" />
-              <circle cx="60" cy="35" r="8" fill="#ea580c" stroke="#F7F5EF" />
-              <circle cx="180" cy="35" r="8" fill="#ea580c" stroke="#F7F5EF" />
-              <circle cx="180" cy="95" r="7" fill="#141720" stroke="#ea580c" strokeWidth="1.5" />
-              <circle cx="60" cy="95" r="7" fill="#141720" stroke="#ea580c" strokeWidth="1.5" />
+              <circle cx="60" cy="35" r="8" fill="#ea580c" stroke="var(--text-primary)" />
+              <circle cx="180" cy="35" r="8" fill="#ea580c" stroke="var(--text-primary)" />
+              <circle cx="180" cy="95" r="7" fill="var(--bg-secondary)" stroke="#ea580c" strokeWidth="1.5" />
+              <circle cx="60" cy="95" r="7" fill="var(--bg-secondary)" stroke="#ea580c" strokeWidth="1.5" />
             </svg>
           ),
         },
@@ -518,7 +518,7 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
                 <line x1="180" y1="35" x2="180" y2="95" />
                 <line x1="180" y1="95" x2="60" y2="95" />
               </g>
-              <line x1="60" y1="95" x2="60" y2="35" stroke="rgba(247,245,239,0.15)" strokeDasharray="3,3" strokeWidth="1.5" />
+              <line x1="60" y1="95" x2="60" y2="35" stroke="var(--svg-edge)" strokeDasharray="3,3" strokeWidth="1.5" />
               <circle cx="60" cy="35" r="8" fill="#ea580c" />
               <circle cx="180" cy="35" r="8" fill="#ea580c" />
               <circle cx="180" cy="95" r="8" fill="#ea580c" />
@@ -535,16 +535,16 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           description: 'Source S has dist[S] = 0; all other vertices initialized to ∞.',
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
-              <g stroke="rgba(247,245,239,0.3)" strokeWidth="1.5" fill="none">
+              <g stroke="var(--svg-edge)" strokeWidth="1.5" fill="none">
                 <line x1="50" y1="65" x2="120" y2="35" />
                 <line x1="50" y1="65" x2="120" y2="95" />
                 <line x1="120" y1="35" x2="190" y2="65" />
                 <line x1="120" y1="95" x2="190" y2="65" />
               </g>
-              <circle cx="50" cy="65" r="9" fill="var(--accent)" stroke="#F7F5EF" strokeWidth="2" />
-              <circle cx="120" cy="35" r="7" fill="#141720" stroke="rgba(247,245,239,0.4)" strokeWidth="1.5" />
-              <circle cx="120" cy="95" r="7" fill="#141720" stroke="rgba(247,245,239,0.4)" strokeWidth="1.5" />
-              <circle cx="190" cy="65" r="7" fill="#141720" stroke="rgba(247,245,239,0.4)" strokeWidth="1.5" />
+              <circle cx="50" cy="65" r="9" fill="var(--accent)" stroke="var(--text-primary)" strokeWidth="2" />
+              <circle cx="120" cy="35" r="7" fill="var(--bg-secondary)" stroke="var(--svg-node-stroke)" strokeWidth="1.5" />
+              <circle cx="120" cy="95" r="7" fill="var(--bg-secondary)" stroke="var(--svg-node-stroke)" strokeWidth="1.5" />
+              <circle cx="190" cy="65" r="7" fill="var(--bg-secondary)" stroke="var(--svg-node-stroke)" strokeWidth="1.5" />
             </svg>
           ),
         },
@@ -553,16 +553,16 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           description: 'Relaxing neighbors of S: dist[A] = 2, dist[B] = 5.',
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
-              <g stroke="rgba(247,245,239,0.3)" strokeWidth="1.5" fill="none">
+              <g stroke="var(--svg-edge)" strokeWidth="1.5" fill="none">
                 <line x1="50" y1="65" x2="120" y2="35" stroke="#10b981" strokeWidth="2.5" />
                 <line x1="50" y1="65" x2="120" y2="95" stroke="#10b981" strokeWidth="2.5" />
                 <line x1="120" y1="35" x2="190" y2="65" />
                 <line x1="120" y1="95" x2="190" y2="65" />
               </g>
-              <circle cx="50" cy="65" r="8" fill="var(--accent)" stroke="#F7F5EF" />
-              <circle cx="120" cy="35" r="8" fill="#10b981" stroke="#F7F5EF" />
-              <circle cx="120" cy="95" r="8" fill="#10b981" stroke="#F7F5EF" />
-              <circle cx="190" cy="65" r="7" fill="#141720" stroke="rgba(247,245,239,0.4)" />
+              <circle cx="50" cy="65" r="8" fill="var(--accent)" stroke="var(--text-primary)" />
+              <circle cx="120" cy="35" r="8" fill="#10b981" stroke="var(--text-primary)" />
+              <circle cx="120" cy="95" r="8" fill="#10b981" stroke="var(--text-primary)" />
+              <circle cx="190" cy="65" r="7" fill="var(--bg-secondary)" stroke="var(--svg-node-stroke)" />
             </svg>
           ),
         },
@@ -575,10 +575,10 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
                 <line x1="50" y1="65" x2="120" y2="35" />
                 <line x1="120" y1="35" x2="190" y2="65" />
               </g>
-              <line x1="50" y1="65" x2="120" y2="95" stroke="rgba(247,245,239,0.2)" strokeWidth="1" strokeDasharray="3,3" />
+              <line x1="50" y1="65" x2="120" y2="95" stroke="var(--svg-edge)" strokeWidth="1" strokeDasharray="3,3" />
               <circle cx="50" cy="65" r="8" fill="var(--accent)" />
               <circle cx="120" cy="35" r="8" fill="#10b981" />
-              <circle cx="190" cy="65" r="9" fill="#38A169" stroke="#F7F5EF" strokeWidth="2" />
+              <circle cx="190" cy="65" r="9" fill="#38A169" stroke="var(--text-primary)" strokeWidth="2" />
             </svg>
           ),
         },
@@ -591,13 +591,16 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           description: 'Tortoise (slow, speed=1) and Hare (fast, speed=2) both begin at list head.',
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
-              <g stroke="rgba(247,245,239,0.3)" strokeWidth="2" fill="none">
+              <g stroke="var(--svg-edge)" strokeWidth="2" fill="none">
                 <line x1="45" y1="85" x2="85" y2="55" />
                 <line x1="85" y1="55" x2="125" y2="45" />
+                <line x1="125" y1="45" x2="160" y2="45" />
+                <circle cx="85" cy="55" r="4" fill="var(--bg-secondary)" stroke="var(--svg-node-stroke)" strokeWidth="1.5" />
+                <circle cx="125" cy="45" r="4" fill="var(--bg-secondary)" stroke="var(--svg-node-stroke)" strokeWidth="1.5" />
                 <circle cx="160" cy="70" r="25" stroke="#06b6d4" strokeWidth="2" />
               </g>
-              <circle cx="45" cy="85" r="8" fill="var(--accent)" stroke="#F7F5EF" strokeWidth="1.5" />
-              <text x="45" y="89" fill="#F7F5EF" fontSize="9" fontWeight="800" textAnchor="middle">S</text>
+              <circle cx="45" cy="85" r="8" fill="var(--accent)" stroke="var(--text-primary)" strokeWidth="1.5" />
+              <text x="45" y="89" fill="#FFFFFF" fontSize="9" fontWeight="800" textAnchor="middle">S</text>
             </svg>
           ),
         },
@@ -606,15 +609,18 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           description: 'Fast pointer loops through cycle twice as quickly as Slow pointer.',
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
-              <g stroke="rgba(247,245,239,0.3)" strokeWidth="2" fill="none">
+              <g stroke="var(--svg-edge)" strokeWidth="2" fill="none">
                 <line x1="45" y1="85" x2="85" y2="55" />
                 <line x1="85" y1="55" x2="125" y2="45" />
+                <line x1="125" y1="45" x2="160" y2="45" />
+                <circle cx="85" cy="55" r="4" fill="var(--bg-secondary)" stroke="var(--svg-node-stroke)" strokeWidth="1.5" />
+                <circle cx="125" cy="45" r="4" fill="var(--bg-secondary)" stroke="var(--svg-node-stroke)" strokeWidth="1.5" />
                 <circle cx="160" cy="70" r="25" stroke="#06b6d4" strokeWidth="2" />
               </g>
-              <circle cx="135" cy="70" r="7" fill="var(--accent)" stroke="#F7F5EF" />
-              <text x="135" y="74" fill="#F7F5EF" fontSize="8" fontWeight="800" textAnchor="middle">S</text>
-              <circle cx="185" cy="70" r="7" fill="#38A169" stroke="#F7F5EF" />
-              <text x="185" y="74" fill="#F7F5EF" fontSize="8" fontWeight="800" textAnchor="middle">F</text>
+              <circle cx="135" cy="70" r="7" fill="var(--accent)" stroke="var(--text-primary)" />
+              <text x="135" y="74" fill="#FFFFFF" fontSize="8" fontWeight="800" textAnchor="middle">S</text>
+              <circle cx="185" cy="70" r="7" fill="#38A169" stroke="var(--text-primary)" />
+              <text x="185" y="74" fill="#FFFFFF" fontSize="8" fontWeight="800" textAnchor="middle">F</text>
             </svg>
           ),
         },
@@ -623,13 +629,16 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           description: 'Slow == Fast inside the loop! Cycle detected in O(n) time and O(1) extra memory.',
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
-              <g stroke="rgba(247,245,239,0.3)" strokeWidth="2" fill="none">
+              <g stroke="var(--svg-edge)" strokeWidth="2" fill="none">
                 <line x1="45" y1="85" x2="85" y2="55" />
                 <line x1="85" y1="55" x2="125" y2="45" />
+                <line x1="125" y1="45" x2="160" y2="45" />
+                <circle cx="85" cy="55" r="4" fill="var(--bg-secondary)" stroke="var(--svg-node-stroke)" strokeWidth="1.5" />
+                <circle cx="125" cy="45" r="4" fill="var(--bg-secondary)" stroke="var(--svg-node-stroke)" strokeWidth="1.5" />
                 <circle cx="160" cy="70" r="25" stroke="#38A169" strokeWidth="2.5" />
               </g>
-              <circle cx="160" cy="45" r="9" fill="#38A169" stroke="#F7F5EF" strokeWidth="2" />
-              <text x="160" y="49" fill="#F7F5EF" fontSize="8" fontWeight="900" textAnchor="middle">S=F</text>
+              <circle cx="160" cy="45" r="9" fill="#38A169" stroke="var(--text-primary)" strokeWidth="2" />
+              <text x="160" y="49" fill="#FFFFFF" fontSize="8" fontWeight="900" textAnchor="middle">S=F</text>
             </svg>
           ),
         },
@@ -648,7 +657,7 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
                   <g key={r} transform={`translate(0, ${r * 22})`}>
                     <text x="-15" y="15" fill="var(--text-muted)" fontSize="10" fontFamily="monospace">{r}</text>
                     {row.map((val, c) => (
-                      <rect key={c} x={c * 24} y="0" width="20" height="18" fill={val ? 'rgba(56,189,248,0.2)' : '#141720'} stroke={val ? '#38bdf8' : 'rgba(247,245,239,0.1)'} rx="2" />
+                      <rect key={c} x={c * 24} y="0" width="20" height="18" fill={val ? 'rgba(56,189,248,0.2)' : 'var(--bg-secondary)'} stroke={val ? '#38bdf8' : 'var(--svg-edge-subtle)'} rx="2" />
                     ))}
                   </g>
                 ))}
@@ -670,11 +679,11 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
                 ].map((row, i) => (
                   <g key={i} transform={`translate(0, ${i * 25})`}>
                     <rect x="0" y="0" width="24" height="20" fill="var(--accent)" rx="3" />
-                    <text x="12" y="14" fill="#F7F5EF" fontSize="11" fontWeight="700" textAnchor="middle">{row.u}</text>
-                    <line x1="24" y1="10" x2="42" y2="10" stroke="#F7F5EF" strokeWidth="1.5" />
+                    <text x="12" y="14" fill="#FFFFFF" fontSize="11" fontWeight="700" textAnchor="middle">{row.u}</text>
+                    <line x1="24" y1="10" x2="42" y2="10" stroke="var(--text-primary)" strokeWidth="1.5" />
                     {row.neighbors.map((v, j) => (
                       <g key={j} transform={`translate(${45 + j * 38}, 0)`}>
-                        <rect x="0" y="0" width="24" height="20" fill="#141720" stroke="#38bdf8" strokeWidth="1.5" rx="3" />
+                        <rect x="0" y="0" width="24" height="20" fill="var(--bg-secondary)" stroke="#38bdf8" strokeWidth="1.5" rx="3" />
                         <text x="12" y="14" fill="#38bdf8" fontSize="11" fontWeight="700" textAnchor="middle">{v}</text>
                       </g>
                     ))}
@@ -695,10 +704,10 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
                 <line x1="110" y1="30" x2="180" y2="55" />
                 <line x1="110" y1="85" x2="180" y2="55" />
               </g>
-              <circle cx="50" cy="40" r="10" fill="var(--accent)" stroke="#F7F5EF" strokeWidth="2" />
-              <circle cx="110" cy="30" r="10" fill="#38bdf8" stroke="#F7F5EF" strokeWidth="1.5" />
-              <circle cx="110" cy="85" r="10" fill="#38bdf8" stroke="#F7F5EF" strokeWidth="1.5" />
-              <circle cx="180" cy="55" r="10" fill="#38A169" stroke="#F7F5EF" strokeWidth="2" />
+              <circle cx="50" cy="40" r="10" fill="var(--accent)" stroke="var(--text-primary)" strokeWidth="2" />
+              <circle cx="110" cy="30" r="10" fill="#38bdf8" stroke="var(--text-primary)" strokeWidth="1.5" />
+              <circle cx="110" cy="85" r="10" fill="#38bdf8" stroke="var(--text-primary)" strokeWidth="1.5" />
+              <circle cx="180" cy="55" r="10" fill="#38A169" stroke="var(--text-primary)" strokeWidth="2" />
             </svg>
           ),
         },
@@ -714,8 +723,8 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
               <g transform="translate(25, 45)">
                 {[0, 1, 2, 3, 4].map((v, i) => (
                   <g key={i} transform={`translate(${i * 40}, 0)`}>
-                    <circle cx="16" cy="16" r="14" fill="#141720" stroke="#f59e0b" strokeWidth="1.5" />
-                    <text x="16" y="20" fill="#F7F5EF" fontSize="12" fontWeight="700" textAnchor="middle">{v}</text>
+                    <circle cx="16" cy="16" r="14" fill="var(--bg-secondary)" stroke="#f59e0b" strokeWidth="1.5" />
+                    <text x="16" y="20" fill="var(--text-primary)" fontSize="12" fontWeight="700" textAnchor="middle">{v}</text>
                   </g>
                 ))}
               </g>
@@ -731,14 +740,14 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
                 <line x1="60" y1="75" x2="60" y2="35" />
                 <line x1="160" y1="75" x2="160" y2="35" />
               </g>
-              <circle cx="60" cy="35" r="13" fill="#f59e0b" stroke="#F7F5EF" strokeWidth="1.5" />
+              <circle cx="60" cy="35" r="13" fill="#f59e0b" stroke="var(--text-primary)" strokeWidth="1.5" />
               <text x="60" y="39" fill="#111" fontSize="11" fontWeight="800" textAnchor="middle">1</text>
-              <circle cx="60" cy="75" r="11" fill="#141720" stroke="#f59e0b" strokeWidth="1.5" />
-              <text x="60" y="79" fill="#F7F5EF" fontSize="11" textAnchor="middle">2</text>
-              <circle cx="160" cy="35" r="13" fill="#f59e0b" stroke="#F7F5EF" strokeWidth="1.5" />
+              <circle cx="60" cy="75" r="11" fill="var(--bg-secondary)" stroke="#f59e0b" strokeWidth="1.5" />
+              <text x="60" y="79" fill="var(--text-primary)" fontSize="11" textAnchor="middle">2</text>
+              <circle cx="160" cy="35" r="13" fill="#f59e0b" stroke="var(--text-primary)" strokeWidth="1.5" />
               <text x="160" y="39" fill="#111" fontSize="11" fontWeight="800" textAnchor="middle">3</text>
-              <circle cx="160" cy="75" r="11" fill="#141720" stroke="#f59e0b" strokeWidth="1.5" />
-              <text x="160" y="79" fill="#F7F5EF" fontSize="11" textAnchor="middle">4</text>
+              <circle cx="160" cy="75" r="11" fill="var(--bg-secondary)" stroke="#f59e0b" strokeWidth="1.5" />
+              <text x="160" y="79" fill="var(--text-primary)" fontSize="11" textAnchor="middle">4</text>
             </svg>
           ),
         },
@@ -752,11 +761,11 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
                 <line x1="120" y1="75" x2="120" y2="35" />
                 <line x1="170" y1="75" x2="120" y2="35" />
               </g>
-              <circle cx="120" cy="35" r="14" fill="#38A169" stroke="#F7F5EF" strokeWidth="2" />
-              <text x="120" y="39" fill="#F7F5EF" fontSize="11" fontWeight="800" textAnchor="middle">Root</text>
-              <circle cx="70" cy="75" r="10" fill="#141720" stroke="#38A169" strokeWidth="1.5" />
-              <circle cx="120" cy="75" r="10" fill="#141720" stroke="#38A169" strokeWidth="1.5" />
-              <circle cx="170" cy="75" r="10" fill="#141720" stroke="#38A169" strokeWidth="1.5" />
+              <circle cx="120" cy="35" r="14" fill="#38A169" stroke="var(--text-primary)" strokeWidth="2" />
+              <text x="120" y="39" fill="#FFFFFF" fontSize="11" fontWeight="800" textAnchor="middle">Root</text>
+              <circle cx="70" cy="75" r="10" fill="var(--bg-secondary)" stroke="#38A169" strokeWidth="1.5" />
+              <circle cx="120" cy="75" r="10" fill="var(--bg-secondary)" stroke="#38A169" strokeWidth="1.5" />
+              <circle cx="170" cy="75" r="10" fill="var(--bg-secondary)" stroke="#38A169" strokeWidth="1.5" />
             </svg>
           ),
         },
@@ -778,7 +787,7 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
                   { idx: 5, val: 7 },
                 ].map((item, i) => (
                   <g key={i} transform={`translate(${i * 42}, 0)`}>
-                    <rect x="0" y={35 - item.idx * 5} width="35" height="24" fill="#141720" stroke="#06b6d4" strokeWidth="1.5" rx="3" />
+                    <rect x="0" y={35 - item.idx * 5} width="35" height="24" fill="var(--bg-secondary)" stroke="#06b6d4" strokeWidth="1.5" rx="3" />
                     <text x="17" y={51 - item.idx * 5} fill="#06b6d4" fontSize="11" fontWeight="700" textAnchor="middle">{item.val}</text>
                     <text x="17" y="70" fill="var(--text-muted)" fontSize="9" fontFamily="monospace" textAnchor="middle">[{item.idx}]</text>
                   </g>
@@ -793,9 +802,9 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
               <path d="M 180,50 Q 130,15 80,50" fill="none" stroke="var(--accent)" strokeWidth="2" strokeDasharray="3,3" />
-              <circle cx="180" cy="50" r="12" fill="var(--accent)" stroke="#F7F5EF" strokeWidth="1.5" />
-              <text x="180" y="54" fill="#F7F5EF" fontSize="10" fontWeight="700" textAnchor="middle">i=7</text>
-              <circle cx="80" cy="50" r="12" fill="#06b6d4" stroke="#F7F5EF" strokeWidth="1.5" />
+              <circle cx="180" cy="50" r="12" fill="var(--accent)" stroke="var(--text-primary)" strokeWidth="1.5" />
+              <text x="180" y="54" fill="#FFFFFF" fontSize="10" fontWeight="700" textAnchor="middle">i=7</text>
+              <circle cx="80" cy="50" r="12" fill="#06b6d4" stroke="var(--text-primary)" strokeWidth="1.5" />
               <text x="80" y="54" fill="#111" fontSize="10" fontWeight="700" textAnchor="middle">i=6</text>
             </svg>
           ),
@@ -811,7 +820,7 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
               </g>
               <circle cx="50" cy="65" r="10" fill="#38A169" />
               <circle cx="110" cy="45" r="10" fill="#38A169" />
-              <circle cx="180" cy="25" r="12" fill="#38A169" stroke="#F7F5EF" strokeWidth="2" />
+              <circle cx="180" cy="25" r="12" fill="#38A169" stroke="var(--text-primary)" strokeWidth="2" />
             </svg>
           ),
         },
@@ -824,18 +833,18 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           description: 'Root covers [0..N-1], each internal node stores aggregate of left and right halves.',
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
-              <g stroke="rgba(247,245,239,0.2)" strokeWidth="1.5">
+              <g stroke="var(--svg-edge)" strokeWidth="1.5">
                 <line x1="120" y1="25" x2="65" y2="60" />
                 <line x1="120" y1="25" x2="175" y2="60" />
                 <line x1="65" y1="60" x2="40" y2="95" />
                 <line x1="65" y1="60" x2="90" y2="95" />
               </g>
-              <circle cx="120" cy="25" r="14" fill="#141720" stroke="#8b5cf6" strokeWidth="2" />
+              <circle cx="120" cy="25" r="14" fill="var(--bg-secondary)" stroke="#8b5cf6" strokeWidth="2" />
               <text x="120" y="29" fill="#8b5cf6" fontSize="10" fontWeight="700" textAnchor="middle">[0..7]</text>
-              <circle cx="65" cy="60" r="12" fill="#141720" stroke="#8b5cf6" strokeWidth="1.5" />
-              <circle cx="175" cy="60" r="12" fill="#141720" stroke="#8b5cf6" strokeWidth="1.5" />
-              <circle cx="40" cy="95" r="9" fill="#141720" stroke="rgba(247,245,239,0.3)" />
-              <circle cx="90" cy="95" r="9" fill="#141720" stroke="rgba(247,245,239,0.3)" />
+              <circle cx="65" cy="60" r="12" fill="var(--bg-secondary)" stroke="#8b5cf6" strokeWidth="1.5" />
+              <circle cx="175" cy="60" r="12" fill="var(--bg-secondary)" stroke="#8b5cf6" strokeWidth="1.5" />
+              <circle cx="40" cy="95" r="9" fill="var(--bg-secondary)" stroke="var(--svg-edge)" />
+              <circle cx="90" cy="95" r="9" fill="var(--bg-secondary)" stroke="var(--svg-edge)" />
             </svg>
           ),
         },
@@ -848,10 +857,10 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
                 <line x1="120" y1="25" x2="65" y2="60" />
                 <line x1="120" y1="25" x2="175" y2="60" />
               </g>
-              <circle cx="65" cy="60" r="13" fill="var(--accent)" stroke="#F7F5EF" strokeWidth="1.5" />
-              <text x="65" y="64" fill="#F7F5EF" fontSize="9" fontWeight="800" textAnchor="middle">[2..3]</text>
-              <circle cx="175" cy="60" r="13" fill="#38A169" stroke="#F7F5EF" strokeWidth="1.5" />
-              <text x="175" y="64" fill="#F7F5EF" fontSize="9" fontWeight="800" textAnchor="middle">[4..6]</text>
+              <circle cx="65" cy="60" r="13" fill="var(--accent)" stroke="var(--text-primary)" strokeWidth="1.5" />
+              <text x="65" y="64" fill="#FFFFFF" fontSize="9" fontWeight="800" textAnchor="middle">[2..3]</text>
+              <circle cx="175" cy="60" r="13" fill="#38A169" stroke="var(--text-primary)" strokeWidth="1.5" />
+              <text x="175" y="64" fill="#FFFFFF" fontSize="9" fontWeight="800" textAnchor="middle">[4..6]</text>
             </svg>
           ),
         },
@@ -866,7 +875,7 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
               </g>
               <circle cx="40" cy="95" r="10" fill="#38A169" />
               <circle cx="65" cy="60" r="11" fill="#38A169" />
-              <circle cx="120" cy="25" r="14" fill="#38A169" stroke="#F7F5EF" strokeWidth="2" />
+              <circle cx="120" cy="25" r="14" fill="#38A169" stroke="var(--text-primary)" strokeWidth="2" />
             </svg>
           ),
         },
@@ -879,8 +888,8 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           description: 'Root function frame placed onto runtime execution call stack.',
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
-              <circle cx="120" cy="35" r="16" fill="var(--accent)" stroke="#F7F5EF" strokeWidth="2" />
-              <text x="120" y="40" fill="#F7F5EF" fontSize="11" fontWeight="800" textAnchor="middle">f(4)</text>
+              <circle cx="120" cy="35" r="16" fill="var(--accent)" stroke="var(--text-primary)" strokeWidth="2" />
+              <text x="120" y="40" fill="#FFFFFF" fontSize="11" fontWeight="800" textAnchor="middle">f(4)</text>
             </svg>
           ),
         },
@@ -891,12 +900,12 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
             <svg width="100%" height="100%" viewBox="0 0 240 130">
               <line x1="120" y1="35" x2="70" y2="70" stroke="var(--accent)" strokeWidth="1.5" />
               <line x1="120" y1="35" x2="170" y2="70" stroke="var(--accent)" strokeWidth="1.5" />
-              <circle cx="120" cy="35" r="14" fill="#141720" stroke="var(--accent)" strokeWidth="2" />
+              <circle cx="120" cy="35" r="14" fill="var(--bg-secondary)" stroke="var(--accent)" strokeWidth="2" />
               <text x="120" y="39" fill="var(--accent)" fontSize="10" fontWeight="700" textAnchor="middle">f(4)</text>
-              <circle cx="70" cy="70" r="12" fill="var(--accent)" stroke="#F7F5EF" strokeWidth="1.5" />
-              <text x="70" y="74" fill="#F7F5EF" fontSize="10" fontWeight="700" textAnchor="middle">f(3)</text>
-              <circle cx="170" cy="70" r="12" fill="var(--accent)" stroke="#F7F5EF" strokeWidth="1.5" />
-              <text x="170" y="74" fill="#F7F5EF" fontSize="10" fontWeight="700" textAnchor="middle">f(2)</text>
+              <circle cx="70" cy="70" r="12" fill="var(--accent)" stroke="var(--text-primary)" strokeWidth="1.5" />
+              <text x="70" y="74" fill="#FFFFFF" fontSize="10" fontWeight="700" textAnchor="middle">f(3)</text>
+              <circle cx="170" cy="70" r="12" fill="var(--accent)" stroke="var(--text-primary)" strokeWidth="1.5" />
+              <text x="170" y="74" fill="#FFFFFF" fontSize="10" fontWeight="700" textAnchor="middle">f(2)</text>
             </svg>
           ),
         },
@@ -905,8 +914,8 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           description: 'Base cases hit O(1) leaves; stack frames unwind returning combined values.',
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
-              <circle cx="120" cy="35" r="15" fill="#38A169" stroke="#F7F5EF" strokeWidth="2" />
-              <text x="120" y="39" fill="#F7F5EF" fontSize="10" fontWeight="800" textAnchor="middle">ret=3</text>
+              <circle cx="120" cy="35" r="15" fill="#38A169" stroke="var(--text-primary)" strokeWidth="2" />
+              <text x="120" y="39" fill="#FFFFFF" fontSize="10" fontWeight="800" textAnchor="middle">ret=3</text>
             </svg>
           ),
         },
@@ -922,7 +931,7 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
               <line x1="120" y1="25" x2="60" y2="65" stroke="#ec4899" strokeWidth="1.5" />
               <line x1="120" y1="25" x2="120" y2="65" stroke="#ec4899" strokeWidth="1.5" />
               <line x1="120" y1="25" x2="180" y2="65" stroke="#ec4899" strokeWidth="1.5" />
-              <circle cx="120" cy="25" r="10" fill="#141720" stroke="#ec4899" strokeWidth="2" />
+              <circle cx="120" cy="25" r="10" fill="var(--bg-secondary)" stroke="#ec4899" strokeWidth="2" />
               <circle cx="60" cy="65" r="8" fill="#ec4899" />
               <circle cx="120" cy="65" r="8" fill="#ec4899" />
               <circle cx="180" cy="65" r="8" fill="#ec4899" />
@@ -935,7 +944,7 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
               <path d="M 60,65 Q 90,45 120,65" fill="none" stroke="var(--accent)" strokeWidth="2" strokeDasharray="3,3" />
-              <circle cx="60" cy="65" r="9" fill="#141720" stroke="#ec4899" strokeWidth="2" />
+              <circle cx="60" cy="65" r="9" fill="var(--bg-secondary)" stroke="#ec4899" strokeWidth="2" />
               <circle cx="120" cy="65" r="9" fill="#ec4899" />
             </svg>
           ),
@@ -945,8 +954,8 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           description: 'Any pattern of length M checked in O(M) time independent of corpus size.',
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
-              <circle cx="120" cy="60" r="14" fill="#38A169" stroke="#F7F5EF" strokeWidth="2" />
-              <text x="120" y="64" fill="#F7F5EF" fontSize="10" fontWeight="800" textAnchor="middle">Found</text>
+              <circle cx="120" cy="60" r="14" fill="#38A169" stroke="var(--text-primary)" strokeWidth="2" />
+              <text x="120" y="64" fill="#FFFFFF" fontSize="10" fontWeight="800" textAnchor="middle">Found</text>
             </svg>
           ),
         },
@@ -967,7 +976,7 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
                   { sa: 0, str: 'banana' },
                 ].map((item, i) => (
                   <g key={i} transform={`translate(${i * 48}, 0)`}>
-                    <rect x="0" y="0" width="42" height="30" fill="#141720" stroke="#ec4899" strokeWidth="1.5" rx="3" />
+                    <rect x="0" y="0" width="42" height="30" fill="var(--bg-secondary)" stroke="#ec4899" strokeWidth="1.5" rx="3" />
                     <text x="21" y="20" fill="#ec4899" fontSize="12" fontWeight="700" textAnchor="middle">{item.sa}</text>
                   </g>
                 ))}
@@ -984,7 +993,7 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
                 {[1, 3, 0].map((lcp, i) => (
                   <g key={i} transform={`translate(${i * 50}, 0)`}>
                     <rect x="0" y="0" width="40" height="26" fill="rgba(236,72,153,0.2)" stroke="#ec4899" rx="3" />
-                    <text x="20" y="17" fill="#F7F5EF" fontSize="11" fontWeight="700" textAnchor="middle">LCP={lcp}</text>
+                    <text x="20" y="17" fill="var(--text-primary)" fontSize="11" fontWeight="700" textAnchor="middle">LCP={lcp}</text>
                   </g>
                 ))}
               </g>
@@ -996,8 +1005,8 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           description: 'Fast substring pattern existence check using binary search on sorted index array.',
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
-              <circle cx="120" cy="55" r="14" fill="#38A169" stroke="#F7F5EF" strokeWidth="2" />
-              <text x="120" y="59" fill="#F7F5EF" fontSize="10" fontWeight="800" textAnchor="middle">Matched</text>
+              <circle cx="120" cy="55" r="14" fill="#38A169" stroke="var(--text-primary)" strokeWidth="2" />
+              <text x="120" y="59" fill="#FFFFFF" fontSize="10" fontWeight="800" textAnchor="middle">Matched</text>
             </svg>
           ),
         },
@@ -1025,7 +1034,7 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
               <polygon points="50,90 120,30 190,60 160,105 80,105" fill="rgba(168,85,247,0.3)" stroke="#a855f7" strokeWidth="2" />
-              <text x="120" y="80" fill="#F7F5EF" fontSize="12" fontWeight="800" textAnchor="middle">Area = 42.5</text>
+              <text x="120" y="80" fill="var(--text-primary)" fontSize="12" fontWeight="800" textAnchor="middle">Area = 42.5</text>
             </svg>
           ),
         },
@@ -1036,7 +1045,7 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
             <svg width="100%" height="100%" viewBox="0 0 240 130">
               <polygon points="50,90 120,30 190,60 160,105 80,105" fill="rgba(168,85,247,0.15)" stroke="#a855f7" strokeWidth="2" />
               <line x1="20" y1="75" x2="220" y2="75" stroke="#38A169" strokeWidth="1.5" strokeDasharray="3,3" />
-              <circle cx="115" cy="75" r="6" fill="#38A169" stroke="#F7F5EF" />
+              <circle cx="115" cy="75" r="6" fill="#38A169" stroke="var(--text-primary)" />
             </svg>
           ),
         },
@@ -1049,7 +1058,7 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           description: 'Find lowest y-coordinate anchor point and sort remaining points by polar angle.',
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
-              <circle cx="60" cy="100" r="7" fill="var(--accent)" stroke="#F7F5EF" strokeWidth="2" />
+              <circle cx="60" cy="100" r="7" fill="var(--accent)" stroke="var(--text-primary)" strokeWidth="2" />
               <text x="60" y="118" fill="var(--accent)" fontSize="9" fontWeight="700" textAnchor="middle">Anchor</text>
               {[
                 [100, 40], [140, 75], [170, 30], [190, 85], [120, 80],
@@ -1066,7 +1075,7 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
             <svg width="100%" height="100%" viewBox="0 0 240 130">
               <line x1="60" y1="100" x2="100" y2="40" stroke="#a855f7" strokeWidth="2" />
               <line x1="100" y1="40" x2="170" y2="30" stroke="#a855f7" strokeWidth="2" />
-              <circle cx="170" cy="30" r="7" fill="#38A169" stroke="#F7F5EF" strokeWidth="1.5" />
+              <circle cx="170" cy="30" r="7" fill="#38A169" stroke="var(--text-primary)" strokeWidth="1.5" />
             </svg>
           ),
         },
@@ -1076,8 +1085,8 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
               <polygon points="60,100 100,40 170,30 190,85" fill="rgba(56,161,105,0.2)" stroke="#38A169" strokeWidth="2.5" />
-              <circle cx="140" cy="75" r="4" fill="rgba(247,245,239,0.4)" />
-              <circle cx="120" cy="80" r="4" fill="rgba(247,245,239,0.4)" />
+              <circle cx="140" cy="75" r="4" fill="var(--text-secondary)" />
+              <circle cx="120" cy="80" r="4" fill="var(--text-secondary)" />
             </svg>
           ),
         },
@@ -1094,10 +1103,10 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
               <line x1="40" y1="65" x2="110" y2="95" stroke="#3b82f6" strokeWidth="2" />
               <line x1="110" y1="35" x2="190" y2="65" stroke="#3b82f6" strokeWidth="2" />
               <line x1="110" y1="95" x2="190" y2="65" stroke="#3b82f6" strokeWidth="2" />
-              <circle cx="40" cy="65" r="10" fill="var(--accent)" stroke="#F7F5EF" />
-              <circle cx="110" cy="35" r="8" fill="#141720" stroke="#3b82f6" strokeWidth="1.5" />
-              <circle cx="110" cy="95" r="8" fill="#141720" stroke="#3b82f6" strokeWidth="1.5" />
-              <circle cx="190" cy="65" r="10" fill="#38A169" stroke="#F7F5EF" />
+              <circle cx="40" cy="65" r="10" fill="var(--accent)" stroke="var(--text-primary)" />
+              <circle cx="110" cy="35" r="8" fill="var(--bg-secondary)" stroke="#3b82f6" strokeWidth="1.5" />
+              <circle cx="110" cy="95" r="8" fill="var(--bg-secondary)" stroke="#3b82f6" strokeWidth="1.5" />
+              <circle cx="190" cy="65" r="10" fill="#38A169" stroke="var(--text-primary)" />
             </svg>
           ),
         },
@@ -1135,9 +1144,9 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
             <svg width="100%" height="100%" viewBox="0 0 240 130">
               {[35, 65, 95].map((y, i) => (
                 <g key={i}>
-                  <circle cx="60" cy={y} r="8" fill="#3b82f6" stroke="#F7F5EF" strokeWidth="1.5" />
-                  <circle cx="180" cy={y} r="8" fill="#ec4899" stroke="#F7F5EF" strokeWidth="1.5" />
-                  <line x1="68" y1={y} x2="172" y2={y} stroke="rgba(247,245,239,0.2)" strokeWidth="1" />
+                  <circle cx="60" cy={y} r="8" fill="#3b82f6" stroke="var(--text-primary)" strokeWidth="1.5" />
+                  <circle cx="180" cy={y} r="8" fill="#ec4899" stroke="var(--text-primary)" strokeWidth="1.5" />
+                  <line x1="68" y1={y} x2="172" y2={y} stroke="var(--svg-edge)" strokeWidth="1" />
                 </g>
               ))}
             </svg>
@@ -1149,7 +1158,7 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
               <line x1="68" y1="35" x2="172" y2="65" stroke="#38A169" strokeWidth="2.5" />
-              <line x1="68" y1="65" x2="172" y2="35" stroke="rgba(247,245,239,0.2)" strokeWidth="1" strokeDasharray="2,2" />
+              <line x1="68" y1="65" x2="172" y2="35" stroke="var(--svg-edge)" strokeWidth="1" strokeDasharray="2,2" />
               <line x1="68" y1="95" x2="172" y2="95" stroke="#38A169" strokeWidth="2.5" />
             </svg>
           ),
@@ -1174,15 +1183,15 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           description: 'Goal: Select minimal subset of vertices such that every edge touches at least one selected vertex.',
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
-              <g stroke="rgba(247,245,239,0.3)" strokeWidth="1.5">
+              <g stroke="var(--svg-edge)" strokeWidth="1.5">
                 <line x1="60" y1="50" x2="120" y2="30" />
                 <line x1="120" y1="30" x2="180" y2="50" />
                 <line x1="120" y1="30" x2="120" y2="95" />
               </g>
-              <circle cx="60" cy="50" r="7" fill="#141720" stroke="#f43f5e" strokeWidth="1.5" />
-              <circle cx="120" cy="30" r="7" fill="#141720" stroke="#f43f5e" strokeWidth="1.5" />
-              <circle cx="180" cy="50" r="7" fill="#141720" stroke="#f43f5e" strokeWidth="1.5" />
-              <circle cx="120" cy="95" r="7" fill="#141720" stroke="#f43f5e" strokeWidth="1.5" />
+              <circle cx="60" cy="50" r="7" fill="var(--bg-secondary)" stroke="#f43f5e" strokeWidth="1.5" />
+              <circle cx="120" cy="30" r="7" fill="var(--bg-secondary)" stroke="#f43f5e" strokeWidth="1.5" />
+              <circle cx="180" cy="50" r="7" fill="var(--bg-secondary)" stroke="#f43f5e" strokeWidth="1.5" />
+              <circle cx="120" cy="95" r="7" fill="var(--bg-secondary)" stroke="#f43f5e" strokeWidth="1.5" />
             </svg>
           ),
         },
@@ -1191,8 +1200,8 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           description: 'Select both endpoints of an uncovered edge to guarantee within 2× of optimal.',
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
-              <circle cx="120" cy="30" r="10" fill="var(--accent)" stroke="#F7F5EF" strokeWidth="2" />
-              <circle cx="120" cy="95" r="10" fill="var(--accent)" stroke="#F7F5EF" strokeWidth="2" />
+              <circle cx="120" cy="30" r="10" fill="var(--accent)" stroke="var(--text-primary)" strokeWidth="2" />
+              <circle cx="120" cy="95" r="10" fill="var(--accent)" stroke="var(--text-primary)" strokeWidth="2" />
             </svg>
           ),
         },
@@ -1201,8 +1210,8 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           description: 'Every edge has at least one endpoint in cover; verified NP-Hard optimization.',
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
-              <circle cx="120" cy="30" r="11" fill="#38A169" stroke="#F7F5EF" strokeWidth="2" />
-              <circle cx="120" cy="95" r="11" fill="#38A169" stroke="#F7F5EF" strokeWidth="2" />
+              <circle cx="120" cy="30" r="11" fill="#38A169" stroke="var(--text-primary)" strokeWidth="2" />
+              <circle cx="120" cy="95" r="11" fill="#38A169" stroke="var(--text-primary)" strokeWidth="2" />
             </svg>
           ),
         },
@@ -1215,9 +1224,9 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           description: 'Specific required subset of terminals that must be interconnected.',
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
-              <circle cx="60" cy="40" r="8" fill="#f43f5e" stroke="#F7F5EF" strokeWidth="1.5" />
-              <circle cx="180" cy="40" r="8" fill="#f43f5e" stroke="#F7F5EF" strokeWidth="1.5" />
-              <circle cx="120" cy="100" r="8" fill="#f43f5e" stroke="#F7F5EF" strokeWidth="1.5" />
+              <circle cx="60" cy="40" r="8" fill="#f43f5e" stroke="var(--text-primary)" strokeWidth="1.5" />
+              <circle cx="180" cy="40" r="8" fill="#f43f5e" stroke="var(--text-primary)" strokeWidth="1.5" />
+              <circle cx="120" cy="100" r="8" fill="#f43f5e" stroke="var(--text-primary)" strokeWidth="1.5" />
             </svg>
           ),
         },
@@ -1226,7 +1235,7 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           description: 'Adding intermediate junction vertices lowers total network spanning wire length.',
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
-              <circle cx="120" cy="65" r="6" fill="#38bdf8" stroke="#F7F5EF" strokeWidth="1.5" />
+              <circle cx="120" cy="65" r="6" fill="#38bdf8" stroke="var(--text-primary)" strokeWidth="1.5" />
               <text x="120" y="55" fill="#38bdf8" fontSize="9" textAnchor="middle">Steiner</text>
             </svg>
           ),
@@ -1292,10 +1301,10 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           description: 'Maps instance of problem A to problem B in polynomial time O(N^k).',
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
-              <rect x="30" y="40" width="60" height="40" fill="#141720" stroke="#f43f5e" strokeWidth="1.5" rx="4" />
+              <rect x="30" y="40" width="60" height="40" fill="var(--bg-secondary)" stroke="#f43f5e" strokeWidth="1.5" rx="4" />
               <text x="60" y="65" fill="#f43f5e" fontSize="12" fontWeight="700" textAnchor="middle">3-SAT</text>
-              <line x1="90" y1="60" x2="145" y2="60" stroke="#F7F5EF" strokeWidth="2" />
-              <rect x="150" y="40" width="60" height="40" fill="#141720" stroke="#38A169" strokeWidth="1.5" rx="4" />
+              <line x1="90" y1="60" x2="145" y2="60" stroke="var(--text-primary)" strokeWidth="2" />
+              <rect x="150" y="40" width="60" height="40" fill="var(--bg-secondary)" stroke="#38A169" strokeWidth="1.5" rx="4" />
               <text x="180" y="65" fill="#38A169" fontSize="12" fontWeight="700" textAnchor="middle">Clique</text>
             </svg>
           ),
@@ -1317,8 +1326,8 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           description: 'Instance of A is satisfiable if and only if constructed instance of B has solution.',
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
-              <circle cx="120" cy="60" r="16" fill="#38A169" stroke="#F7F5EF" strokeWidth="2" />
-              <text x="120" y="65" fill="#F7F5EF" fontSize="11" fontWeight="800" textAnchor="middle">Q.E.D.</text>
+              <circle cx="120" cy="60" r="16" fill="#38A169" stroke="var(--text-primary)" strokeWidth="2" />
+              <text x="120" y="65" fill="#FFFFFF" fontSize="11" fontWeight="800" textAnchor="middle">Q.E.D.</text>
             </svg>
           ),
         },
@@ -1332,18 +1341,18 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
           description: `Initial data representation and graph/tree topology prepared in memory.`,
           render: () => (
             <svg width="100%" height="100%" viewBox="0 0 240 130">
-              <g stroke="rgba(247,245,239,0.3)" strokeWidth="1.5" fill="none">
+              <g stroke="var(--svg-edge)" strokeWidth="1.5" fill="none">
                 <line x1="60" y1="40" x2="120" y2="30" />
                 <line x1="120" y1="30" x2="180" y2="50" />
                 <line x1="180" y1="50" x2="150" y2="95" />
                 <line x1="150" y1="95" x2="70" y2="90" />
                 <line x1="70" y1="90" x2="60" y2="40" />
               </g>
-              <circle cx="60" cy="40" r="6" fill="#141720" stroke={themeColor} strokeWidth="1.5" />
-              <circle cx="120" cy="30" r="6" fill="#141720" stroke={themeColor} strokeWidth="1.5" />
-              <circle cx="180" cy="50" r="6" fill="#141720" stroke={themeColor} strokeWidth="1.5" />
-              <circle cx="150" cy="95" r="6" fill="#141720" stroke={themeColor} strokeWidth="1.5" />
-              <circle cx="70" cy="90" r="6" fill="#141720" stroke={themeColor} strokeWidth="1.5" />
+              <circle cx="60" cy="40" r="6" fill="var(--bg-secondary)" stroke={themeColor} strokeWidth="1.5" />
+              <circle cx="120" cy="30" r="6" fill="var(--bg-secondary)" stroke={themeColor} strokeWidth="1.5" />
+              <circle cx="180" cy="50" r="6" fill="var(--bg-secondary)" stroke={themeColor} strokeWidth="1.5" />
+              <circle cx="150" cy="95" r="6" fill="var(--bg-secondary)" stroke={themeColor} strokeWidth="1.5" />
+              <circle cx="70" cy="90" r="6" fill="var(--bg-secondary)" stroke={themeColor} strokeWidth="1.5" />
             </svg>
           ),
         },
@@ -1356,16 +1365,16 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
                 <line x1="60" y1="40" x2="120" y2="30" />
                 <line x1="120" y1="30" x2="180" y2="50" />
               </g>
-              <g stroke="rgba(247,245,239,0.2)" strokeWidth="1" strokeDasharray="3,3" fill="none">
+              <g stroke="var(--svg-edge)" strokeWidth="1" strokeDasharray="3,3" fill="none">
                 <line x1="180" y1="50" x2="150" y2="95" />
                 <line x1="150" y1="95" x2="70" y2="90" />
                 <line x1="70" y1="90" x2="60" y2="40" />
               </g>
-              <circle cx="60" cy="40" r="7" fill={themeColor} stroke="#F7F5EF" strokeWidth="1.5" />
-              <circle cx="120" cy="30" r="7" fill={themeColor} stroke="#F7F5EF" strokeWidth="1.5" />
-              <circle cx="180" cy="50" r="7" fill="var(--accent)" stroke="#F7F5EF" strokeWidth="1.5" />
-              <circle cx="150" cy="95" r="5" fill="#141720" stroke="rgba(247,245,239,0.4)" />
-              <circle cx="70" cy="90" r="5" fill="#141720" stroke="rgba(247,245,239,0.4)" />
+              <circle cx="60" cy="40" r="7" fill={themeColor} stroke="var(--text-primary)" strokeWidth="1.5" />
+              <circle cx="120" cy="30" r="7" fill={themeColor} stroke="var(--text-primary)" strokeWidth="1.5" />
+              <circle cx="180" cy="50" r="7" fill="var(--accent)" stroke="var(--text-primary)" strokeWidth="1.5" />
+              <circle cx="150" cy="95" r="5" fill="var(--bg-secondary)" stroke="var(--svg-node-stroke)" />
+              <circle cx="70" cy="90" r="5" fill="var(--bg-secondary)" stroke="var(--svg-node-stroke)" />
             </svg>
           ),
         },
@@ -1377,11 +1386,11 @@ export function getInteractiveSteps(id: string, themeColor: string = 'var(--acce
               <g stroke="#38A169" strokeWidth="2.5" fill="none">
                 <polygon points="60,40 120,30 180,50 150,95 70,90" fill="rgba(56,161,105,0.12)" />
               </g>
-              <circle cx="60" cy="40" r="7" fill="#38A169" stroke="#F7F5EF" strokeWidth="1.5" />
-              <circle cx="120" cy="30" r="7" fill="#38A169" stroke="#F7F5EF" strokeWidth="1.5" />
-              <circle cx="180" cy="50" r="7" fill="#38A169" stroke="#F7F5EF" strokeWidth="1.5" />
-              <circle cx="150" cy="95" r="7" fill="#38A169" stroke="#F7F5EF" strokeWidth="1.5" />
-              <circle cx="70" cy="90" r="7" fill="#38A169" stroke="#F7F5EF" strokeWidth="1.5" />
+              <circle cx="60" cy="40" r="7" fill="#38A169" stroke="var(--text-primary)" strokeWidth="1.5" />
+              <circle cx="120" cy="30" r="7" fill="#38A169" stroke="var(--text-primary)" strokeWidth="1.5" />
+              <circle cx="180" cy="50" r="7" fill="#38A169" stroke="var(--text-primary)" strokeWidth="1.5" />
+              <circle cx="150" cy="95" r="7" fill="#38A169" stroke="var(--text-primary)" strokeWidth="1.5" />
+              <circle cx="70" cy="90" r="7" fill="#38A169" stroke="var(--text-primary)" strokeWidth="1.5" />
             </svg>
           ),
         },

@@ -53,7 +53,7 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items }) => {
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: 4,
-                    color: isLast ? '#F7F5EF' : 'rgba(247, 245, 239, 0.7)',
+                    color: isLast ? 'var(--text-primary)' : 'rgba(247, 245, 239, 0.7)',
                     textDecoration: 'none',
                     fontWeight: isLast ? 600 : 400,
                   }}
@@ -65,7 +65,7 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items }) => {
                 <span
                   aria-current="page"
                   style={{
-                    color: '#F7F5EF',
+                    color: 'var(--text-primary)',
                     fontWeight: 600,
                   }}
                 >

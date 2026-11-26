@@ -88,12 +88,12 @@ export const PlaybackControls: React.FC = () => {
           alignItems: 'center',
           gap: 14,
           padding: '10px 20px',
-          background: 'rgba(16, 18, 22, 0.88)',
+          background: 'var(--surface-glass-strong)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
-          border: '1px solid rgba(247, 245, 239, 0.12)',
+          border: '1px solid var(--border)',
           borderRadius: 40,
-          boxShadow: '0 16px 40px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.04)',
+          boxShadow: '0 12px 32px rgba(0, 0, 0, 0.25)',
         }}
       >
         {/* Reset / Start */}
@@ -236,7 +236,7 @@ export const PlaybackControls: React.FC = () => {
             flex: 1,
             position: 'relative',
             height: 6,
-            background: 'rgba(247, 245, 239, 0.1)',
+            background: 'var(--border)',
             borderRadius: 3,
             cursor: 'pointer',
             margin: '0 8px',
@@ -261,7 +261,7 @@ export const PlaybackControls: React.FC = () => {
               width: 14,
               height: 14,
               borderRadius: '50%',
-              background: '#F7F5EF',
+              background: 'var(--bg-primary)',
               border: '2px solid var(--accent)',
               transform: 'translate(-50%, -50%)',
               boxShadow: '0 0 10px var(--accent-glow)',
@@ -274,8 +274,8 @@ export const PlaybackControls: React.FC = () => {
           <button
             onClick={() => setShowSpeedMenu(!showSpeedMenu)}
             style={{
-              background: 'rgba(247, 245, 239, 0.06)',
-              border: '1px solid rgba(247, 245, 239, 0.12)',
+              background: 'var(--bg-tertiary)',
+              border: '1px solid var(--border)',
               borderRadius: 16,
               padding: '4px 10px',
               color: 'var(--text-primary)',
@@ -299,9 +299,9 @@ export const PlaybackControls: React.FC = () => {
                 position: 'absolute',
                 bottom: 'calc(100% + 8px)',
                 right: 0,
-                background: 'rgba(16, 18, 22, 0.95)',
+                background: 'var(--surface-glass-strong)',
                 backdropFilter: 'blur(16px)',
-                border: '1px solid rgba(247, 245, 239, 0.15)',
+                border: '1px solid var(--border)',
                 borderRadius: 8,
                 padding: '4px 0',
                 minWidth: 80,

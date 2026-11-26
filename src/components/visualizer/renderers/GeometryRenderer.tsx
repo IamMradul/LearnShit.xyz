@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import type { TraceStep } from '../../../engine/TraceTypes';
+import { useUIStore } from '../../../store/uiStore';
 
 interface GeometryRendererProps {
   step: TraceStep | null;
@@ -21,6 +22,8 @@ export const GeometryRenderer: React.FC<GeometryRendererProps> = ({
   height = 360,
 }) => {
   const width = 640;
+  const theme = useUIStore((s) => s.theme);
+  const isLight = theme === 'light';
 
   // Extract all geometric point lists and hull sequences from current step
   const { points, hullPoints, activePoint } = useMemo(() => {
@@ -124,6 +127,9 @@ export const GeometryRenderer: React.FC<GeometryRendererProps> = ({
     ? points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${scaleX(p.x)} ${scaleY(p.y)}`).join(' ') + ' Z'
     : '';
 
+  const badgeAmber = isLight ? '#b45309' : '#facc15';
+  const strokeAmber = isLight ? '#d97706' : '#facc15';
+
   return (
     <div
       style={{
@@ -133,11 +139,11 @@ export const GeometryRenderer: React.FC<GeometryRendererProps> = ({
         justifyContent: 'center',
         height,
         position: 'relative',
-        background: '#0c0d12',
+        background: isLight ? '#FFFFFF' : '#0c0d12',
         borderRadius: 12,
-        border: '1px solid rgba(247, 245, 239, 0.08)',
+        border: '1px solid var(--border)',
         overflow: 'hidden',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+        boxShadow: isLight ? '0 8px 24px rgba(16, 18, 22, 0.08)' : '0 8px 32px rgba(0,0,0,0.5)',
       }}
     >
       {/* Top Coordinate Badge Bar */}
@@ -158,9 +164,9 @@ export const GeometryRenderer: React.FC<GeometryRendererProps> = ({
           style={{
             padding: '2px 8px',
             borderRadius: 4,
-            background: 'rgba(250, 204, 21, 0.15)',
-            border: '1px solid rgba(250, 204, 21, 0.35)',
-            color: '#facc15',
+            background: isLight ? 'rgba(217, 119, 6, 0.12)' : 'rgba(250, 204, 21, 0.15)',
+            border: isLight ? '1px solid rgba(217, 119, 6, 0.35)' : '1px solid rgba(250, 204, 21, 0.35)',
+            color: badgeAmber,
             fontWeight: 700,
           }}
         >
@@ -174,7 +180,7 @@ export const GeometryRenderer: React.FC<GeometryRendererProps> = ({
             style={{
               padding: '2px 6px',
               borderRadius: 4,
-              background: 'rgba(214, 82, 58, 0.2)',
+              background: 'rgba(214, 82, 58, 0.18)',
               border: '1px solid rgba(214, 82, 58, 0.4)',
               color: 'var(--accent)',
             }}
@@ -187,17 +193,17 @@ export const GeometryRenderer: React.FC<GeometryRendererProps> = ({
       <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} style={{ overflow: 'visible' }}>
         <defs>
           <radialGradient id="pointGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#facc15" stopOpacity="0.8" />
-            <stop offset="100%" stopColor="#facc15" stopOpacity="0" />
+            <stop offset="0%" stopColor={strokeAmber} stopOpacity="0.8" />
+            <stop offset="100%" stopColor={strokeAmber} stopOpacity="0" />
           </radialGradient>
           <linearGradient id="polyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#facc15" stopOpacity="0.18" />
+            <stop offset="0%" stopColor={strokeAmber} stopOpacity="0.18" />
             <stop offset="100%" stopColor="#f97316" stopOpacity="0.06" />
           </linearGradient>
         </defs>
 
         {/* Coordinate Grid Lines */}
-        <g stroke="rgba(247, 245, 239, 0.05)" strokeWidth="1">
+        <g stroke={isLight ? 'rgba(16, 18, 22, 0.08)' : 'rgba(247, 245, 239, 0.05)'} strokeWidth="1">
           {[0.2, 0.4, 0.6, 0.8].map((ratio, idx) => {
             const x = padding + ratio * (width - padding * 2);
             const y = padding + ratio * (height - padding * 2);
@@ -216,7 +222,7 @@ export const GeometryRenderer: React.FC<GeometryRendererProps> = ({
           y1={height - padding}
           x2={width - padding + 15}
           y2={height - padding}
-          stroke="rgba(247, 245, 239, 0.3)"
+          stroke={isLight ? 'rgba(16, 18, 22, 0.3)' : 'rgba(247, 245, 239, 0.3)'}
           strokeWidth="1.5"
         />
         <line
@@ -224,13 +230,13 @@ export const GeometryRenderer: React.FC<GeometryRendererProps> = ({
           y1={height - padding}
           x2={padding}
           y2={padding - 15}
-          stroke="rgba(247, 245, 239, 0.3)"
+          stroke={isLight ? 'rgba(16, 18, 22, 0.3)' : 'rgba(247, 245, 239, 0.3)'}
           strokeWidth="1.5"
         />
-        <text x={width - padding + 18} y={height - padding + 4} fill="rgba(247, 245, 239, 0.5)" fontSize="10" fontFamily="'JetBrains Mono', monospace">
+        <text x={width - padding + 18} y={height - padding + 4} fill={isLight ? 'rgba(16, 18, 22, 0.6)' : 'rgba(247, 245, 239, 0.5)'} fontSize="10" fontFamily="'JetBrains Mono', monospace">
           X
         </text>
-        <text x={padding - 4} y={padding - 18} fill="rgba(247, 245, 239, 0.5)" fontSize="10" fontFamily="'JetBrains Mono', monospace">
+        <text x={padding - 4} y={padding - 18} fill={isLight ? 'rgba(16, 18, 22, 0.6)' : 'rgba(247, 245, 239, 0.5)'} fontSize="10" fontFamily="'JetBrains Mono', monospace">
           Y
         </text>
 
@@ -239,7 +245,7 @@ export const GeometryRenderer: React.FC<GeometryRendererProps> = ({
           <path
             d={polyPathStr}
             fill="url(#polyGrad)"
-            stroke="#facc15"
+            stroke={strokeAmber}
             strokeWidth="2.5"
             strokeLinejoin="round"
           />
@@ -273,15 +279,15 @@ export const GeometryRenderer: React.FC<GeometryRendererProps> = ({
                 cx={cx}
                 cy={cy}
                 r={isHullPoint ? 6 : 4.5}
-                fill={isActive ? 'var(--accent)' : isHullPoint ? '#f97316' : '#222634'}
-                stroke={isActive ? '#F7F5EF' : isHullPoint ? '#facc15' : 'rgba(247, 245, 239, 0.5)'}
+                fill={isActive ? 'var(--accent)' : isHullPoint ? '#f97316' : isLight ? '#ECEAE3' : '#222634'}
+                stroke={isActive ? (isLight ? '#101216' : '#F7F5EF') : isHullPoint ? strokeAmber : isLight ? 'rgba(16, 18, 22, 0.55)' : 'rgba(247, 245, 239, 0.5)'}
                 strokeWidth={isHullPoint || isActive ? 2 : 1.5}
               />
               {/* Coordinate label */}
               <text
                 x={cx}
                 y={cy - 9}
-                fill={isActive ? 'var(--accent)' : isHullPoint ? '#F7F5EF' : 'rgba(247, 245, 239, 0.65)'}
+                fill={isActive ? 'var(--accent)' : isHullPoint ? (isLight ? '#101216' : '#F7F5EF') : isLight ? 'rgba(16, 18, 22, 0.7)' : 'rgba(247, 245, 239, 0.65)'}
                 fontSize="10"
                 fontWeight={isHullPoint || isActive ? 700 : 500}
                 textAnchor="middle"

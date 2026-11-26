@@ -12,6 +12,7 @@ const ROUTES = [
   { url: '/visualizer', file: path.join(rootDir, 'dist/visualizer/index.html') },
   { url: '/playgrounds', file: path.join(rootDir, 'dist/playgrounds/index.html') },
   { url: '/dsa', file: path.join(rootDir, 'dist/dsa/index.html') },
+  { url: '/books', file: path.join(rootDir, 'dist/books/index.html') },
   { url: '/resources', file: path.join(rootDir, 'dist/resources/index.html') },
   { url: '/about', file: path.join(rootDir, 'dist/about/index.html') },
   { url: '/contact', file: path.join(rootDir, 'dist/contact/index.html') },

@@ -7,6 +7,9 @@
   --bg-secondary: #101216;
   --bg-tertiary: #16181e;
   --bg-elevated: #1f2229;
+  --surface-glass: rgba(16, 18, 22, 0.85);
+  --surface-glass-strong: rgba(10, 11, 14, 0.92);
+  --grid-dot: rgba(247, 245, 239, 0.08);
   --border: rgba(247, 245, 239, 0.1);
   --border-subtle: rgba(247, 245, 239, 0.05);
   --border-focus: rgba(214, 82, 58, 0.5);
@@ -41,6 +44,11 @@
   --vis-done: #1A1D24;
   --vis-pivot: #9F7AEA;
   --vis-highlight: #FF5A36;
+
+  /* Mini preview & blueprint SVG diagram strokes */
+  --svg-edge: rgba(247, 245, 239, 0.36);
+  --svg-edge-subtle: rgba(247, 245, 239, 0.22);
+  --svg-node-stroke: rgba(247, 245, 239, 0.48);
 }
 
 .light {
@@ -48,13 +56,16 @@
   --bg-secondary: #ECEAE3;
   --bg-tertiary: #E1DFD7;
   --bg-elevated: #D6D4CB;
+  --surface-glass: rgba(247, 245, 239, 0.9);
+  --surface-glass-strong: rgba(236, 234, 227, 0.96);
+  --grid-dot: rgba(16, 18, 22, 0.12);
   --border: rgba(16, 18, 21, 0.12);
   --border-subtle: rgba(16, 18, 21, 0.06);
   --border-focus: rgba(214, 82, 58, 0.5);
 
   --text-primary: #101216;
   --text-secondary: #5A5955;
-  --text-muted: #8F8E89;
+  --text-muted: #706F6A;
 
   --accent: #D6523A;
   --accent-hover: #BF442E;
@@ -69,6 +80,11 @@
   --vis-done: #E1DFD7;
   --vis-pivot: #6B46C1;
   --vis-highlight: #DD6B20;
+
+  /* Mini preview & blueprint SVG diagram strokes (high contrast drafting ink) */
+  --svg-edge: rgba(16, 18, 22, 0.44);
+  --svg-edge-subtle: rgba(16, 18, 22, 0.28);
+  --svg-node-stroke: rgba(16, 18, 22, 0.55);
 }
 
 /* ─── Reset / base ────────────────────────────────────────── */
@@ -76,12 +92,13 @@
 
 html {
   scroll-behavior: smooth;
-  background: #0a0b0d;
+  background: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background: #0a0b0d;
+  background: var(--bg-primary);
   color: var(--text-primary);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
@@ -89,18 +106,19 @@ body {
 
 #root {
   min-height: 100vh;
-  background: #0a0b0d;
+  background: var(--bg-primary);
 }
 
 /* ─── Scrollbar ───────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: var(--bg-secondary); }
 ::-webkit-scrollbar-thumb { background: rgba(247, 245, 239, 0.18); border-radius: 2px; }
+html.light ::-webkit-scrollbar-thumb { background: rgba(16, 18, 22, 0.22); }
 ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
 /* ─── Utilities ───────────────────────────────────────────── */
 .glass {
-  background: rgba(16, 18, 22, 0.85);
+  background: var(--surface-glass);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border: 1px solid var(--border);
@@ -223,7 +241,7 @@ body {
 .timeline-track {
   flex: 1;
   height: 6px;
-  background: rgba(247, 245, 239, 0.08);
+  background: var(--border);
   border-radius: 3px;
   position: relative;
   cursor: pointer;
@@ -244,7 +262,7 @@ body {
   top: 50%;
   width: 14px;
   height: 14px;
-  background: #F7F5EF;
+  background: var(--bg-primary);
   border: 2px solid var(--accent);
   border-radius: 50%;
   transform: translate(-50%, -50%);
@@ -258,13 +276,13 @@ body {
 /* ─── Gallery (Hero Theme) ─────────────────────────────────── */
 .gallery-section {
   padding: 60px 24px;
-  background: #0a0b0d;
+  background: var(--bg-primary);
   border-top: 1px solid var(--border);
 }
 
 .gallery-card {
-  background: #111216;
-  border: 1px solid rgba(247, 245, 239, 0.08);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
   border-radius: 12px;
   overflow: hidden;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -272,7 +290,7 @@ body {
 }
 .gallery-card:hover {
   border-color: rgba(214, 82, 58, 0.5);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(214, 82, 58, 0.3);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(214, 82, 58, 0.3);
   transform: translateY(-2px);
 }
 
@@ -436,7 +454,7 @@ body {
   position: sticky;
   top: 62px;
   z-index: 20;
-  background: rgba(10, 11, 13, 0.94);
+  background: var(--surface-glass-strong);
   border-bottom: 1px solid var(--border);
   backdrop-filter: blur(14px);
 }

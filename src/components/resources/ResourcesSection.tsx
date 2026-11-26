@@ -71,7 +71,7 @@ export function ResourcesSection({
               alignItems: 'center',
               gap: 8,
               fontSize: 13,
-              color: 'rgba(247, 245, 239, 0.65)',
+              color: 'var(--text-secondary)',
               fontFamily: "'Inter', sans-serif",
             }}
           >
@@ -89,13 +89,13 @@ export function ResourcesSection({
                 gap: 6,
                 transition: 'color 0.15s ease',
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = '#F7F5EF')}
-              onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(247, 245, 239, 0.65)')}
+              onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text-primary)')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}
             >
               Home
             </button>
             <span style={{ opacity: 0.4 }}>/</span>
-            <span style={{ color: '#F7F5EF', fontWeight: 600 }}>Resources</span>
+            <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>Resources</span>
             <span style={{ opacity: 0.4 }}>/</span>
             <span style={{ color: 'var(--accent, #D6523A)', fontWeight: 600 }}>
               {tab === 'books' ? 'Books' : tab === 'sheets' ? 'Sheets' : 'LearnShit Sheet'}

@@ -417,12 +417,12 @@ export const DebuggerTraceView: React.FC<DebuggerTraceViewProps> = ({
         height: '100%',
         maxHeight: 'calc(100vh - 200px)',
         minHeight: 460,
-        background: 'rgba(12, 14, 18, 0.94)',
+        background: 'var(--surface-glass-strong)',
         backdropFilter: 'blur(20px)',
         borderRadius: 16,
         padding: '16px 20px',
-        border: '1px solid rgba(247, 245, 239, 0.12)',
-        boxShadow: '0 16px 40px rgba(0,0,0,0.65)',
+        border: '1px solid var(--border)',
+        boxShadow: '0 12px 32px rgba(0,0,0,0.2)',
         overflowY: 'auto',
       }}
     >
@@ -432,7 +432,7 @@ export const DebuggerTraceView: React.FC<DebuggerTraceViewProps> = ({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          borderBottom: '1px solid rgba(247, 245, 239, 0.08)',
+          borderBottom: '1px solid var(--border)',
           paddingBottom: 10,
           flexWrap: 'wrap',
           gap: 8,
@@ -458,7 +458,7 @@ export const DebuggerTraceView: React.FC<DebuggerTraceViewProps> = ({
               style={{
                 fontFamily: "'Oswald', sans-serif",
                 fontSize: 15,
-                color: '#F7F5EF',
+                color: 'var(--text-primary)',
                 letterSpacing: '0.04em',
                 textTransform: 'uppercase',
                 display: 'flex',
@@ -587,8 +587,8 @@ export const DebuggerTraceView: React.FC<DebuggerTraceViewProps> = ({
           display: 'flex',
           alignItems: 'center',
           gap: 6,
-          background: 'rgba(247, 245, 239, 0.03)',
-          border: '1px solid rgba(247, 245, 239, 0.08)',
+          background: 'var(--border-subtle)',
+          border: '1px solid var(--border)',
           borderRadius: 8,
           padding: '6px 12px',
           flexWrap: 'wrap',
@@ -601,7 +601,7 @@ export const DebuggerTraceView: React.FC<DebuggerTraceViewProps> = ({
           style={{
             background: 'transparent',
             border: 'none',
-            color: currentIndex === 0 ? 'var(--text-muted)' : '#F7F5EF',
+            color: currentIndex === 0 ? 'var(--text-muted)' : 'var(--text-primary)',
             cursor: currentIndex === 0 ? 'not-allowed' : 'pointer',
             padding: '4px 6px',
             borderRadius: 4,
@@ -623,7 +623,7 @@ export const DebuggerTraceView: React.FC<DebuggerTraceViewProps> = ({
           style={{
             background: 'transparent',
             border: 'none',
-            color: currentIndex === 0 ? 'var(--text-muted)' : '#F7F5EF',
+            color: currentIndex === 0 ? 'var(--text-muted)' : 'var(--text-primary)',
             cursor: currentIndex === 0 ? 'not-allowed' : 'pointer',
             padding: '4px 6px',
             borderRadius: 4,
@@ -644,7 +644,7 @@ export const DebuggerTraceView: React.FC<DebuggerTraceViewProps> = ({
           style={{
             background: 'var(--accent)',
             border: 'none',
-            color: '#F7F5EF',
+            color: '#FFFFFF',
             cursor: 'pointer',
             padding: '4px 10px',
             borderRadius: 6,
@@ -689,8 +689,8 @@ export const DebuggerTraceView: React.FC<DebuggerTraceViewProps> = ({
           title="Step over (step without diving deeper into callee)"
           style={{
             background: 'rgba(255, 255, 255, 0.05)',
-            border: '1px solid rgba(247, 245, 239, 0.12)',
-            color: '#F7F5EF',
+            border: '1px solid var(--border)',
+            color: 'var(--text-primary)',
             cursor: currentIndex >= totalSteps - 1 ? 'not-allowed' : 'pointer',
             padding: '4px 8px',
             borderRadius: 6,
@@ -711,8 +711,8 @@ export const DebuggerTraceView: React.FC<DebuggerTraceViewProps> = ({
           title="Step out (run until current function returns)"
           style={{
             background: 'rgba(255, 255, 255, 0.05)',
-            border: '1px solid rgba(247, 245, 239, 0.12)',
-            color: '#F7F5EF',
+            border: '1px solid var(--border)',
+            color: 'var(--text-primary)',
             cursor:
               currentIndex >= totalSteps - 1 || (step?.callStack?.length ?? 1) <= 1
                 ? 'not-allowed'
@@ -737,7 +737,7 @@ export const DebuggerTraceView: React.FC<DebuggerTraceViewProps> = ({
           style={{
             background: 'transparent',
             border: 'none',
-            color: currentIndex >= totalSteps - 1 ? 'var(--text-muted)' : '#F7F5EF',
+            color: currentIndex >= totalSteps - 1 ? 'var(--text-muted)' : 'var(--text-primary)',
             cursor: currentIndex >= totalSteps - 1 ? 'not-allowed' : 'pointer',
             padding: '4px 6px',
             borderRadius: 4,
@@ -765,7 +765,7 @@ export const DebuggerTraceView: React.FC<DebuggerTraceViewProps> = ({
               key={sp.label}
               onClick={() => setSpeed(sp.ms)}
               style={{
-                background: speed === sp.ms ? 'rgba(214, 82, 58, 0.22)' : 'rgba(247, 245, 239, 0.06)',
+                background: speed === sp.ms ? 'rgba(214, 82, 58, 0.22)' : 'var(--border-subtle)',
                 border: speed === sp.ms ? '1px solid var(--accent)' : '1px solid rgba(247, 245, 239, 0.1)',
                 borderRadius: 4,
                 padding: '2px 6px',
@@ -809,8 +809,8 @@ export const DebuggerTraceView: React.FC<DebuggerTraceViewProps> = ({
             flexWrap: 'wrap',
             gap: 8,
             padding: '6px 12px',
-            background: 'rgba(247, 245, 239, 0.03)',
-            border: '1px solid rgba(247, 245, 239, 0.08)',
+            background: 'var(--border-subtle)',
+            border: '1px solid var(--border)',
             borderRadius: 6,
           }}
         >
@@ -835,7 +835,7 @@ export const DebuggerTraceView: React.FC<DebuggerTraceViewProps> = ({
                 border: '1px solid rgba(247, 245, 239, 0.1)',
                 padding: '2px 8px',
                 borderRadius: 4,
-                color: '#F7F5EF',
+                color: 'var(--text-primary)',
               }}
             >
               <span style={{ color: 'var(--accent)', fontWeight: 600 }}>{a.name}</span>
@@ -866,7 +866,7 @@ export const DebuggerTraceView: React.FC<DebuggerTraceViewProps> = ({
               display: 'flex',
               flexDirection: 'column',
               background: 'rgba(255, 255, 255, 0.02)',
-              border: '1px solid rgba(247, 245, 239, 0.06)',
+              border: '1px solid var(--border-subtle)',
               borderRadius: 10,
               padding: '10px 12px',
               minHeight: 180,
@@ -881,7 +881,7 @@ export const DebuggerTraceView: React.FC<DebuggerTraceViewProps> = ({
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 fontSize: 11,
-                color: '#F7F5EF',
+                color: 'var(--text-primary)',
                 fontFamily: "'Oswald', sans-serif",
                 textTransform: 'uppercase',
                 letterSpacing: '0.04em',
@@ -924,7 +924,7 @@ export const DebuggerTraceView: React.FC<DebuggerTraceViewProps> = ({
                       borderLeft: isCurrent ? '3px solid var(--accent)' : '3px solid transparent',
                       padding: '2px 6px',
                       borderRadius: 4,
-                      color: isCurrent ? '#F7F5EF' : 'var(--text-secondary)',
+                      color: isCurrent ? '#FFFFFF' : 'var(--text-secondary)',
                       fontWeight: isCurrent ? 600 : 400,
                       cursor: 'pointer',
                       whiteSpace: 'pre',
@@ -1007,7 +1007,7 @@ export const DebuggerTraceView: React.FC<DebuggerTraceViewProps> = ({
               flexDirection: 'column',
               gap: 4,
               background: 'rgba(255, 255, 255, 0.02)',
-              border: '1px solid rgba(247, 245, 239, 0.06)',
+              border: '1px solid var(--border-subtle)',
               borderRadius: 10,
               padding: '8px 12px',
               minHeight: 70,
@@ -1021,7 +1021,7 @@ export const DebuggerTraceView: React.FC<DebuggerTraceViewProps> = ({
                 alignItems: 'center',
                 gap: 6,
                 fontSize: 10.5,
-                color: '#F7F5EF',
+                color: 'var(--text-primary)',
                 fontFamily: "'Oswald', sans-serif",
                 textTransform: 'uppercase',
                 letterSpacing: '0.04em',
@@ -1061,7 +1061,7 @@ export const DebuggerTraceView: React.FC<DebuggerTraceViewProps> = ({
               flexDirection: 'column',
               gap: 4,
               background: 'rgba(255, 255, 255, 0.02)',
-              border: '1px solid rgba(247, 245, 239, 0.06)',
+              border: '1px solid var(--border-subtle)',
               borderRadius: 10,
               padding: '8px 12px',
               minHeight: 50,
@@ -1073,7 +1073,7 @@ export const DebuggerTraceView: React.FC<DebuggerTraceViewProps> = ({
                 alignItems: 'center',
                 gap: 6,
                 fontSize: 10.5,
-                color: '#F7F5EF',
+                color: 'var(--text-primary)',
                 fontFamily: "'Oswald', sans-serif",
                 textTransform: 'uppercase',
                 letterSpacing: '0.04em',
@@ -1129,7 +1129,7 @@ export const DebuggerTraceView: React.FC<DebuggerTraceViewProps> = ({
               flexDirection: 'column',
               gap: 6,
               background: 'rgba(255, 255, 255, 0.02)',
-              border: '1px solid rgba(247, 245, 239, 0.06)',
+              border: '1px solid var(--border-subtle)',
               borderRadius: 10,
               padding: '10px 12px',
               minHeight: 140,
@@ -1143,7 +1143,7 @@ export const DebuggerTraceView: React.FC<DebuggerTraceViewProps> = ({
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 fontSize: 11,
-                color: '#F7F5EF',
+                color: 'var(--text-primary)',
                 fontFamily: "'Oswald', sans-serif",
                 textTransform: 'uppercase',
                 letterSpacing: '0.04em',
@@ -1174,7 +1174,7 @@ export const DebuggerTraceView: React.FC<DebuggerTraceViewProps> = ({
                         padding: '4px 8px',
                         borderRadius: 6,
                         background: isMutated ? 'rgba(46, 213, 115, 0.14)' : 'rgba(255, 255, 255, 0.03)',
-                        border: isMutated ? '1px solid rgba(46, 213, 115, 0.4)' : '1px solid rgba(247, 245, 239, 0.04)',
+                        border: isMutated ? '1px solid rgba(46, 213, 115, 0.4)' : '1px solid var(--border-subtle)',
                         fontFamily: "'JetBrains Mono', monospace",
                         fontSize: 11,
                         gap: 8,
@@ -1187,7 +1187,7 @@ export const DebuggerTraceView: React.FC<DebuggerTraceViewProps> = ({
                         </span>
                       </span>
 
-                      <div style={{ color: '#F7F5EF', textAlign: 'right', minWidth: 0 }}>
+                      <div style={{ color: 'var(--text-primary)', textAlign: 'right', minWidth: 0 }}>
                         <CollapsibleValue
                           name={name}
                           val={v.value !== undefined ? v.value : v.repr}
@@ -1209,7 +1209,7 @@ export const DebuggerTraceView: React.FC<DebuggerTraceViewProps> = ({
               flexDirection: 'column',
               gap: 6,
               background: 'rgba(255, 255, 255, 0.02)',
-              border: '1px solid rgba(247, 245, 239, 0.06)',
+              border: '1px solid var(--border-subtle)',
               borderRadius: 10,
               padding: '10px 12px',
               minHeight: 120,
@@ -1223,7 +1223,7 @@ export const DebuggerTraceView: React.FC<DebuggerTraceViewProps> = ({
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 fontSize: 11,
-                color: '#F7F5EF',
+                color: 'var(--text-primary)',
                 fontFamily: "'Oswald', sans-serif",
                 textTransform: 'uppercase',
                 letterSpacing: '0.04em',
@@ -1317,7 +1317,7 @@ export const DebuggerTraceView: React.FC<DebuggerTraceViewProps> = ({
                         }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, overflow: 'hidden' }}>
-                          <span style={{ color: isTop ? 'var(--accent)' : '#F7F5EF', fontWeight: 600 }}>
+                          <span style={{ color: isTop ? 'var(--accent)' : '#FFFFFF', fontWeight: 600 }}>
                             {frame.name || 'anonymous'}({argsStr})
                           </span>
                           {frame.returnValue && (
@@ -1346,7 +1346,7 @@ export const DebuggerTraceView: React.FC<DebuggerTraceViewProps> = ({
             display: 'flex',
             flexDirection: 'column',
             gap: 6,
-            borderTop: '1px solid rgba(247, 245, 239, 0.08)',
+            borderTop: '1px solid var(--border)',
             paddingTop: 8,
           }}
         >
@@ -1375,7 +1375,7 @@ export const DebuggerTraceView: React.FC<DebuggerTraceViewProps> = ({
                 style={{
                   flexShrink: 0,
                   background: 'rgba(255, 255, 255, 0.04)',
-                  border: '1px solid rgba(247, 245, 239, 0.08)',
+                  border: '1px solid var(--border)',
                   borderRadius: 4,
                   padding: '2px 6px',
                   color: 'var(--text-secondary)',
@@ -1398,10 +1398,10 @@ export const DebuggerTraceView: React.FC<DebuggerTraceViewProps> = ({
                   style={{
                     flexShrink: 0,
                     background: isSelected ? 'var(--accent)' : 'rgba(255, 255, 255, 0.04)',
-                    border: isSelected ? '1px solid var(--accent)' : '1px solid rgba(247, 245, 239, 0.08)',
+                    border: isSelected ? '1px solid var(--accent)' : '1px solid var(--border)',
                     borderRadius: 4,
                     padding: '2px 6px',
-                    color: isSelected ? '#F7F5EF' : 'var(--text-secondary)',
+                    color: isSelected ? '#FFFFFF' : 'var(--text-secondary)',
                     fontFamily: "'JetBrains Mono', monospace",
                     fontSize: 9.5,
                     cursor: 'pointer',
@@ -1419,7 +1419,7 @@ export const DebuggerTraceView: React.FC<DebuggerTraceViewProps> = ({
                 style={{
                   flexShrink: 0,
                   background: 'rgba(255, 255, 255, 0.04)',
-                  border: '1px solid rgba(247, 245, 239, 0.08)',
+                  border: '1px solid var(--border)',
                   borderRadius: 4,
                   padding: '2px 6px',
                   color: 'var(--text-secondary)',

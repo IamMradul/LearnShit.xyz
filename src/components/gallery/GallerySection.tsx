@@ -329,8 +329,8 @@ const GalleryCard: React.FC<CardProps> = ({
   <div
     className="gallery-card animate-fade-in"
     style={{
-      background: '#101216',
-      border: '1px solid rgba(247, 245, 239, 0.08)',
+      background: 'var(--bg-secondary)',
+      border: '1px solid var(--border)',
       borderRadius: 12,
       overflow: 'hidden',
     }}
@@ -338,8 +338,8 @@ const GalleryCard: React.FC<CardProps> = ({
     <div
       style={{
         padding: '16px 20px 14px',
-        borderBottom: '1px solid rgba(247, 245, 239, 0.08)',
-        background: 'rgba(247, 245, 239, 0.02)',
+        borderBottom: '1px solid var(--border)',
+        background: 'var(--border-subtle)',
         display: 'flex',
         alignItems: 'flex-start',
         justifyContent: 'space-between',
@@ -363,7 +363,7 @@ const GalleryCard: React.FC<CardProps> = ({
             style={{
               fontSize: 10,
               fontFamily: "'JetBrains Mono', monospace",
-              background: 'rgba(247, 245, 239, 0.06)',
+              background: 'var(--border-subtle)',
               color: 'var(--text-secondary)',
               padding: '2px 6px',
               borderRadius: 4,
@@ -379,7 +379,7 @@ const GalleryCard: React.FC<CardProps> = ({
               fontWeight: 700,
               letterSpacing: '0.04em',
               textTransform: 'uppercase',
-              color: '#F7F5EF',
+              color: 'var(--text-primary)',
               margin: 0,
             }}
           >
@@ -409,10 +409,10 @@ const GalleryCard: React.FC<CardProps> = ({
             alignItems: 'center',
             gap: 6,
             padding: '6px 14px',
-            background: 'var(--accent-subtle)',
+            background: 'var(--accent)',
             border: '1px solid var(--accent)',
             borderRadius: 6,
-            color: '#F7F5EF',
+            color: '#FFFFFF',
             fontFamily: "'Oswald', sans-serif",
             fontSize: 12,
             fontWeight: 700,
@@ -423,7 +423,7 @@ const GalleryCard: React.FC<CardProps> = ({
           }}
           title="Load into main visualizer stage"
         >
-          <Upload size={12} style={{ color: 'var(--accent)' }} />
+          <Upload size={12} style={{ color: '#FFFFFF' }} />
           Visualize
         </button>
       )}
@@ -912,8 +912,8 @@ export const GallerySection: React.FC = () => {
       id="gallery"
       style={{
         padding: '80px 24px',
-        background: '#0a0b0d',
-        borderTop: '1px solid rgba(247, 245, 239, 0.08)',
+        background: 'var(--bg-primary)',
+        borderTop: '1px solid var(--border)',
         position: 'relative',
       }}
     >
@@ -923,7 +923,7 @@ export const GallerySection: React.FC = () => {
           grid-template-columns: repeat(4, minmax(0, 1fr));
           gap: 20px;
         }
-        @media (max-width: 1200px) {
+        @media (max-width: 1240px) {
           .gallery-playgrounds-grid {
             grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 18px;
@@ -942,70 +942,69 @@ export const GallerySection: React.FC = () => {
           }
         }
       `}</style>
-      <div style={{ maxWidth: 1600, margin: '0 auto' }}>
+      <div style={{ maxWidth: 1540, margin: '0 auto' }}>
         {/* Header matching Hero aesthetic */}
-        <div style={{ marginBottom: 36, textAlign: 'center' }}>
+        <div style={{ marginBottom: 34, textAlign: 'center' }}>
           <div
             style={{
-              fontFamily: "'JetBrains Mono', monospace",
+              fontFamily: "'Inter Tight', 'Inter', sans-serif",
               fontSize: 11,
-              fontWeight: 700,
-              letterSpacing: '0.15em',
+              fontWeight: 600,
+              letterSpacing: '0.16em',
               textTransform: 'uppercase',
               color: 'var(--accent)',
-              marginBottom: 10,
+              marginBottom: 8,
             }}
           >
-            02 // INTERACTIVE ALGORITHM PLAYGROUNDS
+            Interactive Playgrounds
           </div>
           <h2
             style={{
-              fontFamily: "'Oswald', 'Display', 'Impact', sans-serif",
-              fontSize: 38,
-              fontWeight: 800,
-              letterSpacing: '0.04em',
-              textTransform: 'uppercase',
-              color: '#F7F5EF',
+              fontFamily: "'Newsreader', 'Oswald', serif",
+              fontSize: 'clamp(2rem, 3.4vw, 2.75rem)',
+              fontWeight: 400,
+              letterSpacing: '-0.02em',
+              color: 'var(--text-primary)',
               marginBottom: 10,
             }}
           >
-            ALGORITHM PLAYGROUNDS
+            Algorithm &amp; Structure Studios
           </h2>
           <p
             style={{
               color: 'var(--text-secondary)',
-              fontSize: 15,
-              maxWidth: 680,
+              fontSize: 14.5,
+              maxWidth: 560,
               margin: '0 auto',
-              lineHeight: 1.6,
+              lineHeight: 1.55,
             }}
           >
-            Explore and interact with all 26 core data structures and algorithms directly in your browser. Step through execution states, play animations in real-time, or launch any module into the full visualizer stage.
+            Edit inputs, step through algorithm frames directly, or open any module inside the full execution visualizer.
           </p>
         </div>
 
         {/* Search + category filter */}
-        <div style={{ display: 'flex', gap: 10, marginBottom: 30, flexWrap: 'wrap', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 10, marginBottom: 32, flexWrap: 'wrap', alignItems: 'center' }}>
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search 26 interactive playgrounds (e.g. hash table, bst, mst, convex hull, tsp, O(log n))..."
+            placeholder="Filter algorithms or complexities..."
             id="gallery-search"
             style={{
               flex: 1,
-              minWidth: 260,
-              padding: '10px 16px',
-              background: '#111216',
-              border: '1px solid rgba(247, 245, 239, 0.12)',
-              borderRadius: 8,
-              color: '#F7F5EF',
+              minWidth: 240,
+              padding: '9px 16px',
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--border)',
+              borderRadius: 999,
+              color: 'var(--text-primary)',
               fontSize: 13,
-              fontFamily: "'JetBrains Mono', monospace",
+              fontFamily: "'Inter', sans-serif",
               outline: 'none',
               transition: 'border-color 0.15s',
             }}
             onFocus={(e) => (e.currentTarget.style.borderColor = 'var(--accent)')}
-            onBlur={(e) => (e.currentTarget.style.borderColor = 'rgba(247, 245, 239, 0.12)')}
+            onBlur={(e) => (e.currentTarget.style.borderColor = 'var(--border)')}
           />
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {CATEGORIES.map((c) => {
@@ -1019,13 +1018,13 @@ export const GallerySection: React.FC = () => {
                   onClick={() => setActiveCategory(c)}
                   id={`cat-${c.toLowerCase()}`}
                   style={{
-                    padding: '7px 14px',
-                    borderRadius: 8,
-                    background: activeCategory === c ? 'var(--accent)' : '#111216',
-                    border: `1px solid ${activeCategory === c ? 'var(--accent)' : 'rgba(247, 245, 239, 0.1)'}`,
-                    color: activeCategory === c ? '#F7F5EF' : 'var(--text-secondary)',
-                    fontFamily: "'Oswald', sans-serif",
-                    fontSize: 12,
+                    padding: '6px 13px',
+                    borderRadius: 999,
+                    background: activeCategory === c ? 'var(--accent)' : 'var(--bg-secondary)',
+                    border: `1px solid ${activeCategory === c ? 'var(--accent)' : 'var(--border)'}`,
+                    color: activeCategory === c ? '#FFFFFF' : 'var(--text-secondary)',
+                    fontFamily: "'Inter Tight', sans-serif",
+                    fontSize: 11.5,
                     fontWeight: 600,
                     letterSpacing: '0.04em',
                     textTransform: 'uppercase',
@@ -1033,7 +1032,7 @@ export const GallerySection: React.FC = () => {
                     transition: 'all 0.15s ease',
                   }}
                 >
-                  {c} ({count})
+                  {c} · {count}
                 </button>
               );
             })}

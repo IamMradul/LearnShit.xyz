@@ -189,7 +189,7 @@ export const VisualizerHeader: React.FC = () => {
     img.onload = () => {
       if (ctx) {
         ctx.scale(2, 2);
-        ctx.fillStyle = '#0a0b0d';
+        ctx.fillStyle = 'var(--bg-primary)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(img, 0, 0);
         const a = document.createElement('a');
@@ -209,67 +209,16 @@ export const VisualizerHeader: React.FC = () => {
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '10px 20px',
-        background: '#0e1014',
-        borderBottom: '1px solid rgba(247, 245, 239, 0.08)',
+        background: 'var(--bg-secondary)',
+        borderBottom: '1px solid var(--border)',
         zIndex: 30,
         gap: 12,
         flexWrap: 'wrap',
       }}
     >
       {/* ── Left Controls: Branding & Language & Preset Picker ─────────────── */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        {/* Logo / Brand badge */}
-        <div
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          title="Return to Home"
-          style={{ display: 'flex', alignItems: 'center', gap: 8, marginRight: 8, cursor: 'pointer' }}
-        >
-          <div
-            style={{
-              width: 28,
-              height: 28,
-              borderRadius: 6,
-              overflow: 'hidden',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 0 12px var(--accent-glow)',
-            }}
-          >
-            <img
-              src="/learnshit.svg"
-              alt="LearnShit Logo"
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
-          </div>
-          <span
-            style={{
-              fontFamily: "'Oswald', 'Display', 'Impact', sans-serif",
-              fontSize: 16,
-              letterSpacing: '0.1em',
-              textTransform: 'uppercase',
-              color: '#F7F5EF',
-            }}
-          >
-            Learn<span style={{ color: 'var(--accent)' }}>Shit</span>
-          </span>
-          <span
-            style={{
-              fontSize: 10,
-              fontFamily: "'JetBrains Mono', monospace",
-              background: 'rgba(214, 82, 58, 0.15)',
-              color: 'var(--accent)',
-              padding: '2px 6px',
-              borderRadius: 4,
-              fontWeight: 700,
-              letterSpacing: '0.06em',
-            }}
-          >
-            CANVAS
-          </span>
-        </div>
-
-        {/* Language selector (staying.fun style) */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        {/* Language selector */}
         <div ref={langMenuRef} style={{ position: 'relative' }}>
           <button
             onClick={() => setShowLangMenu(!showLangMenu)}
@@ -278,10 +227,10 @@ export const VisualizerHeader: React.FC = () => {
               alignItems: 'center',
               gap: 8,
               padding: '6px 12px',
-              background: 'rgba(247, 245, 239, 0.05)',
-              border: '1px solid rgba(247, 245, 239, 0.12)',
+              background: 'var(--border-subtle)',
+              border: '1px solid var(--border)',
               borderRadius: 6,
-              color: '#F7F5EF',
+              color: 'var(--text-primary)',
               fontSize: 13,
               fontWeight: 500,
               cursor: 'pointer',
@@ -323,13 +272,13 @@ export const VisualizerHeader: React.FC = () => {
                 position: 'absolute',
                 top: 'calc(100% + 6px)',
                 left: 0,
-                background: '#14161b',
-                border: '1px solid rgba(247, 245, 239, 0.15)',
+                background: 'var(--bg-tertiary)',
+                border: '1px solid var(--border)',
                 borderRadius: 8,
                 padding: '6px 0',
                 minWidth: 180,
                 zIndex: 60,
-                boxShadow: '0 12px 30px rgba(0,0,0,0.6)',
+                boxShadow: '0 10px 26px rgba(0,0,0,0.18)',
               }}
             >
               <button
@@ -345,7 +294,7 @@ export const VisualizerHeader: React.FC = () => {
                   padding: '8px 14px',
                   background: isAutoDetecting ? 'rgba(88, 166, 255, 0.15)' : 'transparent',
                   border: 'none',
-                  color: isAutoDetecting ? '#58a6ff' : '#F7F5EF',
+                  color: isAutoDetecting ? '#58a6ff' : '#FFFFFF',
                   fontSize: 12,
                   fontWeight: isAutoDetecting ? 600 : 400,
                   cursor: 'pointer',
@@ -361,7 +310,7 @@ export const VisualizerHeader: React.FC = () => {
               <div
                 style={{
                   height: 1,
-                  background: 'rgba(247, 245, 239, 0.08)',
+                  background: 'var(--border)',
                   margin: '4px 0',
                 }}
               />
@@ -383,7 +332,7 @@ export const VisualizerHeader: React.FC = () => {
                         ? 'rgba(214, 82, 58, 0.15)'
                         : 'transparent',
                     border: 'none',
-                    color: !isAutoDetecting && l.id === language ? 'var(--accent)' : '#F7F5EF',
+                    color: !isAutoDetecting && l.id === language ? 'var(--accent)' : 'var(--text-primary)',
                     fontSize: 12,
                     fontWeight: !isAutoDetecting && l.id === language ? 600 : 400,
                     cursor: 'pointer',
@@ -429,7 +378,7 @@ export const VisualizerHeader: React.FC = () => {
             <span>{platformInfo.badgeIcon}</span>
             <span>{platformInfo.platformName}</span>
             {platformInfo.problemName && (
-              <span style={{ color: '#F7F5EF', opacity: 0.9 }}>
+              <span style={{ color: 'var(--text-primary)', opacity: 0.9 }}>
                 • {platformInfo.problemName}
               </span>
             )}
@@ -445,10 +394,10 @@ export const VisualizerHeader: React.FC = () => {
               alignItems: 'center',
               gap: 7,
               padding: '6px 12px',
-              background: 'rgba(247, 245, 239, 0.05)',
-              border: '1px solid rgba(247, 245, 239, 0.12)',
+              background: 'var(--border-subtle)',
+              border: '1px solid var(--border)',
               borderRadius: 6,
-              color: '#F7F5EF',
+              color: 'var(--text-primary)',
               fontSize: 13,
               fontWeight: 500,
               cursor: 'pointer',
@@ -466,13 +415,13 @@ export const VisualizerHeader: React.FC = () => {
                 position: 'absolute',
                 top: 'calc(100% + 6px)',
                 left: 0,
-                background: '#14161b',
-                border: '1px solid rgba(247, 245, 239, 0.15)',
+                background: 'var(--bg-tertiary)',
+                border: '1px solid var(--border)',
                 borderRadius: 8,
                 padding: '6px 0',
                 minWidth: 260,
                 zIndex: 60,
-                boxShadow: '0 16px 36px rgba(0,0,0,0.7)',
+                boxShadow: '0 12px 28px rgba(0,0,0,0.18)',
               }}
             >
               <div
@@ -499,12 +448,12 @@ export const VisualizerHeader: React.FC = () => {
                     padding: '8px 14px',
                     background: 'transparent',
                     border: 'none',
-                    color: '#F7F5EF',
+                    color: 'var(--text-primary)',
                     cursor: 'pointer',
                     textAlign: 'left',
                     transition: 'background 0.15s',
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(247,245,239,0.06)')}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--border-subtle)')}
                   onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%' }}>
@@ -537,10 +486,10 @@ export const VisualizerHeader: React.FC = () => {
             alignItems: 'center',
             gap: 7,
             padding: '6px 12px',
-            background: isCodeEditorOpen ? 'var(--accent-subtle)' : 'rgba(247, 245, 239, 0.05)',
-            border: `1px solid ${isCodeEditorOpen ? 'var(--accent)' : 'rgba(247, 245, 239, 0.12)'}`,
+            background: isCodeEditorOpen ? 'var(--accent-subtle)' : 'var(--border-subtle)',
+            border: `1px solid ${isCodeEditorOpen ? 'var(--accent)' : 'var(--border)'}`,
             borderRadius: 6,
-            color: isCodeEditorOpen ? 'var(--accent)' : '#F7F5EF',
+            color: isCodeEditorOpen ? 'var(--accent)' : 'var(--text-primary)',
             fontSize: 13,
             fontWeight: 500,
             cursor: 'pointer',
@@ -571,8 +520,8 @@ export const VisualizerHeader: React.FC = () => {
             alignItems: 'center',
             gap: 6,
             padding: '4px 10px',
-            background: 'rgba(247, 245, 239, 0.04)',
-            border: '1px solid rgba(247, 245, 239, 0.1)',
+            background: 'var(--border-subtle)',
+            border: '1px solid var(--border)',
             borderRadius: 6,
           }}
         >
@@ -626,8 +575,8 @@ export const VisualizerHeader: React.FC = () => {
           onClick={handleSnapshot}
           title="Take snapshot (PNG)"
           style={{
-            background: 'rgba(247, 245, 239, 0.05)',
-            border: '1px solid rgba(247, 245, 239, 0.12)',
+            background: 'var(--border-subtle)',
+            border: '1px solid var(--border)',
             borderRadius: 6,
             padding: '7px 9px',
             color: 'var(--text-secondary)',
@@ -645,8 +594,8 @@ export const VisualizerHeader: React.FC = () => {
           onClick={handleShare}
           title="Share algorithm link"
           style={{
-            background: 'rgba(247, 245, 239, 0.05)',
-            border: '1px solid rgba(247, 245, 239, 0.12)',
+            background: 'var(--border-subtle)',
+            border: '1px solid var(--border)',
             borderRadius: 6,
             padding: '7px 9px',
             color: copied ? 'var(--green)' : 'var(--text-secondary)',
@@ -672,7 +621,7 @@ export const VisualizerHeader: React.FC = () => {
             background: 'var(--accent)',
             border: 'none',
             borderRadius: 6,
-            color: '#F7F5EF',
+            color: '#FFFFFF',
             fontSize: 13,
             fontWeight: 700,
             fontFamily: "'Oswald', 'Display', sans-serif",
@@ -696,7 +645,7 @@ export const VisualizerHeader: React.FC = () => {
             </>
           ) : (
             <>
-              <Play size={14} fill="#F7F5EF" />
+              <Play size={14} fill="var(--text-primary)" />
               <span>Visualize</span>
             </>
           )}

@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import type { TraceStep } from '../../../engine/TraceTypes';
+import { useUIStore } from '../../../store/uiStore';
 
 interface CallNode {
   id: string;
@@ -25,6 +26,8 @@ export const RecursionTreeRenderer: React.FC<RecursionTreeRendererProps> = ({
   currentIndex,
   height,
 }) => {
+  const theme = useUIStore((s) => s.theme);
+  const isLight = theme === 'light';
   const currentStep = steps[currentIndex] || null;
 
   // Build the call tree dynamically from step history up to currentIndex
@@ -241,7 +244,7 @@ export const RecursionTreeRenderer: React.FC<RecursionTreeRendererProps> = ({
               key={i}
               d={d}
               fill="none"
-              stroke={link.to.isActive ? '#D6523A' : 'rgba(247, 245, 239, 0.2)'}
+              stroke={link.to.isActive ? '#D6523A' : isLight ? 'rgba(16, 18, 22, 0.22)' : 'rgba(247, 245, 239, 0.2)'}
               strokeWidth={link.to.isActive ? 2.5 : 1.5}
               strokeDasharray={link.to.isCompleted ? 'none' : '4 3'}
               style={{
@@ -253,16 +256,17 @@ export const RecursionTreeRenderer: React.FC<RecursionTreeRendererProps> = ({
 
         {/* Nodes */}
         {allNodes.map((node) => {
+          const completedGreen = isLight ? '#15803d' : '#2ed573';
           const bg = node.isActive
             ? '#D6523A'
             : node.isCompleted
-            ? 'rgba(46, 213, 115, 0.15)'
-            : 'rgba(255, 255, 255, 0.05)';
+            ? isLight ? 'rgba(21, 128, 61, 0.14)' : 'rgba(46, 213, 115, 0.15)'
+            : isLight ? '#ECEAE3' : 'rgba(255, 255, 255, 0.05)';
           const border = node.isActive
             ? '#FF7657'
             : node.isCompleted
-            ? '#2ed573'
-            : 'rgba(247, 245, 239, 0.25)';
+            ? completedGreen
+            : isLight ? 'rgba(16, 18, 22, 0.24)' : 'rgba(247, 245, 239, 0.25)';
 
           return (
             <g
@@ -297,7 +301,7 @@ export const RecursionTreeRenderer: React.FC<RecursionTreeRendererProps> = ({
                       fill={bg}
                       stroke={border}
                       strokeWidth={node.isActive ? 2 : 1}
-                      filter="drop-shadow(0 4px 12px rgba(0,0,0,0.5))"
+                      filter={isLight ? 'drop-shadow(0 2px 6px rgba(16,18,22,0.12))' : 'drop-shadow(0 4px 12px rgba(0,0,0,0.5))'}
                     />
 
                     {/* Function name */}
@@ -305,7 +309,7 @@ export const RecursionTreeRenderer: React.FC<RecursionTreeRendererProps> = ({
                       x={0}
                       y={-5}
                       textAnchor="middle"
-                      fill="#F7F5EF"
+                      fill={node.isActive ? '#FFFFFF' : isLight ? '#101216' : '#F7F5EF'}
                       fontSize={11.5}
                       fontWeight={node.isActive ? 700 : 600}
                       fontFamily="'JetBrains Mono', monospace"
@@ -322,8 +326,8 @@ export const RecursionTreeRenderer: React.FC<RecursionTreeRendererProps> = ({
                         node.isActive
                           ? '#FFE3DE'
                           : node.retVal !== undefined
-                          ? '#2ed573'
-                          : 'var(--text-muted)'
+                          ? completedGreen
+                          : isLight ? '#706F6A' : '#5C5B57'
                       }
                       fontSize={10}
                       fontFamily="'Inter', sans-serif"

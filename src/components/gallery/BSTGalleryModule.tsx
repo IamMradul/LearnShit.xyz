@@ -131,7 +131,7 @@ export const BSTGalleryModule: React.FC = () => {
         if (activePath.includes(sVal) && activePath.includes(tVal)) {
           return 'var(--accent)';
         }
-        return 'rgba(247, 245, 239, 0.15)';
+        return 'var(--svg-edge)';
       })
       .attr('stroke-width', (d) => {
         const sVal = (d.source as d3.HierarchyPointNode<D3Node>).data.val;
@@ -158,12 +158,12 @@ export const BSTGalleryModule: React.FC = () => {
       .attr('fill', (d) => {
         if (d.data.val === targetVal) return 'rgba(34, 197, 94, 0.25)';
         if (activePath.includes(d.data.val)) return 'rgba(214, 82, 58, 0.25)';
-        return '#14161b';
+        return 'var(--bg-tertiary)';
       })
       .attr('stroke', (d) => {
         if (d.data.val === targetVal) return '#22c55e';
         if (activePath.includes(d.data.val)) return 'var(--accent)';
-        return 'rgba(247, 245, 239, 0.2)';
+        return 'var(--text-muted)';
       })
       .attr('stroke-width', (d) => (activePath.includes(d.data.val) || d.data.val === targetVal ? 2.5 : 1.5))
       .style('filter', (d) =>
@@ -184,7 +184,7 @@ export const BSTGalleryModule: React.FC = () => {
       .attr('fill', (d) => {
         if (d.data.val === targetVal) return '#22c55e';
         if (activePath.includes(d.data.val)) return 'var(--accent)';
-        return '#F7F5EF';
+        return 'var(--text-primary)';
       })
       .text((d) => String(d.data.val));
   }, [root, activePath, targetVal]);
@@ -313,8 +313,8 @@ class Solution:
     <div
       className="gallery-card"
       style={{
-        background: '#101216',
-        border: '1px solid rgba(247, 245, 239, 0.1)',
+        background: 'var(--bg-secondary)',
+        border: '1px solid var(--border)',
         borderRadius: 12,
         overflow: 'hidden',
         display: 'flex',
@@ -328,8 +328,8 @@ class Solution:
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: '16px 20px 14px',
-          borderBottom: '1px solid rgba(247, 245, 239, 0.08)',
-          background: 'rgba(20, 22, 27, 0.5)',
+          borderBottom: '1px solid var(--border)',
+          background: 'var(--border-subtle)',
         }}
       >
         <div>
@@ -352,7 +352,7 @@ class Solution:
               style={{
                 fontFamily: "'Oswald', sans-serif",
                 fontSize: 18,
-                color: '#F7F5EF',
+                color: 'var(--text-primary)',
                 margin: 0,
                 textTransform: 'uppercase',
                 letterSpacing: '0.04em',
@@ -394,8 +394,8 @@ class Solution:
         ref={containerRef}
         style={{
           height: 270,
-          background: '#0a0b0d',
-          backgroundImage: 'radial-gradient(rgba(247, 245, 239, 0.05) 1.5px, transparent 1.5px)',
+          background: 'var(--bg-primary)',
+          backgroundImage: 'radial-gradient(var(--border-subtle) 1.5px, transparent 1.5px)',
           backgroundSize: '20px 20px',
           position: 'relative',
           display: 'flex',
@@ -410,12 +410,12 @@ class Solution:
       <div
         style={{
           padding: '8px 20px',
-          background: 'rgba(16, 18, 22, 0.8)',
-          borderTop: '1px solid rgba(247, 245, 239, 0.06)',
-          borderBottom: '1px solid rgba(247, 245, 239, 0.06)',
+          background: 'var(--surface-glass)',
+          borderTop: '1px solid var(--border-subtle)',
+          borderBottom: '1px solid var(--border-subtle)',
           fontSize: 12,
           fontFamily: "'JetBrains Mono', monospace",
-          color: targetVal ? '#22c55e' : 'var(--text-primary)',
+          color: targetVal ? '#16a34a' : 'var(--text-primary)',
           display: 'flex',
           alignItems: 'center',
           gap: 8,
@@ -429,7 +429,7 @@ class Solution:
       <div
         style={{
           padding: '14px 20px',
-          background: '#101216',
+          background: 'var(--bg-secondary)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -446,10 +446,10 @@ class Solution:
             style={{
               width: 65,
               padding: '6px 8px',
-              background: '#14161b',
-              border: '1px solid rgba(247, 245, 239, 0.15)',
+              background: 'var(--bg-tertiary)',
+              border: '1px solid var(--border)',
               borderRadius: 6,
-              color: '#F7F5EF',
+              color: 'var(--text-primary)',
               fontSize: 12,
               fontFamily: "'JetBrains Mono', monospace",
               outline: 'none',
@@ -501,8 +501,8 @@ class Solution:
               alignItems: 'center',
               gap: 4,
               padding: '6px 10px',
-              background: 'rgba(247, 245, 239, 0.06)',
-              border: '1px solid rgba(247, 245, 239, 0.12)',
+              background: 'var(--border-subtle)',
+              border: '1px solid var(--border)',
               borderRadius: 6,
               color: 'var(--text-secondary)',
               fontSize: 12,
@@ -522,10 +522,10 @@ class Solution:
               onClick={() => handleTraverse(t)}
               style={{
                 padding: '5px 10px',
-                background: 'rgba(247, 245, 239, 0.05)',
-                border: '1px solid rgba(247, 245, 239, 0.1)',
+                background: 'var(--border-subtle)',
+                border: '1px solid var(--border)',
                 borderRadius: 4,
-                color: '#F7F5EF',
+                color: 'var(--text-primary)',
                 fontSize: 11,
                 fontFamily: "'JetBrains Mono', monospace",
                 cursor: 'pointer',

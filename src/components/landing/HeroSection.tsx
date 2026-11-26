@@ -5,18 +5,7 @@ import { useTraceStore } from '../../store/traceStore';
 import { useUIStore } from '../../store/uiStore';
 import { ALGORITHM_PRESETS } from '../../engine/presets';
 import { getAdapter } from '../../engine/adapters/AdapterRegistry';
-import {
-  Code2,
-  Terminal,
-  Activity,
-  Play,
-  Layers,
-  Cpu,
-  Sparkles,
-  ArrowDown,
-  ChevronRight,
-  ExternalLink,
-} from 'lucide-react';
+import { Code2, Activity, ArrowDown } from 'lucide-react';
 
 /* ─── Accent Mark SVG (Industrial Gyroscope) ─────────────────────── */
 function AccentMark() {
@@ -48,25 +37,25 @@ function AccentMark() {
 /* ─── HeroSection ────────────────────────────────────────────────── */
 export function HeroSection({
   onEnterApp,
-  onOpenResources,
+  onOpenResources: _onOpenResources,
 }: {
   onEnterApp: () => void;
   onOpenResources?: (tab?: 'sheets' | 'books') => void;
 }) {
-  const { setCode, setInput, setLanguage, language } = useEditorStore();
+  const { setCode, setInput, language } = useEditorStore();
   const { setResult, setRunning, setError } = useTraceStore();
+  const theme = useUIStore((s) => s.theme);
+  const isLight = theme === 'light';
 
   // Mini live preview animation state
   const [activeBarIndex, setActiveBarIndex] = useState(2);
   const [comparingIndex, setComparingIndex] = useState(3);
-  const [isSwapped, setIsSwapped] = useState(false);
 
   // Cycle a small animation on the right card preview
   useEffect(() => {
     const timer = setInterval(() => {
       setActiveBarIndex((prev) => (prev + 1) % 7);
-      setComparingIndex((prev) => (prev + 1) % 7 + 1);
-      setIsSwapped((s) => !s);
+      setComparingIndex((prev) => ((prev + 1) % 6) + 1);
     }, 1800);
     return () => clearInterval(timer);
   }, []);
@@ -80,7 +69,6 @@ export function HeroSection({
       setInput(langData.input);
       useUIStore.getState().setCenterViewMode('ds');
 
-      // Trigger immediate trace run
       setRunning(true);
       setError(null);
       try {
@@ -103,6 +91,13 @@ export function HeroSection({
     onEnterApp();
   };
 
+  const cardInnerBg = isLight ? '#F8F6F0' : '#0d0f13';
+  const cardSpecBg = isLight ? '#FDFBF7' : '#101216';
+  const cardBorder = isLight ? 'rgba(16, 18, 22, 0.12)' : 'rgba(247, 245, 239, 0.1)';
+  const cardRowBorder = isLight ? 'rgba(16, 18, 22, 0.08)' : 'rgba(247, 245, 239, 0.08)';
+  const greenTone = isLight ? '#237A4B' : '#38A169';
+  const amberTone = isLight ? '#B7791F' : '#E5A93C';
+
   return (
     <>
       <style>{`
@@ -118,12 +113,13 @@ export function HeroSection({
           width: 100%;
           min-height: 100vh;
           overflow: hidden;
-          background: #0a0b0d;
+          background: ${isLight ? '#F7F5EF' : '#0a0b0d'};
           display: flex;
           flex-direction: column;
-          justifyContent: center;
+          justify-content: center;
           padding: 80px 32px 32px;
           box-sizing: border-box;
+          transition: background 0.3s ease;
         }
 
         .hero-bg-overlay {
@@ -131,121 +127,34 @@ export function HeroSection({
           inset: 0;
           pointer-events: none;
           z-index: 1;
-          background:
-            radial-gradient(circle at 50% 50%, rgba(10, 11, 13, 0.4) 0%, rgba(10, 11, 13, 0.92) 80%),
-            linear-gradient(to bottom, rgba(10,11,13,0.85) 0%, rgba(10,11,13,0.3) 25%, rgba(10,11,13,0.6) 80%, #0a0b0d 100%);
-        }
-
-        /* ── Header ── */
-        .hero-top-nav {
-          position: relative;
-          z-index: 10;
-          display: flex;
-          align-items: center;
-          justifyContent: space-between;
-          width: 100%;
-          max-width: 1600px;
-          margin: 0 auto;
-          padding-bottom: 20px;
-        }
-
-        .hero-brand {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          text-decoration: none;
-        }
-
-        .hero-brand-logo {
-          width: 32px;
-          height: 32px;
-          border-radius: 8px;
-          background: #181b22;
-          border: 1px solid rgba(247, 245, 239, 0.15);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          box-shadow: 0 4px 12px rgba(214, 82, 58, 0.25);
-        }
-
-        .hero-brand-name {
-          font-family: 'Oswald', sans-serif;
-          font-size: 20px;
-          font-weight: 700;
-          letter-spacing: 0.08em;
-          color: #F7F5EF;
-          text-transform: uppercase;
-        }
-
-        .hero-brand-badge {
-          font-family: 'JetBrains Mono', monospace;
-          font-size: 10px;
-          color: var(--accent);
-          background: rgba(214, 82, 58, 0.15);
-          border: 1px solid rgba(214, 82, 58, 0.3);
-          border-radius: 12px;
-          padding: 2px 8px;
-          font-weight: 700;
-          letter-spacing: 0.05em;
+          background: ${
+            isLight
+              ? 'radial-gradient(ellipse 46% 38% at 50% 42%, rgba(247, 245, 239, 0.62) 0%, rgba(247, 245, 239, 0.22) 62%, rgba(236, 234, 227, 0.45) 100%), linear-gradient(to bottom, rgba(247,245,239,0.78) 0%, rgba(247,245,239,0.06) 26%, rgba(247,245,239,0.16) 80%, #F7F5EF 100%)'
+              : 'radial-gradient(circle at 50% 50%, rgba(10, 11, 13, 0.4) 0%, rgba(10, 11, 13, 0.92) 80%), linear-gradient(to bottom, rgba(10,11,13,0.85) 0%, rgba(10,11,13,0.3) 25%, rgba(10,11,13,0.6) 80%, #0a0b0d 100%)'
+          };
         }
 
         .hero-nav-ticker {
           display: flex;
           align-items: center;
           gap: 10px;
-          background: rgba(16, 18, 22, 0.7);
-          border: 1px solid rgba(247, 245, 239, 0.08);
+          background: ${isLight ? 'rgba(255, 255, 255, 0.85)' : 'rgba(16, 18, 22, 0.7)'};
+          border: 1px solid ${isLight ? 'rgba(16, 18, 22, 0.12)' : 'rgba(247, 245, 239, 0.08)'};
           border-radius: 20px;
           padding: 6px 16px;
           font-family: 'JetBrains Mono', monospace;
           font-size: 11px;
-          color: #9B9A95;
+          color: var(--text-secondary);
           backdrop-filter: blur(10px);
+          box-shadow: ${isLight ? '0 2px 10px rgba(16, 18, 22, 0.05)' : 'none'};
         }
 
         .hero-nav-ticker .pulse {
           width: 6px;
           height: 6px;
           border-radius: 50%;
-          background: #38A169;
-          box-shadow: 0 0 8px #38A169;
-        }
-
-        .hero-nav-actions {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-
-        .hero-nav-btn {
-          background: transparent;
-          border: 1px solid rgba(247, 245, 239, 0.2);
-          color: #F7F5EF;
-          font-family: 'Inter', sans-serif;
-          font-size: 12px;
-          font-weight: 600;
-          padding: 7px 16px;
-          border-radius: 6px;
-          cursor: pointer;
-          transition: all 0.2s ease;
-        }
-
-        .hero-nav-btn:hover {
-          background: rgba(247, 245, 239, 0.08);
-          border-color: rgba(247, 245, 239, 0.4);
-        }
-
-        .hero-nav-btn-primary {
-          background: var(--accent);
-          border-color: var(--accent);
-          color: #F7F5EF;
-          box-shadow: 0 2px 10px rgba(214, 82, 58, 0.3);
-        }
-
-        .hero-nav-btn-primary:hover {
-          background: #e05e46;
-          border-color: #e05e46;
-          box-shadow: 0 4px 16px rgba(214, 82, 58, 0.5);
+          background: ${greenTone};
+          box-shadow: 0 0 8px ${greenTone};
         }
 
         /* ── Main Widescreen Grid ── */
@@ -282,19 +191,23 @@ export function HeroSection({
 
         /* ── Flank Cards (Left & Right) ── */
         .hero-flank-card {
-          background: rgba(16, 18, 22, 0.85);
+          background: ${isLight ? '#FCFBF8' : 'rgba(16, 18, 22, 0.85)'};
           backdrop-filter: blur(20px);
           -webkit-backdrop-filter: blur(20px);
-          border: 1px solid rgba(247, 245, 239, 0.12);
+          border: 1px solid ${cardBorder};
           border-radius: 14px;
           overflow: hidden;
-          box-shadow: 0 20px 48px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.03);
+          box-shadow: ${
+            isLight
+              ? '0 14px 36px rgba(16, 18, 22, 0.08), 0 2px 6px rgba(16, 18, 22, 0.04)'
+              : '0 20px 48px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.03)'
+          };
           transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
         }
 
         .hero-flank-card:hover {
           transform: translateY(-4px);
-          border-color: rgba(247, 245, 239, 0.25);
+          border-color: ${isLight ? 'rgba(16, 18, 22, 0.22)' : 'rgba(247, 245, 239, 0.25)'};
         }
 
         .card-header-bar {
@@ -302,8 +215,8 @@ export function HeroSection({
           align-items: center;
           justify-content: space-between;
           padding: 10px 14px;
-          background: rgba(247, 245, 239, 0.03);
-          border-bottom: 1px solid rgba(247, 245, 239, 0.08);
+          background: ${isLight ? 'rgba(16, 18, 22, 0.03)' : 'rgba(247, 245, 239, 0.03)'};
+          border-bottom: 1px solid ${cardRowBorder};
         }
 
         .window-dots {
@@ -320,7 +233,7 @@ export function HeroSection({
         .card-title-pill {
           font-family: "'JetBrains Mono', monospace";
           font-size: 11px;
-          color: #9B9A95;
+          color: var(--text-secondary);
           display: flex;
           align-items: center;
           gap: 6px;
@@ -329,7 +242,7 @@ export function HeroSection({
         .card-badge {
           font-family: "'JetBrains Mono', monospace";
           font-size: 9px;
-          background: rgba(214, 82, 58, 0.18);
+          background: rgba(214, 82, 58, 0.14);
           color: var(--accent);
           padding: 2px 6px;
           border-radius: 4px;
@@ -351,7 +264,7 @@ export function HeroSection({
           font-weight: 700;
           letter-spacing: 0.28em;
           text-transform: uppercase;
-          color: #9B9A95;
+          color: var(--text-secondary);
           margin-bottom: 14px;
           display: flex;
           align-items: center;
@@ -364,7 +277,7 @@ export function HeroSection({
           display: inline-block;
           width: 24px;
           height: 1px;
-          background: rgba(247, 245, 239, 0.25);
+          background: ${isLight ? 'rgba(16, 18, 22, 0.22)' : 'rgba(247, 245, 239, 0.25)'};
         }
 
         .hero-headline-title {
@@ -374,9 +287,9 @@ export function HeroSection({
           font-weight: 800;
           letter-spacing: -0.015em;
           text-transform: uppercase;
-          color: #F7F5EF;
+          color: ${isLight ? '#101216' : '#F7F5EF'};
           margin: 0;
-          text-shadow: 0 16px 40px rgba(0, 0, 0, 0.8);
+          text-shadow: ${isLight ? 'none' : '0 16px 40px rgba(0, 0, 0, 0.8)'};
         }
 
         .hero-headline-title span {
@@ -395,22 +308,13 @@ export function HeroSection({
           to { transform: rotate(360deg); }
         }
 
-        .hero-subtitle {
-          font-family: 'Inter', sans-serif;
-          font-size: clamp(13px, 1.1vw, 15px);
-          line-height: 1.5;
-          color: rgba(247, 245, 239, 0.75);
-          max-width: 520px;
-          margin: 0 0 24px;
-        }
-
         .hero-main-cta {
           display: inline-flex;
           align-items: center;
           gap: 10px;
           background: var(--accent);
-          color: #F7F5EF;
-          border: 1px solid rgba(255, 255, 255, 0.2);
+          color: #FFFFFF;
+          border: 1px solid ${isLight ? 'rgba(214, 82, 58, 0.4)' : 'rgba(255, 255, 255, 0.2)'};
           border-radius: 40px;
           padding: 13px 34px;
           font-family: 'Inter', sans-serif;
@@ -419,32 +323,40 @@ export function HeroSection({
           letter-spacing: 0.12em;
           text-transform: uppercase;
           cursor: pointer;
-          box-shadow: 0 8px 28px rgba(214, 82, 58, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+          box-shadow: ${
+            isLight
+              ? '0 10px 26px rgba(214, 82, 58, 0.28)'
+              : '0 8px 28px rgba(214, 82, 58, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
+          };
           transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .hero-main-cta:hover {
           transform: translateY(-2px) scale(1.02);
           background: #e05e46;
-          box-shadow: 0 12px 36px rgba(214, 82, 58, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+          box-shadow: ${
+            isLight
+              ? '0 14px 32px rgba(214, 82, 58, 0.36)'
+              : '0 12px 36px rgba(214, 82, 58, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.3)'
+          };
         }
 
         .hero-hint-shortcuts {
           font-family: "'JetBrains Mono', monospace";
           font-size: 11px;
-          color: #6E6D68;
-          margin-top: 10px;
+          color: var(--text-muted);
+          margin-top: 12px;
           display: flex;
           align-items: center;
           gap: 8px;
         }
 
         .kbd-chip {
-          background: rgba(247, 245, 239, 0.08);
-          border: 1px solid rgba(247, 245, 239, 0.15);
+          background: ${isLight ? 'rgba(16, 18, 22, 0.06)' : 'rgba(247, 245, 239, 0.08)'};
+          border: 1px solid ${isLight ? 'rgba(16, 18, 22, 0.14)' : 'rgba(247, 245, 239, 0.15)'};
           border-radius: 4px;
-          padding: 1px 5px;
-          color: #9B9A95;
+          padding: 1px 6px;
+          color: var(--text-secondary);
           font-size: 10px;
         }
 
@@ -460,7 +372,7 @@ export function HeroSection({
           align-items: center;
           gap: 12px;
           padding-top: 14px;
-          border-top: 1px solid rgba(247, 245, 239, 0.08);
+          border-top: 1px solid ${cardRowBorder};
         }
 
         .shelf-label {
@@ -469,7 +381,7 @@ export function HeroSection({
           font-weight: 700;
           letter-spacing: 0.2em;
           text-transform: uppercase;
-          color: #6E6D68;
+          color: var(--text-muted);
         }
 
         .shelf-presets {
@@ -480,11 +392,11 @@ export function HeroSection({
         }
 
         .preset-pill {
-          background: rgba(16, 18, 22, 0.7);
-          border: 1px solid rgba(247, 245, 239, 0.1);
+          background: ${isLight ? 'rgba(255, 255, 255, 0.78)' : 'rgba(16, 18, 22, 0.7)'};
+          border: 1px solid ${isLight ? 'rgba(16, 18, 22, 0.12)' : 'rgba(247, 245, 239, 0.1)'};
           border-radius: 20px;
           padding: 5px 14px;
-          color: #9B9A95;
+          color: var(--text-secondary);
           font-family: "'JetBrains Mono', monospace";
           font-size: 11px;
           cursor: pointer;
@@ -495,16 +407,11 @@ export function HeroSection({
         }
 
         .preset-pill:hover {
-          background: rgba(247, 245, 239, 0.1);
-          color: #F7F5EF;
-          border-color: rgba(247, 245, 239, 0.3);
+          background: ${isLight ? '#FFFFFF' : 'rgba(247, 245, 239, 0.1)'};
+          color: var(--text-primary);
+          border-color: ${isLight ? 'rgba(16, 18, 22, 0.28)' : 'rgba(247, 245, 239, 0.3)'};
           transform: translateY(-1px);
-        }
-
-        .preset-pill.active {
-          background: rgba(214, 82, 58, 0.15);
-          border-color: var(--accent);
-          color: #F7F5EF;
+          box-shadow: ${isLight ? '0 4px 12px rgba(16, 18, 22, 0.08)' : 'none'};
         }
       `}</style>
 
@@ -514,7 +421,7 @@ export function HeroSection({
           <HeroAnimatedBG />
         </div>
 
-        {/* Ambient Dark Gradient Layer */}
+        {/* Ambient Gradient Layer */}
         <div className="hero-bg-overlay" />
 
         {/* ── 3-Column Full-Widescreen Stage ── */}
@@ -541,14 +448,15 @@ export function HeroSection({
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: 11,
                 lineHeight: 1.6,
-                background: '#0d0f13',
+                background: cardInnerBg,
+                color: isLight ? '#24292f' : '#F7F5EF',
               }}
             >
-              <div style={{ color: '#6E6D68' }}>// Zero-backend AST execution</div>
+              <div style={{ color: 'var(--text-muted)' }}>// Zero-backend AST execution</div>
               <div>
                 <span style={{ color: '#D6523A' }}>function</span>{' '}
-                <span style={{ color: '#E5A93C' }}>bubbleSort</span>(
-                <span style={{ color: '#F7F5EF' }}>arr</span>) &#123;
+                <span style={{ color: amberTone }}>bubbleSort</span>(
+                <span>arr</span>) &#123;
               </div>
               <div style={{ paddingLeft: 12 }}>
                 <span style={{ color: '#D6523A' }}>const</span> n = arr.length;
@@ -565,11 +473,11 @@ export function HeroSection({
               <div
                 style={{
                   paddingLeft: 36,
-                  background: 'rgba(214, 82, 58, 0.22)',
+                  background: isLight ? 'rgba(214, 82, 58, 0.14)' : 'rgba(214, 82, 58, 0.22)',
                   borderLeft: '2px solid var(--accent)',
                   margin: '2px -16px 2px -14px',
                   paddingRight: 16,
-                  color: '#F7F5EF',
+                  color: isLight ? '#101216' : '#F7F5EF',
                   fontWeight: 600,
                 }}
               >
@@ -587,15 +495,15 @@ export function HeroSection({
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 padding: '8px 14px',
-                background: 'rgba(247, 245, 239, 0.03)',
-                borderTop: '1px solid rgba(247, 245, 239, 0.08)',
+                background: isLight ? 'rgba(16, 18, 22, 0.025)' : 'rgba(247, 245, 239, 0.03)',
+                borderTop: `1px solid ${cardRowBorder}`,
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: 10,
-                color: '#6E6D68',
+                color: 'var(--text-muted)',
               }}
             >
               <span>AST Latency: 0.02ms</span>
-              <span style={{ color: '#38A169' }}>● 100% Client-Side</span>
+              <span style={{ color: greenTone }}>● 100% Client-Side</span>
             </div>
           </aside>
 
@@ -617,9 +525,7 @@ export function HeroSection({
               <AccentMark />
             </div>
 
-            <br />
-            <br />
-            <br />
+            <div style={{ height: 26 }} />
 
             <button className="hero-main-cta" onClick={onEnterApp}>
               Launch Visualizer
@@ -640,10 +546,16 @@ export function HeroSection({
           <aside className="hero-flank-card">
             <div className="card-header-bar">
               <div className="card-title-pill">
-                <Activity size={12} style={{ color: '#38A169' }} />
+                <Activity size={12} style={{ color: greenTone }} />
                 <span>Vector Canvas</span>
               </div>
-              <span className="card-badge" style={{ background: 'rgba(56, 161, 105, 0.2)', color: '#38A169' }}>
+              <span
+                className="card-badge"
+                style={{
+                  background: isLight ? 'rgba(35, 122, 75, 0.14)' : 'rgba(56, 161, 105, 0.2)',
+                  color: greenTone,
+                }}
+              >
                 60 FPS D3
               </span>
             </div>
@@ -652,7 +564,7 @@ export function HeroSection({
             <div
               style={{
                 padding: '24px 16px 14px',
-                background: '#0d0f13',
+                background: cardInnerBg,
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -673,15 +585,15 @@ export function HeroSection({
                 {[45, 18, 72, 34, 88, 52, 90].map((val, idx) => {
                   const isActive = idx === activeBarIndex;
                   const isComp = idx === comparingIndex;
-                  let bg = 'rgba(247, 245, 239, 0.16)';
-                  let border = '1px solid rgba(247, 245, 239, 0.1)';
+                  let bg = isLight ? '#DDD9CE' : 'rgba(247, 245, 239, 0.16)';
+                  let border = isLight ? '1px solid rgba(16, 18, 22, 0.12)' : '1px solid rgba(247, 245, 239, 0.1)';
 
                   if (isActive) {
                     bg = 'var(--accent)';
                     border = '1px solid #FF5A36';
                   } else if (isComp) {
-                    bg = '#E5A93C';
-                    border = '1px solid #F6E05E';
+                    bg = isLight ? '#D99B26' : '#E5A93C';
+                    border = isLight ? '1px solid #B7791F' : '1px solid #F6E05E';
                   }
 
                   return (
@@ -705,7 +617,7 @@ export function HeroSection({
                         style={{
                           fontSize: 9,
                           fontFamily: "'JetBrains Mono', monospace",
-                          color: isActive || isComp ? '#101215' : '#F7F5EF',
+                          color: isActive || isComp ? (isLight ? '#FFFFFF' : '#101215') : isLight ? '#181A20' : '#F7F5EF',
                           fontWeight: 700,
                         }}
                       >
@@ -724,7 +636,7 @@ export function HeroSection({
                   width: '100%',
                   fontFamily: "'JetBrains Mono', monospace",
                   fontSize: 10,
-                  color: '#9B9A95',
+                  color: 'var(--text-secondary)',
                   padding: '0 4px',
                 }}
               >
@@ -733,10 +645,10 @@ export function HeroSection({
                   <span>{activeBarIndex}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <span style={{ color: '#E5A93C', fontWeight: 700 }}>j:</span>
+                  <span style={{ color: amberTone, fontWeight: 700 }}>j:</span>
                   <span>{comparingIndex}</span>
                 </div>
-                <div style={{ color: '#38A169' }}>Comparing</div>
+                <div style={{ color: greenTone }}>Comparing</div>
               </div>
             </div>
 
@@ -746,23 +658,23 @@ export function HeroSection({
                 display: 'grid',
                 gridTemplateColumns: '1fr 1fr',
                 gap: 1,
-                background: 'rgba(247, 245, 239, 0.08)',
-                borderTop: '1px solid rgba(247, 245, 239, 0.08)',
+                background: cardRowBorder,
+                borderTop: `1px solid ${cardRowBorder}`,
               }}
             >
-              <div style={{ background: '#101216', padding: '8px 12px' }}>
-                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 9, color: '#6E6D68', textTransform: 'uppercase' }}>
+              <div style={{ background: cardSpecBg, padding: '8px 12px' }}>
+                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
                   Time
                 </div>
-                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: '#F7F5EF', fontWeight: 600 }}>
+                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: 'var(--text-primary)', fontWeight: 600 }}>
                   O(n²)
                 </div>
               </div>
-              <div style={{ background: '#101216', padding: '8px 12px' }}>
-                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 9, color: '#6E6D68', textTransform: 'uppercase' }}>
+              <div style={{ background: cardSpecBg, padding: '8px 12px' }}>
+                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
                   Space
                 </div>
-                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: '#F7F5EF', fontWeight: 600 }}>
+                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: 'var(--text-primary)', fontWeight: 600 }}>
                   O(1) Aux
                 </div>
               </div>
@@ -772,7 +684,7 @@ export function HeroSection({
 
         {/* ── Bottom Ribbon: Algorithm Quick Jump ── */}
         <footer className="hero-bottom-shelf">
-          <div className="shelf-label">Instant Presets · Click to Load & Trace</div>
+          <div className="shelf-label">Instant Presets · Click to Load &amp; Trace</div>
           <div className="shelf-presets">
             {ALGORITHM_PRESETS.slice(0, 7).map((p) => (
               <button
@@ -781,7 +693,7 @@ export function HeroSection({
                 onClick={() => handleSelectPreset(p.id)}
               >
                 <span>{p.title}</span>
-                <span style={{ fontSize: 9, color: '#6E6D68' }}>{p.timeComplexity}</span>
+                <span style={{ fontSize: 9, color: 'var(--text-muted)' }}>{p.timeComplexity}</span>
               </button>
             ))}
           </div>

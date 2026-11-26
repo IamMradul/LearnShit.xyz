@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useMemo } from 'react';
 import * as d3 from 'd3';
 import type { TraceStep } from '../../../engine/TraceTypes';
 import { useTraceStore } from '../../../store/traceStore';
+import { useUIStore } from '../../../store/uiStore';
 
 interface LLNodeData {
   id: string;
@@ -87,6 +88,8 @@ export const LinkedListRenderer: React.FC<LinkedListRendererProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState<number>(640);
   const allSteps = useTraceStore((s) => s.steps);
+  const theme = useUIStore((s) => s.theme);
+  const isLight = theme === 'light';
 
   useEffect(() => {
     const el = containerRef.current;
@@ -326,8 +329,8 @@ export const LinkedListRenderer: React.FC<LinkedListRendererProps> = ({
             .attr('width', 34)
             .attr('height', 20)
             .attr('rx', 5)
-            .attr('fill', 'rgba(247, 245, 239, 0.06)')
-            .attr('stroke', 'rgba(247, 245, 239, 0.18)')
+            .attr('fill', isLight ? 'rgba(16, 18, 22, 0.06)' : 'rgba(247, 245, 239, 0.06)')
+            .attr('stroke', isLight ? 'rgba(16, 18, 22, 0.18)' : 'rgba(247, 245, 239, 0.18)')
             .attr('stroke-width', 1);
 
           nullG
@@ -338,7 +341,7 @@ export const LinkedListRenderer: React.FC<LinkedListRendererProps> = ({
             .attr('dominant-baseline', 'central')
             .attr('font-size', 9.5)
             .attr('font-weight', 600)
-            .attr('fill', 'var(--text-muted)')
+            .attr('fill', isLight ? '#706F6A' : '#5C5B57')
             .attr('font-family', "'JetBrains Mono', monospace")
             .text('null');
         }
@@ -376,10 +379,20 @@ export const LinkedListRenderer: React.FC<LinkedListRendererProps> = ({
         .attr('width', nodeSize)
         .attr('height', nodeSize)
         .attr('rx', 10)
-        .attr('fill', hasActivePointer ? 'rgba(255, 255, 255, 0.08)' : '#141720')
-        .attr('stroke', hasActivePointer ? pointers[0].color : 'rgba(247, 245, 239, 0.22)')
+        .attr(
+          'fill',
+          hasActivePointer
+            ? isLight ? '#FFFFFF' : 'rgba(255, 255, 255, 0.08)'
+            : isLight ? '#ECEAE3' : '#141720',
+        )
+        .attr(
+          'stroke',
+          hasActivePointer
+            ? pointers[0].color
+            : isLight ? 'rgba(16, 18, 22, 0.22)' : 'rgba(247, 245, 239, 0.22)',
+        )
         .attr('stroke-width', 1.5)
-        .attr('filter', 'drop-shadow(0 4px 12px rgba(0,0,0,0.5))');
+        .attr('filter', isLight ? 'drop-shadow(0 2px 8px rgba(16,18,22,0.12))' : 'drop-shadow(0 4px 12px rgba(0,0,0,0.5))');
 
       // Value text
       g.append('text')
@@ -389,7 +402,7 @@ export const LinkedListRenderer: React.FC<LinkedListRendererProps> = ({
         .attr('dominant-baseline', 'central')
         .attr('font-size', 14)
         .attr('font-weight', 700)
-        .attr('fill', '#F7F5EF')
+        .attr('fill', isLight ? '#101216' : '#F7F5EF')
         .attr('font-family', "'JetBrains Mono', monospace")
         .text(String(node.val));
 
@@ -399,7 +412,7 @@ export const LinkedListRenderer: React.FC<LinkedListRendererProps> = ({
         .attr('y', nodeSize + 16)
         .attr('text-anchor', 'middle')
         .attr('font-size', 10)
-        .attr('fill', 'var(--text-muted)')
+        .attr('fill', isLight ? '#706F6A' : '#5C5B57')
         .attr('font-family', "'JetBrains Mono', monospace")
         .text(`[${i}]`);
 
@@ -417,7 +430,7 @@ export const LinkedListRenderer: React.FC<LinkedListRendererProps> = ({
             .attr('height', 16)
             .attr('rx', 4)
             .attr('fill', p.color)
-            .attr('filter', 'drop-shadow(0 2px 6px rgba(0,0,0,0.4))');
+            .attr('filter', isLight ? 'drop-shadow(0 2px 4px rgba(16,18,22,0.18))' : 'drop-shadow(0 2px 6px rgba(0,0,0,0.4))');
 
           badge
             .append('text')
@@ -434,7 +447,7 @@ export const LinkedListRenderer: React.FC<LinkedListRendererProps> = ({
         });
       }
     });
-  }, [step, stableNodeOrder, varName, height, containerWidth]);
+  }, [step, stableNodeOrder, varName, height, containerWidth, isLight]);
 
   return (
     <div

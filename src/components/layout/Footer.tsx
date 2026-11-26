@@ -87,9 +87,9 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
   return (
     <footer
       style={{
-        background: '#07080a',
-        borderTop: '1px solid rgba(247, 245, 239, 0.08)',
-        color: '#F7F5EF',
+        background: 'var(--bg-primary)',
+        borderTop: '1px solid var(--border)',
+        color: 'var(--text-primary)',
         position: 'relative',
         zIndex: 20,
       }}
@@ -150,8 +150,8 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
                   width: 30,
                   height: 30,
                   borderRadius: 8,
-                  background: '#14161c',
-                  border: '1px solid rgba(247, 245, 239, 0.18)',
+                  background: 'var(--bg-tertiary)',
+                  border: '1px solid var(--border)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -174,7 +174,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
                   fontSize: 19,
                   fontWeight: 700,
                   letterSpacing: '0.07em',
-                  color: '#F7F5EF',
+                  color: 'var(--text-primary)',
                   textTransform: 'uppercase',
                 }}
               >
@@ -187,7 +187,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
                 fontFamily: "'Inter', sans-serif",
                 fontSize: 12.5,
                 lineHeight: 1.6,
-                color: 'rgba(247, 245, 239, 0.65)',
+                color: 'var(--text-secondary)',
                 margin: 0,
                 maxWidth: 320,
               }}
@@ -205,7 +205,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
                   fontWeight: 600,
                   letterSpacing: '0.08em',
                   textTransform: 'uppercase',
-                  color: 'rgba(247, 245, 239, 0.45)',
+                  color: 'var(--text-secondary)',
                 }}
               >
                 Official Support
@@ -221,7 +221,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
                   borderRadius: 7,
                   background: 'rgba(214, 82, 58, 0.08)',
                   border: '1px solid rgba(214, 82, 58, 0.24)',
-                  color: '#F7F5EF',
+                  color: 'var(--text-primary)',
                   fontFamily: "'JetBrains Mono', monospace",
                   fontSize: 12,
                   fontWeight: 500,
@@ -253,7 +253,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
                 fontWeight: 700,
                 letterSpacing: '0.08em',
                 textTransform: 'uppercase',
-                color: 'rgba(247, 245, 239, 0.45)',
+                color: 'var(--text-secondary)',
               }}
             >
               Platform
@@ -271,12 +271,12 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
                 style={{
                   fontFamily: "'Inter', sans-serif",
                   fontSize: 12.5,
-                  color: 'rgba(247, 245, 239, 0.72)',
+                  color: 'var(--text-secondary)',
                   textDecoration: 'none',
                   transition: 'color 0.15s ease',
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = '#F7F5EF')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(247, 245, 239, 0.72)')}
+                onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text-primary)')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}
               >
                 Code Visualizer
               </a>
@@ -289,12 +289,12 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
                 style={{
                   fontFamily: "'Inter', sans-serif",
                   fontSize: 12.5,
-                  color: 'rgba(247, 245, 239, 0.72)',
+                  color: 'var(--text-secondary)',
                   textDecoration: 'none',
                   transition: 'color 0.15s ease',
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = '#F7F5EF')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(247, 245, 239, 0.72)')}
+                onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text-primary)')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}
               >
                 Algorithm Playgrounds
               </a>
@@ -308,12 +308,12 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
                 style={{
                   fontFamily: "'Inter', sans-serif",
                   fontSize: 12.5,
-                  color: 'rgba(247, 245, 239, 0.72)',
+                  color: 'var(--text-secondary)',
                   textDecoration: 'none',
                   transition: 'color 0.15s ease',
                 }}
                 onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--accent, #D6523A)')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(247, 245, 239, 0.72)')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}
               >
                 DSA Guides &amp; Patterns
               </a>
@@ -327,12 +327,12 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
                 style={{
                   fontFamily: "'Inter', sans-serif",
                   fontSize: 12.5,
-                  color: 'rgba(247, 245, 239, 0.72)',
+                  color: 'var(--text-secondary)',
                   textDecoration: 'none',
                   transition: 'color 0.15s ease',
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = '#F7F5EF')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(247, 245, 239, 0.72)')}
+                onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text-primary)')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}
               >
                 Practice Problem Sheets
               </a>
@@ -346,12 +346,12 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
                 style={{
                   fontFamily: "'Inter', sans-serif",
                   fontSize: 12.5,
-                  color: 'rgba(247, 245, 239, 0.72)',
+                  color: 'var(--text-secondary)',
                   textDecoration: 'none',
                   transition: 'color 0.15s ease',
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = '#F7F5EF')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(247, 245, 239, 0.72)')}
+                onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text-primary)')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}
               >
                 Curated Books
               </a>
@@ -367,7 +367,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
                 fontWeight: 700,
                 letterSpacing: '0.08em',
                 textTransform: 'uppercase',
-                color: 'rgba(247, 245, 239, 0.45)',
+                color: 'var(--text-secondary)',
               }}
             >
               LearnShit
@@ -385,12 +385,12 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
                 style={{
                   fontFamily: "'Inter', sans-serif",
                   fontSize: 12.5,
-                  color: 'rgba(247, 245, 239, 0.72)',
+                  color: 'var(--text-secondary)',
                   textDecoration: 'none',
                   transition: 'color 0.15s ease',
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = '#F7F5EF')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(247, 245, 239, 0.72)')}
+                onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text-primary)')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}
               >
                 About Our Mission
               </a>
@@ -403,12 +403,12 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
                 style={{
                   fontFamily: "'Inter', sans-serif",
                   fontSize: 12.5,
-                  color: 'rgba(247, 245, 239, 0.72)',
+                  color: 'var(--text-secondary)',
                   textDecoration: 'none',
                   transition: 'color 0.15s ease',
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = '#F7F5EF')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(247, 245, 239, 0.72)')}
+                onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text-primary)')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}
               >
                 Contact &amp; Support
               </a>
@@ -421,12 +421,12 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
                 style={{
                   fontFamily: "'Inter', sans-serif",
                   fontSize: 12.5,
-                  color: 'rgba(247, 245, 239, 0.72)',
+                  color: 'var(--text-secondary)',
                   textDecoration: 'none',
                   transition: 'color 0.15s ease',
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = '#F7F5EF')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(247, 245, 239, 0.72)')}
+                onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text-primary)')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}
               >
                 Privacy &amp; Local Sandbox
               </a>
@@ -437,15 +437,15 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
                 style={{
                   fontFamily: "'Inter', sans-serif",
                   fontSize: 12.5,
-                  color: 'rgba(247, 245, 239, 0.72)',
+                  color: 'var(--text-secondary)',
                   textDecoration: 'none',
                   transition: 'color 0.15s ease',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: 4,
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = '#F7F5EF')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(247, 245, 239, 0.72)')}
+                onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text-primary)')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}
               >
                 <span>Report an Issue</span>
                 <ExternalLink size={10} style={{ opacity: 0.5 }} />
@@ -462,7 +462,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
                 fontWeight: 700,
                 letterSpacing: '0.08em',
                 textTransform: 'uppercase',
-                color: 'rgba(247, 245, 239, 0.45)',
+                color: 'var(--text-secondary)',
               }}
             >
               Maintained By
@@ -482,17 +482,17 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
                       justifyContent: 'space-between',
                       padding: '6px 12px 6px 8px',
                       borderRadius: 10,
-                      background: '#0d0f14',
-                      border: '1px solid rgba(247, 245, 239, 0.08)',
+                      background: 'var(--bg-secondary)',
+                      border: '1px solid var(--border)',
                       transition: 'all 0.18s ease',
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.borderColor = 'rgba(214, 82, 58, 0.4)';
-                      e.currentTarget.style.background = '#13151b';
+                      e.currentTarget.style.background = 'var(--bg-tertiary)';
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = 'rgba(247, 245, 239, 0.08)';
-                      e.currentTarget.style.background = '#0d0f14';
+                      e.currentTarget.style.borderColor = 'var(--border)';
+                      e.currentTarget.style.background = 'var(--bg-secondary)';
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -513,7 +513,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
                           overflow: 'hidden',
                           flexShrink: 0,
                           textDecoration: 'none',
-                          border: '1.5px solid rgba(247, 245, 239, 0.16)',
+                          border: '1.5px solid var(--border)',
                           boxShadow: '0 2px 6px rgba(0, 0, 0, 0.35)',
                         }}
                       >
@@ -565,12 +565,12 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
                             fontFamily: "'Inter', sans-serif",
                             fontSize: 12.5,
                             fontWeight: 700,
-                            color: '#F7F5EF',
+                            color: 'var(--text-primary)',
                             textDecoration: 'none',
                             transition: 'color 0.15s ease',
                           }}
                           onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--accent, #D6523A)')}
-                          onMouseLeave={(e) => (e.currentTarget.style.color = '#F7F5EF')}
+                          onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-primary)')}
                         >
                           {c.name}
                         </a>
@@ -578,7 +578,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
                           style={{
                             fontFamily: "'JetBrains Mono', monospace",
                             fontSize: 10,
-                            color: 'rgba(247, 245, 239, 0.45)',
+                            color: 'var(--text-secondary)',
                           }}
                         >
                           {c.role}
@@ -600,9 +600,9 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          color: 'rgba(247, 245, 239, 0.65)',
+                          color: 'var(--text-secondary)',
                           textDecoration: 'none',
-                          background: 'rgba(247, 245, 239, 0.04)',
+                          background: 'var(--border-subtle)',
                           transition: 'all 0.15s ease',
                         }}
                         onMouseEnter={(e) => {
@@ -610,8 +610,8 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
                           e.currentTarget.style.background = 'rgba(214, 82, 58, 0.15)';
                         }}
                         onMouseLeave={(e) => {
-                          e.currentTarget.style.color = 'rgba(247, 245, 239, 0.65)';
-                          e.currentTarget.style.background = 'rgba(247, 245, 239, 0.04)';
+                          e.currentTarget.style.color = 'var(--text-secondary)';
+                          e.currentTarget.style.background = 'var(--border-subtle)';
                         }}
                       >
                         <GithubIcon size={13} />
@@ -626,9 +626,9 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          color: 'rgba(247, 245, 239, 0.65)',
+                          color: 'var(--text-secondary)',
                           textDecoration: 'none',
-                          background: 'rgba(247, 245, 239, 0.04)',
+                          background: 'var(--border-subtle)',
                           transition: 'all 0.15s ease',
                         }}
                         onMouseEnter={(e) => {
@@ -636,8 +636,8 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
                           e.currentTarget.style.background = 'rgba(214, 82, 58, 0.15)';
                         }}
                         onMouseLeave={(e) => {
-                          e.currentTarget.style.color = 'rgba(247, 245, 239, 0.65)';
-                          e.currentTarget.style.background = 'rgba(247, 245, 239, 0.04)';
+                          e.currentTarget.style.color = 'var(--text-secondary)';
+                          e.currentTarget.style.background = 'var(--border-subtle)';
                         }}
                       >
                         <Mail size={13} />
@@ -660,9 +660,9 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
                 gap: 7,
                 padding: '7px 14px',
                 borderRadius: 7,
-                background: '#12141a',
-                border: '1px solid rgba(247, 245, 239, 0.12)',
-                color: '#F7F5EF',
+                background: 'var(--bg-tertiary)',
+                border: '1px solid var(--border)',
+                color: 'var(--text-primary)',
                 fontFamily: "'Inter', sans-serif",
                 fontSize: 12,
                 fontWeight: 600,
@@ -672,11 +672,11 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.borderColor = 'rgba(214, 82, 58, 0.5)';
-                e.currentTarget.style.background = '#181b22';
+                e.currentTarget.style.background = 'var(--bg-tertiary)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(247, 245, 239, 0.12)';
-                e.currentTarget.style.background = '#12141a';
+                e.currentTarget.style.borderColor = 'var(--border)';
+                e.currentTarget.style.background = 'var(--bg-tertiary)';
               }}
             >
               <GithubIcon size={14} />
@@ -690,7 +690,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
         <div
           style={{
             paddingTop: 18,
-            borderTop: '1px solid rgba(247, 245, 239, 0.08)',
+            borderTop: '1px solid var(--border)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -698,21 +698,21 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
             gap: 14,
             fontFamily: "'Inter', sans-serif",
             fontSize: 11.5,
-            color: 'rgba(247, 245, 239, 0.5)',
+            color: 'var(--text-secondary)',
           }}
         >
           {/* Copyright notice */}
           <div>
-            &copy; {new Date().getFullYear()} <strong style={{ color: '#F7F5EF', fontWeight: 600 }}>LearnShit.xyz</strong>. Built with{' '}
+            &copy; {new Date().getFullYear()} <strong style={{ color: 'var(--text-primary)', fontWeight: 600 }}>LearnShit.xyz</strong>. Built with{' '}
             <Heart size={11} style={{ display: 'inline', color: 'var(--accent, #D6523A)', verticalAlign: 'middle' }} />{' '}
             by{' '}
             <a
               href="https://github.com/IamMradul"
               target="_blank"
               rel="noopener noreferrer"
-              style={{ color: '#F7F5EF', textDecoration: 'none', fontWeight: 600 }}
+              style={{ color: 'var(--text-primary)', textDecoration: 'none', fontWeight: 600 }}
               onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--accent, #D6523A)')}
-              onMouseLeave={(e) => (e.currentTarget.style.color = '#F7F5EF')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-primary)')}
             >
               Mradul
             </a>{' '}
@@ -721,9 +721,9 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
               href="https://github.com/Imdilshan"
               target="_blank"
               rel="noopener noreferrer"
-              style={{ color: '#F7F5EF', textDecoration: 'none', fontWeight: 600 }}
+              style={{ color: 'var(--text-primary)', textDecoration: 'none', fontWeight: 600 }}
               onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--accent, #D6523A)')}
-              onMouseLeave={(e) => (e.currentTarget.style.color = '#F7F5EF')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-primary)')}
             >
               Md Dilshan
             </a>
@@ -736,10 +736,10 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
               style={{
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: 10.5,
-                background: 'rgba(247, 245, 239, 0.05)',
+                background: 'var(--border-subtle)',
                 padding: '2px 7px',
                 borderRadius: 4,
-                color: 'rgba(247, 245, 239, 0.65)',
+                color: 'var(--text-secondary)',
               }}
             >
               MIT License
@@ -748,10 +748,10 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
               style={{
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: 10.5,
-                background: 'rgba(247, 245, 239, 0.05)',
+                background: 'var(--border-subtle)',
                 padding: '2px 7px',
                 borderRadius: 4,
-                color: 'rgba(247, 245, 239, 0.65)',
+                color: 'var(--text-secondary)',
               }}
             >
               Client Sandbox
@@ -760,10 +760,10 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
               style={{
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: 10.5,
-                background: 'rgba(247, 245, 239, 0.05)',
+                background: 'var(--border-subtle)',
                 padding: '2px 7px',
                 borderRadius: 4,
-                color: 'rgba(247, 245, 239, 0.65)',
+                color: 'var(--text-secondary)',
               }}
             >
               Zero Telemetry
@@ -779,9 +779,9 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
                 gap: 5,
                 padding: '4px 10px',
                 borderRadius: 6,
-                background: '#12141a',
-                border: '1px solid rgba(247, 245, 239, 0.12)',
-                color: 'rgba(247, 245, 239, 0.75)',
+                background: 'var(--bg-tertiary)',
+                border: '1px solid var(--border)',
+                color: 'var(--text-secondary)',
                 fontFamily: "'Inter', sans-serif",
                 fontSize: 11.5,
                 fontWeight: 500,
@@ -790,11 +790,11 @@ export const Footer: React.FC<FooterProps> = ({ onOpenResources, onOpenDsa }) =>
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.borderColor = 'rgba(214, 82, 58, 0.5)';
-                e.currentTarget.style.color = '#F7F5EF';
+                e.currentTarget.style.color = 'var(--text-primary)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(247, 245, 239, 0.12)';
-                e.currentTarget.style.color = 'rgba(247, 245, 239, 0.75)';
+                e.currentTarget.style.borderColor = 'var(--border)';
+                e.currentTarget.style.color = 'var(--text-secondary)';
               }}
             >
               <span>Top</span>

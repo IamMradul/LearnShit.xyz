@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import type { TraceStep } from '../../../engine/TraceTypes';
 import { useTraceStore } from '../../../store/traceStore';
+import { useUIStore } from '../../../store/uiStore';
 
 interface ArrayRendererProps {
   step: TraceStep | null;
@@ -12,26 +13,38 @@ interface ArrayRendererProps {
   height?: number;
 }
 
-const COLOR = {
-  default: '#21252d',
+const DARK_COLOR = {
+  default: '#252830',
   compare: '#E5A93C',
   swap: '#D6523A',
   current: '#F7F5EF',
   visited: '#38A169',
-  done: '#181b22',
+  done: '#1A1D24',
   pivot: '#9F7AEA',
   highlight: '#FF5A36',
 };
 
-function getColor(op: string | undefined): string {
-  if (!op) return COLOR.default;
-  if (op.includes('compare')) return COLOR.compare;
-  if (op.includes('swap')) return COLOR.swap;
-  if (op.includes('visit')) return COLOR.visited;
-  if (op.includes('pivot')) return COLOR.pivot;
-  if (op.includes('current')) return COLOR.current;
-  if (op.includes('done')) return COLOR.done;
-  return COLOR.default;
+const LIGHT_COLOR = {
+  default: '#D6D4CB',
+  compare: '#D99B26',
+  swap: '#D6523A',
+  current: '#101216',
+  visited: '#276749',
+  done: '#E1DFD7',
+  pivot: '#6B46C1',
+  highlight: '#DD6B20',
+};
+
+function getColor(op: string | undefined, isLight: boolean): string {
+  const palette = isLight ? LIGHT_COLOR : DARK_COLOR;
+  if (!op) return palette.default;
+  if (op.includes('compare')) return palette.compare;
+  if (op.includes('swap')) return palette.swap;
+  if (op.includes('visit')) return palette.visited;
+  if (op.includes('pivot')) return palette.pivot;
+  if (op.includes('current')) return palette.current;
+  if (op.includes('done')) return palette.done;
+  return palette.default;
 }
 
 export const ArrayRenderer: React.FC<ArrayRendererProps> = ({
@@ -44,6 +57,8 @@ export const ArrayRenderer: React.FC<ArrayRendererProps> = ({
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState<number>(600);
+  const theme = useUIStore((s) => s.theme);
+  const isLight = theme === 'light';
 
   useEffect(() => {
     const el = containerRef.current;
@@ -76,8 +91,8 @@ export const ArrayRenderer: React.FC<ArrayRendererProps> = ({
       const target = varName
         ? step.variables[varName]
         : Object.values(step.variables).find(
-            (v) => v.type === 'list' || v.type === 'array',
-          );
+          (v) => v.type === 'list' || v.type === 'array',
+        );
 
       if (target?.value) {
         if (Array.isArray(target.value)) {
@@ -97,8 +112,8 @@ export const ArrayRenderer: React.FC<ArrayRendererProps> = ({
           const t = varName
             ? s.variables[varName]
             : Object.values(s.variables).find(
-                (v) => v.type === 'list' || v.type === 'array' || v.type === 'fenwickTree',
-              );
+              (v) => v.type === 'list' || v.type === 'array' || v.type === 'fenwickTree',
+            );
           if (t?.value) {
             if (Array.isArray(t.value) && t.value.length > 0) {
               arr = t.value as number[];
@@ -129,10 +144,10 @@ export const ArrayRenderer: React.FC<ArrayRendererProps> = ({
         if (pointerKeys.includes(vName.toLowerCase()) && typeof vObj.value === 'number') {
           const idx = vObj.value;
           if (idx >= 0 && idx < arr.length) {
-            let pColor = '#9B9A95';
+            let pColor = isLight ? '#5A5955' : '#6E6D68';
             if (vName === 'i') pColor = '#D6523A';
-            else if (vName === 'j') pColor = '#E5A93C';
-            else if (vName === 'mid') pColor = '#9F7AEA';
+            else if (vName === 'j') pColor = isLight ? '#B7791F' : '#E5A93C';
+            else if (vName === 'mid') pColor = isLight ? '#6B46C1' : '#9F7AEA';
             pointers.push({ label: vName, index: idx, color: pColor });
           }
         }
@@ -194,7 +209,7 @@ export const ArrayRenderer: React.FC<ArrayRendererProps> = ({
       .attr('x2', startX + n * (barW + BAR_GAP))
       .attr('y1', H - bottomPadding)
       .attr('y2', H - bottomPadding)
-      .attr('stroke', 'rgba(247, 245, 239, 0.12)')
+      .attr('stroke', isLight ? 'rgba(16, 18, 22, 0.16)' : 'rgba(247, 245, 239, 0.12)')
       .attr('stroke-width', 1);
 
     // Helper to get scalar height for any type
@@ -225,13 +240,13 @@ export const ArrayRenderer: React.FC<ArrayRendererProps> = ({
       .attr('width', barW)
       .attr('height', (d) => yScale(getScalarVal(d.v)))
       .attr('rx', Math.min(6, barW / 3))
-      .attr('fill', (d) => getColor(highlightMap[d.i]))
+      .attr('fill', (d) => getColor(highlightMap[d.i], isLight))
       .attr('stroke', (d) => {
         const isSwapping = highlightMap[d.i]?.includes('swap');
         const isComparing = highlightMap[d.i]?.includes('compare');
-        if (isSwapping) return '#FF5A36';
-        if (isComparing) return '#F6E05E';
-        return 'rgba(247, 245, 239, 0.12)';
+        if (isSwapping) return isLight ? '#B93822' : '#FF5A36';
+        if (isComparing) return isLight ? '#B7791F' : '#F6E05E';
+        return isLight ? 'rgba(16, 18, 22, 0.16)' : 'rgba(247, 245, 239, 0.12)';
       })
       .attr('stroke-width', (d) => (highlightMap[d.i] ? 2 : 1));
 
@@ -259,9 +274,9 @@ export const ArrayRenderer: React.FC<ArrayRendererProps> = ({
       .attr('fill', (d) => {
         const isSwapping = highlightMap[d.i]?.includes('swap');
         const isComparing = highlightMap[d.i]?.includes('compare');
-        if (isSwapping) return '#D6523A';
-        if (isComparing) return '#E5A93C';
-        return '#F7F5EF';
+        if (isSwapping) return isLight ? '#B93822' : '#D6523A';
+        if (isComparing) return isLight ? '#A16207' : '#E5A93C';
+        return isLight ? '#101216' : '#F7F5EF';
       })
       .attr('font-family', "'JetBrains Mono', monospace")
       .text((d) => {
@@ -286,7 +301,7 @@ export const ArrayRenderer: React.FC<ArrayRendererProps> = ({
       .attr('text-anchor', 'middle')
       .attr('font-size', 11)
       .attr('font-family', "'JetBrains Mono', monospace")
-      .attr('fill', '#6E6D68')
+      .attr('fill', isLight ? '#706F6A' : '#6E6D68')
       .text((d) => `[${d.i}]`);
 
     // ── Pointers (i, j, mid, etc.) ──────────────────────────────────────────
@@ -345,10 +360,10 @@ export const ArrayRenderer: React.FC<ArrayRendererProps> = ({
       .attr('font-size', 10)
       .attr('font-weight', '700')
       .attr('font-family', "'JetBrains Mono', monospace")
-      .attr('fill', '#0c0c0c')
+      .attr('fill', '#FFFFFF')
       .text((d) => d.label);
 
-  }, [step, propValues, propHighlight, varName, height, containerWidth]);
+  }, [step, propValues, propHighlight, varName, height, containerWidth, isLight]);
 
   return (
     <div

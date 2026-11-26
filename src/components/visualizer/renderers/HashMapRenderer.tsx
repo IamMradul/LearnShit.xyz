@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import type { TraceStep } from '../../../engine/TraceTypes';
 import { Database, Hash, Sparkles } from 'lucide-react';
+import { useUIStore } from '../../../store/uiStore';
 
 interface HashMapRendererProps {
   step: TraceStep | null;
@@ -19,6 +20,9 @@ export const HashMapRenderer: React.FC<HashMapRendererProps> = ({
   varName = 'map',
   height = 320,
 }) => {
+  const theme = useUIStore((s) => s.theme);
+  const isLight = theme === 'light';
+  const accentGreen = isLight ? '#15803d' : '#2ed573';
   const { entries, changedKey } = useMemo(() => {
     if (!step) return { entries: [], changedKey: null };
 
@@ -105,11 +109,11 @@ export const HashMapRenderer: React.FC<HashMapRendererProps> = ({
         style={{
           width: '100%',
           maxWidth: 640,
-          background: 'rgba(16, 18, 22, 0.92)',
+          background: 'var(--surface-glass-strong)',
           backdropFilter: 'blur(16px)',
-          border: '1px solid rgba(247, 245, 239, 0.12)',
+          border: '1px solid var(--border)',
           borderRadius: 14,
-          boxShadow: '0 16px 40px rgba(0, 0, 0, 0.6)',
+          boxShadow: isLight ? '0 10px 28px rgba(16, 18, 22, 0.08)' : '0 16px 40px rgba(0, 0, 0, 0.6)',
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
@@ -122,8 +126,8 @@ export const HashMapRenderer: React.FC<HashMapRendererProps> = ({
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '10px 16px',
-            borderBottom: '1px solid rgba(247, 245, 239, 0.08)',
-            background: 'rgba(255, 255, 255, 0.02)',
+            borderBottom: '1px solid var(--border)',
+            background: 'var(--border-subtle)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -133,7 +137,7 @@ export const HashMapRenderer: React.FC<HashMapRendererProps> = ({
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: 12.5,
                 fontWeight: 700,
-                color: '#F7F5EF',
+                color: 'var(--text-primary)',
               }}
             >
               {varName}
@@ -142,7 +146,7 @@ export const HashMapRenderer: React.FC<HashMapRendererProps> = ({
               style={{
                 fontSize: 10,
                 color: 'var(--text-muted)',
-                background: 'rgba(247, 245, 239, 0.06)',
+                background: 'var(--bg-tertiary)',
                 padding: '2px 6px',
                 borderRadius: 4,
                 fontFamily: "'JetBrains Mono', monospace",
@@ -158,7 +162,7 @@ export const HashMapRenderer: React.FC<HashMapRendererProps> = ({
               style={{
                 fontSize: 11,
                 fontFamily: "'JetBrains Mono', monospace",
-                color: entries.length > 0 ? '#2ed573' : 'var(--text-muted)',
+                color: entries.length > 0 ? accentGreen : 'var(--text-muted)',
                 fontWeight: 600,
               }}
             >
@@ -173,7 +177,7 @@ export const HashMapRenderer: React.FC<HashMapRendererProps> = ({
             display: 'grid',
             gridTemplateColumns: '1fr 1fr',
             padding: '8px 16px',
-            borderBottom: '1px solid rgba(247, 245, 239, 0.06)',
+            borderBottom: '1px solid var(--border-subtle)',
             fontSize: 11,
             fontFamily: "'Oswald', sans-serif",
             textTransform: 'uppercase',
@@ -230,15 +234,15 @@ export const HashMapRenderer: React.FC<HashMapRendererProps> = ({
                     padding: '7px 12px',
                     borderRadius: 8,
                     background: isHighlight
-                      ? 'rgba(46, 213, 115, 0.15)'
+                      ? isLight ? 'rgba(21, 128, 61, 0.12)' : 'rgba(46, 213, 115, 0.15)'
                       : idx % 2 === 0
-                      ? 'rgba(255, 255, 255, 0.02)'
+                      ? 'var(--border-subtle)'
                       : 'transparent',
                     border: isHighlight
-                      ? '1px solid rgba(46, 213, 115, 0.45)'
+                      ? isLight ? '1px solid rgba(21, 128, 61, 0.35)' : '1px solid rgba(46, 213, 115, 0.45)'
                       : '1px solid transparent',
                     boxShadow: isHighlight
-                      ? '0 0 12px rgba(46, 213, 115, 0.25)'
+                      ? isLight ? '0 0 8px rgba(21, 128, 61, 0.14)' : '0 0 12px rgba(46, 213, 115, 0.25)'
                       : 'none',
                     transition: 'all 0.2s ease',
                     fontFamily: "'JetBrains Mono', monospace",
@@ -250,7 +254,7 @@ export const HashMapRenderer: React.FC<HashMapRendererProps> = ({
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <span
                       style={{
-                        color: isHighlight ? '#2ed573' : 'var(--accent)',
+                        color: isHighlight ? accentGreen : 'var(--accent)',
                         fontWeight: 700,
                       }}
                     >
@@ -260,8 +264,8 @@ export const HashMapRenderer: React.FC<HashMapRendererProps> = ({
                       <span
                         style={{
                           fontSize: 9,
-                          color: '#2ed573',
-                          background: 'rgba(46, 213, 115, 0.2)',
+                          color: accentGreen,
+                          background: isLight ? 'rgba(21, 128, 61, 0.14)' : 'rgba(46, 213, 115, 0.2)',
                           padding: '1px 5px',
                           borderRadius: 4,
                           fontWeight: 700,
@@ -278,7 +282,7 @@ export const HashMapRenderer: React.FC<HashMapRendererProps> = ({
                   {/* Value */}
                   <div
                     style={{
-                      color: isHighlight ? '#F7F5EF' : '#d1d5db',
+                      color: isHighlight ? 'var(--text-primary)' : 'var(--text-secondary)',
                       fontWeight: isHighlight ? 700 : 500,
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
