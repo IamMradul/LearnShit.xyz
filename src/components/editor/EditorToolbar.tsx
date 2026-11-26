@@ -64,9 +64,9 @@ export const EditorToolbar: React.FC = () => {
         setStatus('playing');
         const detected = detectDataStructures(result.steps);
         if (detected.length > 0) {
-          useUIStore.getState().setCenterViewMode('split');
+          useUIStore.getState().setCenterViewMode('ds');
         } else {
-          useUIStore.getState().setCenterViewMode('trace');
+          useUIStore.getState().setCenterViewMode('code');
         }
       }
     } catch (e: unknown) {

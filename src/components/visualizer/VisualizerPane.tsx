@@ -28,7 +28,6 @@ import {
   Layers,
   Sparkles,
   Loader2,
-  Layout,
 } from 'lucide-react';
 import type { DSType } from '../../engine/TraceTypes';
 
@@ -266,8 +265,8 @@ export const VisualizerPane: React.FC = () => {
         position: 'relative',
         width: '100%',
         height: '100%',
-        background: '#0a0b0d',
-        backgroundImage: 'radial-gradient(rgba(247, 245, 239, 0.07) 1.5px, transparent 1.5px)',
+        background: 'var(--bg-primary)',
+        backgroundImage: 'radial-gradient(var(--border) 1.5px, transparent 1.5px)',
         backgroundSize: '24px 24px',
         overflow: 'hidden',
         display: 'flex',
@@ -298,11 +297,11 @@ export const VisualizerPane: React.FC = () => {
             alignItems: 'flex-start',
             gap: 12,
             padding: '12px 20px',
-            background: 'rgba(28, 12, 14, 0.94)',
+            background: 'var(--surface-glass-strong)',
             backdropFilter: 'blur(16px)',
             border: '1px solid rgba(214, 82, 58, 0.55)',
             borderRadius: 12,
-            boxShadow: '0 12px 36px rgba(0,0,0,0.7)',
+            boxShadow: '0 12px 32px rgba(0,0,0,0.22)',
             maxWidth: '85%',
             minWidth: 320,
           }}
@@ -326,7 +325,7 @@ export const VisualizerPane: React.FC = () => {
               style={{
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: 11.5,
-                color: '#F7F5EF',
+                color: 'var(--text-primary)',
                 lineHeight: 1.45,
                 wordBreak: 'break-word',
               }}
@@ -365,11 +364,11 @@ export const VisualizerPane: React.FC = () => {
             alignItems: 'center',
             gap: 10,
             padding: '8px 16px',
-            background: 'rgba(28, 20, 10, 0.94)',
+            background: 'var(--surface-glass-strong)',
             backdropFilter: 'blur(16px)',
             border: '1px solid rgba(255, 165, 2, 0.55)',
             borderRadius: 12,
-            boxShadow: '0 8px 28px rgba(0,0,0,0.6)',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
             maxWidth: '85%',
           }}
         >
@@ -378,7 +377,7 @@ export const VisualizerPane: React.FC = () => {
             style={{
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: 11.5,
-              color: '#F7F5EF',
+              color: 'var(--text-primary)',
               lineHeight: 1.4,
             }}
           >
@@ -399,7 +398,7 @@ export const VisualizerPane: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            background: 'rgba(10, 11, 13, 0.65)',
+            background: 'var(--surface-glass)',
             backdropFilter: 'blur(6px)',
           }}
         >
@@ -410,7 +409,7 @@ export const VisualizerPane: React.FC = () => {
               alignItems: 'center',
               gap: 12,
               padding: '24px 32px',
-              background: 'rgba(16, 18, 22, 0.92)',
+              background: 'var(--surface-glass-strong)',
               border: '1px solid rgba(214, 82, 58, 0.35)',
               borderRadius: 16,
               boxShadow: '0 16px 40px rgba(0,0,0,0.6)',
@@ -424,7 +423,7 @@ export const VisualizerPane: React.FC = () => {
                   fontSize: 14,
                   letterSpacing: '0.04em',
                   textTransform: 'uppercase',
-                  color: '#F7F5EF',
+                  color: 'var(--text-primary)',
                   fontWeight: 600,
                   marginBottom: 4,
                 }}
@@ -464,9 +463,9 @@ export const VisualizerPane: React.FC = () => {
           style={{
             display: 'flex',
             gap: 2,
-            background: 'rgba(16, 18, 22, 0.9)',
+            background: 'var(--surface-glass)',
             backdropFilter: 'blur(12px)',
-            border: '1px solid rgba(247, 245, 239, 0.12)',
+            border: '1px solid var(--border)',
             borderRadius: 20,
             padding: 3,
             pointerEvents: 'auto',
@@ -481,7 +480,7 @@ export const VisualizerPane: React.FC = () => {
               border: 'none',
               borderRadius: 16,
               padding: '4px 12px',
-              color: centerViewMode === 'code' ? '#F7F5EF' : 'var(--text-secondary)',
+              color: centerViewMode === 'code' ? '#FFFFFF' : 'var(--text-secondary)',
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: 11,
               cursor: 'pointer',
@@ -521,9 +520,9 @@ export const VisualizerPane: React.FC = () => {
               padding: '4px 12px',
               color:
                 centerViewMode === 'ds' && detectedDS.length > 0
-                  ? '#F7F5EF'
+                  ? '#FFFFFF'
                   : detectedDS.length === 0
-                    ? 'rgba(247, 245, 239, 0.35)'
+                    ? 'var(--text-muted)'
                     : 'var(--text-secondary)',
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: 11,
@@ -539,60 +538,6 @@ export const VisualizerPane: React.FC = () => {
             <span>Data Structure</span>
           </button>
 
-          {/* Trace View Pill */}
-          <button
-            onClick={() => setCenterViewMode('trace')}
-            style={{
-              background:
-                centerViewMode === 'trace' || (centerViewMode === 'ds' && detectedDS.length === 0)
-                  ? 'var(--accent)'
-                  : 'transparent',
-              border: 'none',
-              borderRadius: 16,
-              padding: '4px 12px',
-              color:
-                centerViewMode === 'trace' || (centerViewMode === 'ds' && detectedDS.length === 0)
-                  ? '#F7F5EF'
-                  : 'var(--text-secondary)',
-              fontFamily: "'JetBrains Mono', monospace",
-              fontSize: 11,
-              cursor: 'pointer',
-              fontWeight:
-                centerViewMode === 'trace' || (centerViewMode === 'ds' && detectedDS.length === 0)
-                  ? 600
-                  : 400,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 5,
-            }}
-          >
-            <Activity size={12} />
-            <span>Trace View</span>
-          </button>
-
-          {detectedDS.length > 0 && (
-            <button
-              onClick={() => setCenterViewMode('split')}
-              style={{
-                background: centerViewMode === 'split' ? 'var(--accent)' : 'transparent',
-                border: 'none',
-                borderRadius: 16,
-                padding: '4px 12px',
-                color: centerViewMode === 'split' ? '#F7F5EF' : 'var(--text-secondary)',
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: 11,
-                cursor: 'pointer',
-                fontWeight: centerViewMode === 'split' ? 600 : 400,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 5,
-              }}
-            >
-              <Layout size={12} />
-              <span>Split View</span>
-            </button>
-          )}
-
           {hasRecursion && (
             <button
               onClick={() => {
@@ -604,7 +549,7 @@ export const VisualizerPane: React.FC = () => {
                 border: 'none',
                 borderRadius: 16,
                 padding: '4px 12px',
-                color: centerViewMode === 'ds' && visualizerMode === 'recursion' ? '#F7F5EF' : 'var(--text-secondary)',
+                color: centerViewMode === 'ds' && visualizerMode === 'recursion' ? '#FFFFFF' : 'var(--text-secondary)',
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: 11,
                 cursor: 'pointer',
@@ -624,11 +569,11 @@ export const VisualizerPane: React.FC = () => {
               alignItems: 'center',
               gap: 8,
               padding: '5px 14px',
-              background: 'rgba(16, 18, 22, 0.85)',
+              background: 'var(--surface-glass)',
               backdropFilter: 'blur(14px)',
-              border: '1px solid rgba(247, 245, 239, 0.1)',
+              border: '1px solid var(--border)',
               borderRadius: 30,
-              boxShadow: '0 6px 20px rgba(0,0,0,0.5)',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.14)',
               minWidth: 0,
               overflow: 'hidden',
               pointerEvents: 'auto',
@@ -664,7 +609,7 @@ export const VisualizerPane: React.FC = () => {
                 fontFamily: "'Inter', sans-serif",
                 fontSize: 11.5,
                 fontWeight: 500,
-                color: '#F7F5EF',
+                color: 'var(--text-primary)',
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
@@ -681,12 +626,12 @@ export const VisualizerPane: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             gap: 8,
-            background: 'rgba(16, 18, 22, 0.9)',
+            background: 'var(--surface-glass)',
             backdropFilter: 'blur(12px)',
-            border: '1px solid rgba(247, 245, 239, 0.12)',
+            border: '1px solid var(--border)',
             borderRadius: 20,
             padding: '4px 12px',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+            boxShadow: '0 4px 14px rgba(0,0,0,0.12)',
             pointerEvents: 'auto',
             flexShrink: 0,
           }}
@@ -696,20 +641,20 @@ export const VisualizerPane: React.FC = () => {
             <span style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Time:</span>
             <span style={{ fontSize: 11, fontWeight: 700, color: '#D6523A', fontFamily: "'JetBrains Mono', monospace" }}>{profileMetrics.bigO}</span>
           </div>
-          <div style={{ width: 1, height: 12, background: 'rgba(247, 245, 239, 0.15)' }} />
+          <div style={{ width: 1, height: 12, background: 'var(--border)' }} />
           <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-            <Layers size={12} color="#2ed573" />
+            <Layers size={12} color="var(--green)" />
             <span style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Steps:</span>
-            <span style={{ fontSize: 11, fontWeight: 600, color: '#F7F5EF', fontFamily: "'JetBrains Mono', monospace" }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)', fontFamily: "'JetBrains Mono', monospace" }}>
               {steps.length > 0 ? currentIndex + 1 : 0}/{profileMetrics.totalSteps}
             </span>
           </div>
           {profileMetrics.maxStackDepth > 1 && (
             <>
-              <div style={{ width: 1, height: 12, background: 'rgba(247, 245, 239, 0.15)' }} />
+              <div style={{ width: 1, height: 12, background: 'var(--border)' }} />
               <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                 <span style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Stack:</span>
-                <span style={{ fontSize: 11, fontWeight: 600, color: '#ffa502', fontFamily: "'JetBrains Mono', monospace" }}>
+                <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--orange)', fontFamily: "'JetBrains Mono', monospace" }}>
                   {currentStep?.callStack?.length ?? 1}/{profileMetrics.maxStackDepth}
                 </span>
               </div>
@@ -718,8 +663,8 @@ export const VisualizerPane: React.FC = () => {
         </div>
       </div>
 
-      {/* ── Secondary Bar: Data Structure Sub-Tabs (when in DS/Split mode & multiple DS detected) ── */}
-      {(centerViewMode === 'ds' || centerViewMode === 'split') && detectedDS.length > 1 && (
+      {/* ── Secondary Bar: Data Structure Sub-Tabs (when in DS mode & multiple DS detected) ── */}
+      {centerViewMode === 'ds' && detectedDS.length > 1 && (
         <div
           style={{
             position: 'absolute',
@@ -729,12 +674,12 @@ export const VisualizerPane: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             gap: 4,
-            background: 'rgba(16, 18, 22, 0.9)',
+            background: 'var(--surface-glass)',
             backdropFilter: 'blur(12px)',
-            border: '1px solid rgba(247, 245, 239, 0.1)',
+            border: '1px solid var(--border)',
             borderRadius: 20,
             padding: 3,
-            boxShadow: '0 4px 16px rgba(0,0,0,0.35)',
+            boxShadow: '0 4px 14px rgba(0,0,0,0.12)',
           }}
         >
           <button
@@ -744,7 +689,7 @@ export const VisualizerPane: React.FC = () => {
               border: 'none',
               borderRadius: 16,
               padding: '3px 10px',
-              color: activeVisualizerTab === 'all' ? '#F7F5EF' : 'var(--text-secondary)',
+              color: activeVisualizerTab === 'all' ? '#FFFFFF' : 'var(--text-secondary)',
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: 10.5,
               cursor: 'pointer',
@@ -767,7 +712,7 @@ export const VisualizerPane: React.FC = () => {
                   border: 'none',
                   borderRadius: 16,
                   padding: '3px 10px',
-                  color: isSelected ? '#F7F5EF' : 'var(--text-secondary)',
+                  color: isSelected ? '#FFFFFF' : 'var(--text-secondary)',
                   fontFamily: "'JetBrains Mono', monospace",
                   fontSize: 10.5,
                   cursor: 'pointer',
@@ -804,10 +749,10 @@ export const VisualizerPane: React.FC = () => {
             justifyContent: 'center',
             padding:
               centerViewMode === 'code'
-                ? '56px 20px 80px'
-                : (centerViewMode === 'ds' || centerViewMode === 'split') && detectedDS.length > 1
-                  ? '92px 24px 100px'
-                  : '56px 24px 100px',
+                ? '56px 20px 104px'
+                : centerViewMode === 'ds' && detectedDS.length > 1
+                  ? '92px 24px 104px'
+                  : '56px 24px 104px',
             overflow: 'auto',
             minWidth: 0,
             width: '100%',
@@ -820,7 +765,7 @@ export const VisualizerPane: React.FC = () => {
               transformOrigin: 'center center',
               transition: 'transform 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
               width: '100%',
-              maxWidth: centerViewMode === 'split' ? 1280 : 1060,
+              maxWidth: 1060,
               height: '100%',
               display: 'flex',
               alignItems: 'center',
@@ -838,12 +783,12 @@ export const VisualizerPane: React.FC = () => {
                   textAlign: 'center',
                   maxWidth: 440,
                   padding: '36px 28px',
-                  background: 'rgba(16, 18, 22, 0.75)',
+                  background: 'var(--surface-glass)',
                   backdropFilter: 'blur(16px)',
                   WebkitBackdropFilter: 'blur(16px)',
                   borderRadius: 16,
-                  border: '1px solid rgba(247, 245, 239, 0.1)',
-                  boxShadow: '0 16px 40px rgba(0,0,0,0.6)',
+                  border: '1px solid var(--border)',
+                  boxShadow: '0 16px 40px rgba(0,0,0,0.2)',
                 }}
               >
                 <div
@@ -866,7 +811,7 @@ export const VisualizerPane: React.FC = () => {
                     style={{
                       fontFamily: "'Oswald', sans-serif",
                       fontSize: 18,
-                      color: '#F7F5EF',
+                      color: 'var(--text-primary)',
                       margin: '0 0 6px',
                       letterSpacing: '0.04em',
                       textTransform: 'uppercase',
@@ -878,7 +823,7 @@ export const VisualizerPane: React.FC = () => {
                     style={{
                       fontFamily: "'Inter', sans-serif",
                       fontSize: 13,
-                      color: '#9B9A95',
+                      color: 'var(--text-secondary)',
                       margin: 0,
                       lineHeight: 1.5,
                     }}
@@ -904,11 +849,11 @@ export const VisualizerPane: React.FC = () => {
                     display: 'flex',
                     alignItems: 'center',
                     gap: 6,
-                    background: 'rgba(247, 245, 239, 0.08)',
-                    border: '1px solid rgba(247, 245, 239, 0.16)',
+                    background: 'var(--border)',
+                    border: '1px solid var(--border)',
                     borderRadius: 20,
                     padding: '7px 16px',
-                    color: '#F7F5EF',
+                    color: 'var(--text-primary)',
                     fontFamily: "'JetBrains Mono', monospace",
                     fontSize: 11,
                     cursor: 'pointer',
@@ -919,79 +864,8 @@ export const VisualizerPane: React.FC = () => {
                   <span>Load Sample (Bubble Sort)</span>
                 </button>
               </div>
-            ) : centerViewMode === 'code' ? (
+            ) : centerViewMode === 'code' || centerViewMode === 'trace' || centerViewMode === 'split' || (centerViewMode === 'ds' && detectedDS.length === 0) ? (
               <AnimatedCodeVisualizer layoutMode="center" />
-            ) : centerViewMode === 'trace' || (centerViewMode === 'ds' && detectedDS.length === 0) ? (
-              <FallbackStateRenderer
-                step={currentStep}
-                currentIndex={currentIndex}
-                totalSteps={steps.length}
-                steps={steps}
-                code={code}
-                language={language}
-                result={result}
-                onSelectStep={setCurrentIndex}
-              />
-            ) : centerViewMode === 'split' && detectedDS.length > 0 ? (
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1.2fr 1fr',
-                  gap: 16,
-                  width: '100%',
-                  height: '100%',
-                  alignItems: 'stretch',
-                }}
-              >
-                <FallbackStateRenderer
-                  step={currentStep}
-                  currentIndex={currentIndex}
-                  totalSteps={steps.length}
-                  steps={steps}
-                  code={code}
-                  language={language}
-                  result={result}
-                  onSelectStep={setCurrentIndex}
-                />
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    background: 'rgba(16, 18, 22, 0.75)',
-                    borderRadius: 16,
-                    border: '1px solid rgba(247, 245, 239, 0.1)',
-                    padding: 16,
-                    overflow: 'hidden',
-                  }}
-                >
-                  <RendererErrorBoundary
-                    fallback={
-                      <FallbackStateRenderer
-                        step={currentStep}
-                        currentIndex={currentIndex}
-                        totalSteps={steps.length}
-                        steps={steps}
-                        code={code}
-                        language={language}
-                        result={result}
-                        onSelectStep={setCurrentIndex}
-                      />
-                    }
-                  >
-                    {visualizerMode === 'recursion' ? (
-                      <RecursionTreeRenderer steps={steps} currentIndex={currentIndex} height={340} />
-                    ) : activeDS ? (
-                      <DSRenderer
-                        dsType={activeDS.dsType}
-                        step={currentStep}
-                        varName={activeDS.varName}
-                        height={340}
-                      />
-                    ) : null}
-                  </RendererErrorBoundary>
-                </div>
-              </div>
             ) : centerViewMode === 'ds' && activeDS ? (
               <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
                 <RendererErrorBoundary
